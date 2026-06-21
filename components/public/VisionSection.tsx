@@ -8,7 +8,7 @@ export default function VisionSection() {
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
 					{/* Left — Text */}
 					<div className="order-2 md:order-1">
-						<h2 className="text-3xl md:text-4xl lg:text-[40px] font-bold leading-tight text-gray-900">
+						<h2 className="text-3xl md:text-4xl lg:text-[40px] font-bold leading-tight text-brand">
 							Driven with vision
 							<br />
 							built with purpose

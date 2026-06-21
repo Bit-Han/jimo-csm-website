@@ -3,7 +3,7 @@
 // Used for the three-dot ⋮ action menus in tables throughout the CMS
 "use client";
 import { useState, useRef, useEffect, type ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/helpers"
 
 interface DropdownItem {
   label: string;
