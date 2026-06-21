@@ -16,8 +16,8 @@ A flexible Next.js starter for building frontend or fullstack applications.
 No setup required. Just run:
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 ### Enable Supabase
@@ -40,3 +40,10 @@ import { createSupabaseClient } from "@/lib/modules/supabase/client";
 * Keep core minimal
 * Add features only when needed
 * Avoid tight coupling
+
+
+## env 
+# For creating seed and superadmin
+SEED_ADMIN_EMAIL=jimorealestate45@gmail.com
+SEED_ADMIN_PASSWORD=JimorealEstate45$
+SEED_ADMIN_NAME= Onyekachi John

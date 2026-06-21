@@ -1,0 +1,16 @@
+// tsconfig.scripts.json
+// Scripts need path aliases resolved differently from Next.js
+// because they run in Node directly, not through the Next.js compiler.
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"module": "CommonJS",
+		"moduleResolution": "node",
+		"outDir": "./dist-scripts",
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["./*"]
+		}
+	},
+	"include": ["scripts/**/*", "lib/**/*"]
+}
