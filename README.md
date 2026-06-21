@@ -42,8 +42,3 @@ import { createSupabaseClient } from "@/lib/modules/supabase/client";
 * Avoid tight coupling
 
 
-## env 
-# For creating seed and superadmin
-SEED_ADMIN_EMAIL=jimorealestate45@gmail.com
-SEED_ADMIN_PASSWORD=JimorealEstate45$
-SEED_ADMIN_NAME= Onyekachi John
