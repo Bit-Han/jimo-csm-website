@@ -1,51 +1,97 @@
-// src/components/ui/Button.tsx
-// Pure Tailwind — no Radix, no shadcn
-// Variants match the design: primary (gold), secondary (white/border), danger, ghost, navy
+// import { cva, type VariantProps } from "class-variance-authority";
+// import Link from "next/link";
+// import type { ComponentPropsWithoutRef } from "react";
+// import { cn } from "@/lib/utils/helpers";
+
+// export const buttonVariants = cva(
+//   "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+//   {
+//     variants: {
+//       variant: {
+//         primary: "bg-ink-950 text-cream-50 hover:bg-ink-900",
+//         accent: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600",
+//         outline:
+//           "border border-ink-950 bg-transparent text-ink-950 hover:bg-ink-950 hover:text-cream-50",
+//         soft: "bg-red-50 text-red-700 hover:bg-red-100",
+//         ghost: "bg-transparent text-ink-950 hover:bg-ink-950/5",
+//         light: "bg-white text-ink-950 hover:bg-cream-100",
+//       },
+//       size: {
+//         sm: "px-4 py-2 text-sm",
+//         md: "px-5 py-2.5 text-sm",
+//         lg: "px-6 py-3 text-base",
+//       },
+//     },
+//     defaultVariants: {
+//       variant: "primary",
+//       size: "md",
+//     },
+//   },
+// );
+
+// export interface ButtonProps
+//   extends ComponentPropsWithoutRef<"button">,
+//     VariantProps<typeof buttonVariants> {}
+
+// export function Button({ className, variant, size, ...props }: ButtonProps) {
+//   return <button className={cn(buttonVariants({ variant, size }), className)} {...props} />;
+// }
+
+// export interface ButtonLinkProps
+//   extends ComponentPropsWithoutRef<typeof Link>,
+//     VariantProps<typeof buttonVariants> {}
+
+// export function ButtonLink({ className, variant, size, ...props }: ButtonLinkProps) {
+//   return <Link className={cn(buttonVariants({ variant, size }), className)} {...props} />;
+// }
+
+
+
+import { cva, type VariantProps } from "class-variance-authority";
+import Link from "next/link";
+import type { ComponentPropsWithoutRef } from "react";
 import { cn } from "@/lib/utils/helpers";
-import { type ButtonHTMLAttributes, forwardRef } from "react";
 
-type Variant = "primary" | "secondary" | "danger" | "ghost" | "navy";
-type Size    = "sm" | "md" | "lg" | "icon";
+export const buttonVariants = cva(
+  "inline-flex items-center justify-center gap-2 rounded-full font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        primary: "bg-ink-950 text-cream-50 hover:bg-ink-900",
+        accent: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600",
+        outline:
+          "border border-ink-950 bg-transparent text-ink-950 hover:bg-ink-950 hover:text-cream-50",
+        "outline-light":
+          "border border-white/40 bg-transparent text-white hover:bg-white hover:text-ink-950",
+        soft: "bg-red-50 text-red-700 hover:bg-red-100",
+        ghost: "bg-transparent text-ink-950 hover:bg-ink-950/5",
+        light: "bg-white text-ink-950 hover:bg-cream-100",
+      },
+      size: {
+        sm: "px-4 py-2 text-sm",
+        md: "px-5 py-2.5 text-sm",
+        lg: "px-6 py-3 text-base",
+      },
+    },
+    defaultVariants: {
+      variant: "primary",
+      size: "md",
+    },
+  },
+);
 
-const VARIANT: Record<Variant, string> = {
-  primary:   "bg-jimo-gold text-jimo-navy hover:bg-jimo-gold-dark font-semibold",
-  secondary: "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 font-semibold",
-  danger:    "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 font-semibold",
-  ghost:     "text-gray-500 hover:bg-gray-100 hover:text-gray-900 font-medium",
-  navy:      "bg-jimo-navy text-white hover:bg-jimo-navy-2 font-semibold",
-};
+export interface ButtonProps
+  extends ComponentPropsWithoutRef<"button">,
+    VariantProps<typeof buttonVariants> {}
 
-const SIZE: Record<Size, string> = {
-  sm:   "h-7 px-3 text-xs rounded-md gap-1.5",
-  md:   "h-9 px-4 text-sm rounded-lg gap-2",
-  lg:   "h-10 px-5 text-sm rounded-lg gap-2",
-  icon: "h-9 w-9 rounded-lg justify-center",
-};
-
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: Variant;
-  size?: Size;
-  loading?: boolean;
+export function Button({ className, variant, size, ...props }: ButtonProps) {
+  return <button className={cn(buttonVariants({ variant, size }), className)} {...props} />;
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = "primary", size = "md", loading, className, children, disabled, ...props }, ref) => (
-    <button
-      ref={ref}
-      disabled={disabled || loading}
-      className={cn(
-        "inline-flex items-center transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-jimo-gold focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap",
-        VARIANT[variant],
-        SIZE[size],
-        className
-      )}
-      {...props}
-    >
-      {loading ? (
-        <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent" />
-      ) : null}
-      {children}
-    </button>
-  )
-);
-Button.displayName = "Button";
+export interface ButtonLinkProps
+  extends ComponentPropsWithoutRef<typeof Link>,
+    VariantProps<typeof buttonVariants> {}
+
+export function ButtonLink({ className, variant, size, ...props }: ButtonLinkProps) {
+  return <Link className={cn(buttonVariants({ variant, size }), className)} {...props} />;
+}
