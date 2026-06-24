@@ -102,3 +102,22 @@ export function parseIntParam(
 	const n = parseInt(val, 10);
 	return Number.isNaN(n) ? defaultVal : n;
 }
+
+
+export function formatPrice(amount: number, currency = '₦'): string {
+  if (amount >= 1_000_000_000) return `${currency}${(amount / 1_000_000_000).toFixed(1)}B`
+  if (amount >= 1_000_000)     return `${currency}${(amount / 1_000_000).toFixed(0)}M`
+  return `${currency}${amount.toLocaleString()}`
+}
+
+export function getStatusBadge(status: string): string {
+  const map: Record<string, string> = {
+    completed:   'bg-emerald-100 text-emerald-700',
+    'pre-launch': 'bg-amber-100 text-amber-700',
+    concept:     'bg-purple-100 text-purple-700',
+    active:      'bg-emerald-100 text-emerald-700',
+    'sold-out':  'bg-gray-100 text-gray-500',
+    draft:       'bg-gray-100 text-gray-500',
+  }
+  return map[status.toLowerCase()] ?? 'bg-gray-100 text-gray-500'
+}
