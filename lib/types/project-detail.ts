@@ -105,9 +105,14 @@ export interface ProjectProgressStep {
 	isComplete: boolean;
 }
 
-export interface ProjectGalleryImage {
+export type ProjectMediaType = "image" | "video";
+
+export interface ProjectMediaItem {
 	id: string;
+	type: ProjectMediaType;
 	src: string;
+	/** Only used for video items — shown while the video loads. */
+	poster?: string;
 	alt: string;
 }
 
@@ -126,7 +131,8 @@ export interface ProjectDetail extends Project {
 	paymentPlan: ProjectChecklistItem[];
 	amenities: ProjectAmenity[];
 	progress: ProjectProgressStep[];
-	gallery: ProjectGalleryImage[];
+	media: ProjectMediaItem[];
+	/** No longer rendered on the project page itself — kept in case you want it elsewhere later (e.g. a dedicated FAQ page). */
 	faq: ProjectFaqItem[];
 	contactCtaTitle: string;
 	contactCtaDescription: string;
