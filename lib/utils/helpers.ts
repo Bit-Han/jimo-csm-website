@@ -64,6 +64,14 @@ export function formatDate(
 	return format(new Date(date), fmt);
 }
 
+// export function formatDate(isoDate: string): string {
+// 	return new Date(isoDate).toLocaleDateString("en-GB", {
+// 		day: "numeric",
+// 		month: "long",
+// 		year: "numeric",
+// 	});
+// }
+
 /** Format relative time "2 min ago", "3 hrs ago" */
 export function formatRelativeTime(date: Date | string): string {
 	const now = new Date();

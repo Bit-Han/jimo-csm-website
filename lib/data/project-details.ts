@@ -501,19 +501,22 @@ export const projectDetails: Record<string, ProjectDetail> = {
 			{ stage: "finishing", label: "Finishing", isComplete: true },
 			{ stage: "handover", label: "Handover", isComplete: true },
 		],
-		gallery: [
+		media: [
 			{
 				id: "vatican-court-exterior",
+				type: "image",
 				src: "https://images.unsplash.com/photo-1757970326337-95d7cca56fa1?auto=format&fit=crop&w=1200&q=80",
 				alt: "Vatican Court apartment building exterior",
 			},
 			{
 				id: "vatican-court-living-room",
+				type: "image",
 				src: "https://images.unsplash.com/photo-1749930206000-179d0b85aa7e?auto=format&fit=crop&w=800&q=80",
 				alt: "Living room interior representative of Vatican Court apartments",
 			},
 			{
 				id: "vatican-court-lounge",
+				type: "image",
 				src: "https://images.unsplash.com/photo-1758915753332-cab59126742c?auto=format&fit=crop&w=800&q=80",
 				alt: "Lounge interior representative of Vatican Court apartments",
 			},
@@ -634,19 +637,22 @@ export const projectDetails: Record<string, ProjectDetail> = {
 			{ stage: "finishing", label: "Finishing", isComplete: false },
 			{ stage: "handover", label: "Handover", isComplete: false },
 		],
-		gallery: [
+		media: [
 			{
 				id: "jimo-residences-exterior",
+				type: "image",
 				src: "https://images.unsplash.com/photo-1760596413966-22e91dde4e4b?auto=format&fit=crop&w=1200&q=80",
 				alt: "Jimo Residences Yaba apartment building exterior",
 			},
 			{
 				id: "jimo-residences-living-room",
+				type: "image",
 				src: "https://images.unsplash.com/photo-1749930206000-179d0b85aa7e?auto=format&fit=crop&w=800&q=80",
 				alt: "Living room interior representative of Jimo Residences Yaba",
 			},
 			{
 				id: "jimo-residences-lounge",
+				type: "image",
 				src: "https://images.unsplash.com/photo-1758915753332-cab59126742c?auto=format&fit=crop&w=800&q=80",
 				alt: "Lounge interior representative of Jimo Residences Yaba",
 			},
@@ -769,19 +775,22 @@ export const projectDetails: Record<string, ProjectDetail> = {
 			{ stage: "finishing", label: "Finishing", isComplete: false },
 			{ stage: "handover", label: "Handover", isComplete: false },
 		],
-		gallery: [
+		media: [
 			{
 				id: "yaba-hub-exterior",
+				type: "image",
 				src: "https://images.unsplash.com/photo-1761535315385-219131cb53e6?auto=format&fit=crop&w=1200&q=80",
 				alt: "Yaba Hospitality Hub building facade",
 			},
 			{
 				id: "yaba-hub-living-room",
+				type: "image",
 				src: "https://images.unsplash.com/photo-1749930206000-179d0b85aa7e?auto=format&fit=crop&w=800&q=80",
 				alt: "Living room interior representative of Yaba Hospitality Hub suites",
 			},
 			{
 				id: "yaba-hub-lounge",
+				type: "image",
 				src: "https://images.unsplash.com/photo-1758915753332-cab59126742c?auto=format&fit=crop&w=800&q=80",
 				alt: "Lounge interior representative of Yaba Hospitality Hub suites",
 			},

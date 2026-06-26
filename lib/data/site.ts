@@ -1,5 +1,3 @@
-
-
 // export const siteConfig = {
 // 	name: "Jimo",
 // 	legalName: "Jimo Property Development Limited",
@@ -42,6 +40,7 @@ export const siteConfig = {
 
 export const companyLinks: NavLink[] = [
 	{ label: "About Us", href: "/about" },
+	{ label: "Services", href: "/services" },
 	{ label: "Projects", href: "/projects" },
 	{ label: "Why Choose Us", href: "/about#why-choose-us" },
 	{ label: "Contact Us", href: "/contact" },
