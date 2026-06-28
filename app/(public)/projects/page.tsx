@@ -1,21 +1,4 @@
 
-// // app/(public)/projects/page.tsx
-// import type { Metadata } from "next";
-// import ProjectsListing from "@/components/public/projects/ProjectsListing";
-// import { SEED_PROJECTS } from "@/lib/data/projects";
-
-// export const metadata: Metadata = {
-// 	title: "Our Projects",
-// 	description:
-// 		"Explore Jimo Property Development's premium residential, hospitality and investment-led projects across Lagos.",
-// };
-
-// export default function ProjectsPage() {
-// 	return <ProjectsListing projects={SEED_PROJECTS} />;
-// }
-
-
-
 import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 import { ProjectsExplorer } from "@/components/public/projects/ProjectExplorer";

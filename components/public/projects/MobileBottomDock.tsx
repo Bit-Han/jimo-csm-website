@@ -9,19 +9,17 @@
 // export interface MobileBottomDockProps {
 // 	registerHref: string;
 // 	brochureHref: string;
-// 	/** Body content rendered between the hero and the closing CTA (Overview, Pricing, etc.). */
-// 	middleContent: ReactNode;
-// 	/** The page's final section — once this scrolls into view, the dock hands off to the facts panel. */
+// 	/** The body content the bar should float above while scrolling through it. */
+// 	children: ReactNode;
+// 	/** The page's closing section — once this scrolls into view, the bar hides. */
 // 	closingContent: ReactNode;
-// 	factsPanel: ReactNode;
 // }
 
 // export function MobileBottomDock({
 // 	registerHref,
 // 	brochureHref,
-// 	middleContent,
+// 	children,
 // 	closingContent,
-// 	factsPanel,
 // }: MobileBottomDockProps) {
 // 	const startRef = useRef<HTMLDivElement>(null);
 // 	const endRef = useRef<HTMLDivElement>(null);
@@ -54,24 +52,20 @@
 // 		};
 // 	}, []);
 
-// 	const showActionBar = isPastStart && !isPastEnd;
-// 	const showFactsPanel = isPastEnd;
+// 	const isVisible = isPastStart && !isPastEnd;
 
 // 	return (
 // 		<>
 // 			<div ref={startRef} />
-// 			{middleContent}
+// 			{children}
 // 			<div ref={endRef} />
 // 			{closingContent}
 
-// 			{/* Sticky CTA bar — visible while scrolling through the body sections, mobile only */}
 // 			<div
-// 				aria-hidden={!showActionBar}
+// 				aria-hidden={!isVisible}
 // 				className={cn(
 // 					"fixed inset-x-0 bottom-0 z-40 flex gap-3 border-t border-stone-200 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl transition-transform duration-300 ease-out lg:hidden",
-// 					showActionBar
-// 						? "translate-y-0"
-// 						: "translate-y-full pointer-events-none",
+// 					isVisible ? "translate-y-0" : "translate-y-full pointer-events-none",
 // 				)}
 // 			>
 // 				<ButtonLink
@@ -92,20 +86,6 @@
 // 					Brochure
 // 				</ButtonLink>
 // 			</div>
-
-// 			{/* Project Facts panel — takes over once the closing CTA is reached, mobile only */}
-// 			<div
-// 				aria-hidden={!showFactsPanel}
-// 				className={cn(
-// 					"fixed inset-x-0 bottom-0 z-40 max-h-[70vh] overflow-y-auto rounded-t-3xl border-t border-stone-200 bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl transition-transform duration-300 ease-out lg:hidden",
-// 					showFactsPanel
-// 						? "translate-y-0"
-// 						: "translate-y-full pointer-events-none",
-// 				)}
-// 			>
-// 				<span className="mx-auto mb-3 block h-1 w-10 rounded-full bg-stone-200" />
-// 				{factsPanel}
-// 			</div>
 // 		</>
 // 	);
 // }
@@ -114,12 +94,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { Download } from "lucide-react";
+import { Download, MessageCircle } from "lucide-react";
 import { ButtonLink } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/helpers";
 
 export interface MobileBottomDockProps {
-	registerHref: string;
+	whatsappHref: string;
 	brochureHref: string;
 	/** The body content the bar should float above while scrolling through it. */
 	children: ReactNode;
@@ -128,7 +108,7 @@ export interface MobileBottomDockProps {
 }
 
 export function MobileBottomDock({
-	registerHref,
+	whatsappHref,
 	brochureHref,
 	children,
 	closingContent,
@@ -181,12 +161,15 @@ export function MobileBottomDock({
 				)}
 			>
 				<ButtonLink
-					href={registerHref}
+					href={whatsappHref}
+					target="_blank"
+					rel="noopener noreferrer"
 					variant="accent"
 					size="md"
 					className="flex-1"
 				>
-					Register Interest
+					<MessageCircle className="h-4 w-4" />
+					WhatsApp
 				</ButtonLink>
 				<ButtonLink
 					href={brochureHref}

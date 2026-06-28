@@ -77,10 +77,10 @@ export function HeroSection() {
 							</span>
 						</div>
 
-						<div className="absolute bottom-24 left-5">
+						{/* <div className="absolute bottom-24 left-5">
 							<p className="text-lg font-bold text-white">Jimo Development</p>
 							<p className="text-sm text-white/70">Premium Residence</p>
-						</div>
+						</div> */}
 					</div>
 
 					<div className="absolute bottom-0 right-4 w-[85%] max-w-xs rounded-2xl bg-white p-5 shadow-xl sm:right-6">
@@ -88,7 +88,7 @@ export function HeroSection() {
 							Built For
 						</p>
 						<p className="mt-1 text-base font-bold text-ink-950">
-							Buyers, Investors &amp; Partners
+							Home Owners, Investors &amp; Partners
 						</p>
 					</div>
 				</div>
