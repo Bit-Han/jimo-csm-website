@@ -102,7 +102,7 @@
 
 // src/types/index.ts
 
-export type ProjectStatus = 'completed' | 'pre-launch' | 'concept' | 'active' | 'draft' | 'sold-out'
+export type ProjectStatus = 'completed' | 'under-development' | 'concept' | 'active' | 'draft' | 'sold-out'
 
 export interface UnitType {
   name: string

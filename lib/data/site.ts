@@ -31,7 +31,7 @@ export const siteConfig = {
 	email: "info@jimopropertydevelopment.com",
 	phone: "+234 000 000 0000",
 	phoneHref: "tel:+2340000000000",
-	whatsappHref: "https://wa.me/2340000000000",
+	whatsappHref: "https://wa.me/2349009009051",
 	instagramHandle: "@Jimopropertydevelopment",
 	address: "32 Sholanke Street, Akoka, Lagos",
 	registerInterestHref: "/contact",

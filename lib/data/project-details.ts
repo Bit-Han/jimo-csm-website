@@ -550,7 +550,7 @@ export const projectDetails: Record<string, ProjectDetail> = {
 		categoryLabel: "Residential & Hospitality",
 		facts: [
 			{ label: "Location", value: "Yaba, Lagos Mainland" },
-			{ label: "Status", value: "Pre-Launch" },
+			{ label: "Status", value: "Under-development" },
 			{ label: "Project Type", value: "Shortlet Apartments" },
 			{
 				label: "Unit Types",
