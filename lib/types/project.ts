@@ -1,5 +1,5 @@
 
-export type ProjectStatus = "completed" | "under-development" | "concept";
+export type ProjectStatus = "completed" | "under-development" 
 export type ProjectCategory = "residential" | "hospitality";
 export type ProjectFilterId = "all" | ProjectStatus | ProjectCategory;
 

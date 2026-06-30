@@ -9,7 +9,6 @@ export const projectFilters: ProjectFilterOption[] = [
 	{ id: "all", label: "All" },
 	{ id: "completed", label: "Completed" },
 	{ id: "under-development", label: "Under-Development" },
-	{ id: "concept", label: "Concept" },
 	{ id: "residential", label: "Residential" },
 	{ id: "hospitality", label: "Hospitality" },
 ];

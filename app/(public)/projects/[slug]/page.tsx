@@ -59,8 +59,8 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
 			</div>
 
 			<MobileBottomDock
-			whatsappHref={siteConfig.whatsappHref}
-            brochureHref={`/brochures/${project.slug}`}
+				whatsappHref={siteConfig.whatsappHref}
+				brochureHref={`/brochures/${project.slug}`}
 				closingContent={
 					<CtaBanner
 						eyebrow="Start a Conversation"
@@ -105,9 +105,12 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
 								<ProjectAmenities amenities={project.amenities} />
 							</DetailCard>
 
-							<DetailCard title="Gallery">
+							<div className="flex flex-col gap-4">
+								<div className="rounded-3xl border border-stone-200 bg-white p-6 sm:p-8">
+									<h2 className="text-xl font-bold text-ink-950">Gallery</h2>
+								</div>
 								<MediaCarousel items={project.media} />
-							</DetailCard>
+							</div>
 						</div>
 					</Container>
 				</section>
