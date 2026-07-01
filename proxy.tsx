@@ -34,28 +34,28 @@ export async function proxy(request: NextRequest) {
 	);
 
 	// IMPORTANT: do not run any logic between createServerClient and getUser()
-	const {
-		data: { user },
-	} = await supabase.auth.getUser();
+// 	const {
+// 		data: { user },
+// 	} = await supabase.auth.getUser();
 
-	const pathname = request.nextUrl.pathname;
-	const isDashboard = pathname.startsWith("/admin");
-	const isAuth =
-		pathname.startsWith("/login") || pathname.startsWith("/setup-account");
+// 	const pathname = request.nextUrl.pathname;
+// 	const isDashboard = pathname.startsWith("/admin");
+// 	const isAuth =
+// 		pathname.startsWith("/login") || pathname.startsWith("/setup-account");
 
-	// Unauthenticated user trying to access dashboard → redirect to login
-	if (!user && isDashboard) {
-		const loginUrl = new URL("/login", request.url);
-		loginUrl.searchParams.set("redirectTo", pathname);
-		return NextResponse.redirect(loginUrl);
-	}
+// 	// Unauthenticated user trying to access dashboard → redirect to login
+// 	if (!user && isDashboard) {
+// 		const loginUrl = new URL("/login", request.url);
+// 		loginUrl.searchParams.set("redirectTo", pathname);
+// 		return NextResponse.redirect(loginUrl);
+// 	}
 
-	// Authenticated user trying to access login → redirect to dashboard
-	if (user && isAuth) {
-		return NextResponse.redirect(new URL("/admin", request.url));
-	}
+// 	// Authenticated user trying to access login → redirect to dashboard
+// 	if (user && isAuth) {
+// 		return NextResponse.redirect(new URL("/admin", request.url));
+// 	}
 
-	return supabaseResponse;
+// 	return supabaseResponse;
 }
 
 export const config = {
