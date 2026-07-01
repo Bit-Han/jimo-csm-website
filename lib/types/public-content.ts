@@ -1,6 +1,3 @@
-// lib/types/public-content.ts
-// Typed shapes for the flexible `companyPages.sections[].content` JSONB,
-// specifically for the Home page's section types.
 
 export type HeroSectionContent = {
 	headline: string;

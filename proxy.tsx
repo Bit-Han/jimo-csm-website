@@ -9,10 +9,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+export async function proxy(request: NextRequest) {
+	let supabaseResponse = NextResponse.next({ request });
 
-  const supabase = createServerClient(
+	const supabase = createServerClient(
 		process.env.SUPABASE_URL!,
 		process.env.SUPABASE_PUBLISHABLE_KEY!,
 		{
@@ -33,28 +33,29 @@ export async function middleware(request: NextRequest) {
 		},
 	);
 
-  // IMPORTANT: do not run any logic between createServerClient and getUser()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+	// IMPORTANT: do not run any logic between createServerClient and getUser()
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
 
-  const pathname = request.nextUrl.pathname;
-  const isDashboard = pathname.startsWith("/admin");
-  const isAuth = pathname.startsWith("/login") || pathname.startsWith("/setup-account");
+	const pathname = request.nextUrl.pathname;
+	const isDashboard = pathname.startsWith("/admin");
+	const isAuth =
+		pathname.startsWith("/login") || pathname.startsWith("/setup-account");
 
-  // Unauthenticated user trying to access dashboard → redirect to login
-  if (!user && isDashboard) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("redirectTo", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
+	// Unauthenticated user trying to access dashboard → redirect to login
+	if (!user && isDashboard) {
+		const loginUrl = new URL("/login", request.url);
+		loginUrl.searchParams.set("redirectTo", pathname);
+		return NextResponse.redirect(loginUrl);
+	}
 
-  // Authenticated user trying to access login → redirect to dashboard
-  if (user && isAuth) {
-    return NextResponse.redirect(new URL("/admin", request.url));
-  }
+	// Authenticated user trying to access login → redirect to dashboard
+	if (user && isAuth) {
+		return NextResponse.redirect(new URL("/admin", request.url));
+	}
 
-  return supabaseResponse;
+	return supabaseResponse;
 }
 
 export const config = {

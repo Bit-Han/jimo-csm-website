@@ -1,5 +1,6 @@
 
 import type { Project } from "@/lib/types/project";
+import type { ProjectAmenityIcon } from "@/lib/types/amenity";
 
 export interface ProjectFact {
 	label: string;
@@ -24,6 +25,7 @@ export interface ProjectChecklistItem {
 export interface ProjectAmenity {
 	id: string;
 	label: string;
+	icon: ProjectAmenityIcon;
 }
 
 export type ProjectProgressStage =
@@ -33,11 +35,6 @@ export type ProjectProgressStage =
 	| "finishing"
 	| "handover";
 
-export interface ProjectProgressStep {
-	stage: ProjectProgressStage;
-	label: string;
-	isComplete: boolean;
-}
 
 export type ProjectMediaType = "image" | "video";
 
@@ -50,11 +47,6 @@ export interface ProjectMediaItem {
 	alt: string;
 }
 
-export interface ProjectFaqItem {
-	id: string;
-	question: string;
-	answer: string;
-}
 
 export interface ProjectDetail extends Project {
 	categoryLabel: string;
@@ -64,10 +56,7 @@ export interface ProjectDetail extends Project {
 	investmentHighlights: ProjectChecklistItem[];
 	paymentPlan: ProjectChecklistItem[];
 	amenities: ProjectAmenity[];
-	progress: ProjectProgressStep[];
 	media: ProjectMediaItem[];
-	/** No longer rendered on the project page itself — kept in case you want it elsewhere later (e.g. a dedicated FAQ page). */
-	faq: ProjectFaqItem[];
 	contactCtaTitle: string;
 	contactCtaDescription: string;
 }

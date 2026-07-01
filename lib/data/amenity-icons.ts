@@ -1,0 +1,78 @@
+import {
+	BatteryCharging,
+	BellRing,
+	Camera,
+	ChefHat,
+	Droplet,
+	Droplets,
+	Dumbbell,
+	Filter,
+	Fingerprint,
+	Flame,
+	LayoutPanelTop,
+	type LucideIcon,
+	MoveVertical,
+	ParkingCircle,
+	Shirt,
+	ShieldCheck,
+	Sparkles,
+	Sun,
+	UtensilsCrossed,
+	Waves,
+	Wifi,
+	Zap,
+} from "lucide-react";
+import type { ProjectAmenityIcon } from "@/lib/types/amenity";
+
+export const amenityIconMap: Record<ProjectAmenityIcon, LucideIcon> = {
+	camera: Camera,
+	"shield-check": ShieldCheck,
+	fingerprint: Fingerprint,
+	droplet: Droplet,
+	droplets: Droplets,
+	filter: Filter,
+	flame: Flame,
+	zap: Zap,
+	"battery-charging": BatteryCharging,
+	sun: Sun,
+	"chef-hat": ChefHat,
+	shirt: Shirt,
+	"layout-panel-top": LayoutPanelTop,
+	"parking-circle": ParkingCircle,
+	elevator: MoveVertical,
+	wifi: Wifi,
+	"utensils-crossed": UtensilsCrossed,
+	"bell-ring": BellRing,
+	sparkles: Sparkles,
+	dumbbell: Dumbbell,
+	waves: Waves,
+};
+
+// The option list a future admin icon-picker would render — value is what
+// gets stored, label is what the admin actually sees in the dropdown.
+export const amenityIconOptions: {
+	value: ProjectAmenityIcon;
+	label: string;
+}[] = [
+	{ value: "camera", label: "CCTV / camera" },
+	{ value: "shield-check", label: "Security" },
+	{ value: "fingerprint", label: "Smart access" },
+	{ value: "droplet", label: "Water supply" },
+	{ value: "droplets", label: "Water tank" },
+	{ value: "filter", label: "Water treatment" },
+	{ value: "flame", label: "Water heater / gas" },
+	{ value: "zap", label: "Power / generator" },
+	{ value: "battery-charging", label: "Backup power" },
+	{ value: "sun", label: "Solar" },
+	{ value: "chef-hat", label: "Kitchen" },
+	{ value: "shirt", label: "Wardrobe" },
+	{ value: "layout-panel-top", label: "Ceiling finish" },
+	{ value: "parking-circle", label: "Parking" },
+	{ value: "elevator", label: "Elevator" },
+	{ value: "wifi", label: "Internet" },
+	{ value: "utensils-crossed", label: "Restaurant" },
+	{ value: "bell-ring", label: "Reception" },
+	{ value: "sparkles", label: "Housekeeping" },
+	{ value: "dumbbell", label: "Gym" },
+	{ value: "waves", label: "Pool" },
+];

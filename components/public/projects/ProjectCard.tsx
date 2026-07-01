@@ -8,7 +8,6 @@ import type { Project, ProjectStatus } from "@/lib/types/project";
 const statusBadgeVariant: Record<ProjectStatus, BadgeProps["variant"]> = {
   completed: "completed",
   "under-development": "under-development",
-  concept: "concept",
 };
 
 export interface ProjectCardProps {

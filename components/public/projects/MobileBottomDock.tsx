@@ -2,12 +2,12 @@
 
 // import { useEffect, useRef, useState } from "react";
 // import type { ReactNode } from "react";
-// import { Download } from "lucide-react";
+// import { Download, MessageCircle } from "lucide-react";
 // import { ButtonLink } from "@/components/ui/Button";
 // import { cn } from "@/lib/utils/helpers";
 
 // export interface MobileBottomDockProps {
-// 	registerHref: string;
+// 	whatsappHref: string;
 // 	brochureHref: string;
 // 	/** The body content the bar should float above while scrolling through it. */
 // 	children: ReactNode;
@@ -16,7 +16,7 @@
 // }
 
 // export function MobileBottomDock({
-// 	registerHref,
+// 	whatsappHref,
 // 	brochureHref,
 // 	children,
 // 	closingContent,
@@ -69,12 +69,15 @@
 // 				)}
 // 			>
 // 				<ButtonLink
-// 					href={registerHref}
+// 					href={whatsappHref}
+// 					target="_blank"
+// 					rel="noopener noreferrer"
 // 					variant="accent"
 // 					size="md"
 // 					className="flex-1"
 // 				>
-// 					Register Interest
+// 					<MessageCircle className="h-4 w-4" />
+// 					WhatsApp
 // 				</ButtonLink>
 // 				<ButtonLink
 // 					href={brochureHref}
@@ -103,7 +106,7 @@ export interface MobileBottomDockProps {
 	brochureHref: string;
 	/** The body content the bar should float above while scrolling through it. */
 	children: ReactNode;
-	/** The page's closing section — once this scrolls into view, the bar hides. */
+	/** The page's closing section — rendered after children, no longer a hide trigger. */
 	closingContent: ReactNode;
 }
 
@@ -114,15 +117,12 @@ export function MobileBottomDock({
 	closingContent,
 }: MobileBottomDockProps) {
 	const startRef = useRef<HTMLDivElement>(null);
-	const endRef = useRef<HTMLDivElement>(null);
 	const [isPastStart, setIsPastStart] = useState(false);
-	const [isPastEnd, setIsPastEnd] = useState(false);
 
 	useEffect(() => {
 		const startSentinel = startRef.current;
-		const endSentinel = endRef.current;
 
-		if (!startSentinel || !endSentinel) {
+		if (!startSentinel) {
 			return;
 		}
 
@@ -130,34 +130,26 @@ export function MobileBottomDock({
 			([entry]) => setIsPastStart(entry.boundingClientRect.top <= 0),
 			{ threshold: 0 },
 		);
-		const endObserver = new IntersectionObserver(
-			([entry]) => setIsPastEnd(entry.boundingClientRect.top <= 0),
-			{ threshold: 0 },
-		);
 
 		startObserver.observe(startSentinel);
-		endObserver.observe(endSentinel);
 
-		return () => {
-			startObserver.disconnect();
-			endObserver.disconnect();
-		};
+		return () => startObserver.disconnect();
 	}, []);
-
-	const isVisible = isPastStart && !isPastEnd;
 
 	return (
 		<>
 			<div ref={startRef} />
 			{children}
-			<div ref={endRef} />
 			{closingContent}
 
+			{/* Once visible, stays fixed through the rest of the page — including over the footer — on mobile only. */}
 			<div
-				aria-hidden={!isVisible}
+				aria-hidden={!isPastStart}
 				className={cn(
 					"fixed inset-x-0 bottom-0 z-40 flex gap-3 border-t border-stone-200 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl transition-transform duration-300 ease-out lg:hidden",
-					isVisible ? "translate-y-0" : "translate-y-full pointer-events-none",
+					isPastStart
+						? "translate-y-0"
+						: "translate-y-full pointer-events-none",
 				)}
 			>
 				<ButtonLink
