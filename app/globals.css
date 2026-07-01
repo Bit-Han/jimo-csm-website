@@ -23,6 +23,18 @@
   --color-red-700: #a60e27;
 }
 
+@theme {
+	/* ...existing tokens... */
+
+	--color-navy-950: #0a1726;
+	--color-navy-900: #102338;
+	--color-navy-800: #16314c;
+
+	--color-gold-300: #f3dba9;
+	--color-gold-400: #e0b563;
+	--color-gold-500: #c89640;
+}
+
 @layer base {
   * {
     @apply border-stone-200;
