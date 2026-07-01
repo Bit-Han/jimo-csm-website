@@ -17,8 +17,7 @@ function matchesFilter(project: Project, filterId: ProjectFilterId): boolean {
 
 	if (
 		filterId === "completed" ||
-		filterId === "under-development" ||
-		filterId === "concept"
+		filterId === "under-development"
 	) {
 		return project.status === filterId;
 	}
