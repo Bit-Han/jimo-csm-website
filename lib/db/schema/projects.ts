@@ -1,312 +1,125 @@
-// // lib/db/schema/projects.ts
-// import {
-// 	pgTable,
-// 	uuid,
-// 	text,
-// 	timestamp,
-// 	integer,
-// 	boolean,
-// 	jsonb,
-// 	bigint,
-// 	index,
-// } from "drizzle-orm/pg-core";
-// import { projectStatusEnum, projectTypeEnum, unitStatusEnum } from "./enums";
-// import { profiles } from "./users";
-
-// // ─────────────────────────────────────────────────────────────────────────────
-// // projects
-// // Core entity. One project = one real estate development (Jimo Residences, etc.)
-// // ─────────────────────────────────────────────────────────────────────────────
-// export const projects = pgTable(
-// 	"projects",
-// 	{
-// 		id: uuid("id").primaryKey().defaultRandom(),
-// 		name: text("name").notNull(),
-// 		slug: text("slug").notNull().unique(),
-// 		location: text("location").notNull(), // "Yaba, Lagos Mainland"
-// 		locationArea: text("location_area").notNull(), // "Yaba" (used for filters)
-// 		status: projectStatusEnum("status").notNull().default("draft"),
-// 		type: projectTypeEnum("type").notNull().default("residential"),
-
-// 		// ── Content ──
-// 		description: text("description"),
-// 		heroHeadline: text("hero_headline"),
-// 		heroSubtext: text("hero_subtext"),
-// 		heroImageUrl: text("hero_image_url"),
-// 		videoUrl: text("video_url"),
-
-// 		// ── Pricing ── (stored in kobo/smallest unit to avoid decimal issues)
-// 		// Display as Naira in the UI by dividing by 100
-// 		startingPriceKobo: bigint("starting_price_kobo", { mode: "number" }),
-
-// 		// ── Project details ──
-// 		deliveryTimeline: text("delivery_timeline"),
-// 		constructionStatus: text("construction_status"),
-// 		totalUnits: integer("total_units").default(0),
-// 		availableUnits: integer("available_units").default(0),
-
-// 		// ── JSONB arrays — stored as structured data ──
-// 		investmentHighlights: jsonb("investment_highlights")
-// 			.$type<string[]>()
-// 			.default([]),
-// 		locationAdvantages: jsonb("location_advantages")
-// 			.$type<string[]>()
-// 			.default([]),
-// 		featuresAmenities: jsonb("features_amenities")
-// 			.$type<string[]>()
-// 			.default([]),
-
-// 		// ── Payment plan (optional structured data) ──
-// 		paymentPlanDetails: jsonb("payment_plan_details").$type<{
-// 			description: string;
-// 			milestones: Array<{ label: string; percentageValue: number }>;
-// 		} | null>(),
-
-// 		// ── Contact ──
-// 		whatsappNumber: text("whatsapp_number"),
-// 		callNumber: text("call_number"),
-
-// 		// ── SEO ──
-// 		metaTitle: text("meta_title"),
-// 		metaDescription: text("meta_description"),
-// 		focusKeyword: text("focus_keyword"),
-// 		schemaMarkup: jsonb("schema_markup"),
-
-// 		// ── HubSpot ──
-// 		hubspotDealId: text("hubspot_deal_id"),
-
-// 		// ── Flags ──
-// 		isFeatured: boolean("is_featured").notNull().default(false),
-
-// 		// ── Audit ──
-// 		createdBy: uuid("created_by").references(() => profiles.id, {
-// 			onDelete: "set null",
-// 		}),
-// 		lastEditedBy: uuid("last_edited_by").references(() => profiles.id, {
-// 			onDelete: "set null",
-// 		}),
-// 		createdAt: timestamp("created_at", { withTimezone: true })
-// 			.notNull()
-// 			.defaultNow(),
-// 		updatedAt: timestamp("updated_at", { withTimezone: true })
-// 			.notNull()
-// 			.defaultNow(),
-// 	},
-// 	(table) => ({
-// 		slugIdx: index("projects_slug_idx").on(table.slug),
-// 		statusIdx: index("projects_status_idx").on(table.status),
-// 		locationAreaIdx: index("projects_location_area_idx").on(table.locationArea),
-// 	}),
-// );
-
-// // ─────────────────────────────────────────────────────────────────────────────
-// // project_units
-// // Each project has multiple unit types (Studio, 1-Bed, Penthouse, etc.)
-// // ─────────────────────────────────────────────────────────────────────────────
-// export const projectUnits = pgTable(
-// 	"project_units",
-// 	{
-// 		id: uuid("id").primaryKey().defaultRandom(),
-// 		projectId: uuid("project_id")
-// 			.notNull()
-// 			.references(() => projects.id, { onDelete: "cascade" }),
-// 		name: text("name").notNull(), // "Studio Apartment", "1-Bedroom Apartment"
-// 		status: unitStatusEnum("status").notNull().default("active"),
-// 		totalUnits: integer("total_units").notNull().default(0),
-// 		availableUnits: integer("available_units").notNull().default(0),
-// 		launchPriceKobo: bigint("launch_price_kobo", { mode: "number" }),
-// 		currentPriceKobo: bigint("current_price_kobo", { mode: "number" }),
-// 		ctaLabel: text("cta_label"), // "Enquire About Studio"
-// 		ctaLink: text("cta_link"), // "/enquiry?unit=studio"
-// 		imageUrl: text("image_url"),
-// 		description: text("description"),
-// 		orderIndex: integer("order_index").notNull().default(0),
-// 		createdAt: timestamp("created_at", { withTimezone: true })
-// 			.notNull()
-// 			.defaultNow(),
-// 		updatedAt: timestamp("updated_at", { withTimezone: true })
-// 			.notNull()
-// 			.defaultNow(),
-// 	},
-// 	(table) => ({
-// 		projectIdIdx: index("project_units_project_id_idx").on(table.projectId),
-// 	}),
-// );
-
-// // ─────────────────────────────────────────────────────────────────────────────
-// // project_gallery
-// // Join table: project ↔ media items, ordered for display
-// // ─────────────────────────────────────────────────────────────────────────────
-// export const projectGallery = pgTable(
-// 	"project_gallery",
-// 	{
-// 		id: uuid("id").primaryKey().defaultRandom(),
-// 		projectId: uuid("project_id")
-// 			.notNull()
-// 			.references(() => projects.id, { onDelete: "cascade" }),
-// 		// mediaId references media table (defined in media.ts).
-// 		// We use a plain uuid column to avoid a circular import — the relation
-// 		// is declared in lib/db/relations.ts
-// 		mediaId: uuid("media_id").notNull(),
-// 		orderIndex: integer("order_index").notNull().default(0),
-// 		createdAt: timestamp("created_at", { withTimezone: true })
-// 			.notNull()
-// 			.defaultNow(),
-// 	},
-// 	(table) => ({
-// 		projectIdIdx: index("project_gallery_project_id_idx").on(table.projectId),
-// 	}),
-// );
-
-// export type Project = typeof projects.$inferSelect;
-// export type NewProject = typeof projects.$inferInsert;
-// export type ProjectUnit = typeof projectUnits.$inferSelect;
-// export type NewProjectUnit = typeof projectUnits.$inferInsert;
-// export type ProjectGalleryItem = typeof projectGallery.$inferSelect;
-
-
-
-
-// lib/db/schema/projects.ts
 import {
-  pgTable,
-  uuid,
-  text,
-  timestamp,
-  integer,
-  boolean,
-  jsonb,
-  bigint,
-  index,
+	boolean,
+	integer,
+	pgTable,
+	text,
+	timestamp,
+	uuid,
 } from "drizzle-orm/pg-core";
 import {
-  projectStatusEnum,
-  projectTypeEnum,
-  unitStatusEnum,
-  listingTypeEnum,
-  constructionStatusEnum,
+	projectCategoryEnum,
+	projectChecklistKindEnum,
+	projectMediaTypeEnum,
+	projectStatusEnum,
+	projectUnitIconEnum,
+	publishStatusEnum,
 } from "./enums";
-import { profiles } from "./users";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// projects
-// Core entity. One project = one real estate development (Jimo Residences, etc.)
-// ─────────────────────────────────────────────────────────────────────────────
-export const projects = pgTable(
-  "projects",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    name: text("name").notNull(),
-    slug: text("slug").notNull().unique(),
-    location: text("location").notNull(), // "Yaba, Lagos Mainland"
-    locationArea: text("location_area").notNull(), // "Yaba" (used for filters)
-    status: projectStatusEnum("status").notNull().default("draft"),
-    type: projectTypeEnum("type").notNull().default("residential"),
-    listingType: listingTypeEnum("listing_type").notNull().default("for_sale"),
+export const projects = pgTable("projects", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	slug: text("slug").notNull().unique(),
+	name: text("name").notNull(),
+	location: text("location").notNull(),
+	status: projectStatusEnum("status").notNull(),
+	statusLabel: text("status_label").notNull(),
+	categoryLabel: text("category_label").notNull(),
+	developerLabel: text("developer_label").notNull(),
+	typeLabel: text("type_label").notNull(),
+	description: text("description").notNull(),
+	overview: text("overview").array().notNull().default([]),
+	contactCtaTitle: text("contact_cta_title").notNull(),
+	contactCtaDescription: text("contact_cta_description").notNull(),
+	coverImageSrc: text("cover_image_src").notNull(),
+	coverImageAlt: text("cover_image_alt").notNull(),
+	publishStatus: publishStatusEnum("publish_status").notNull().default("draft"),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+	updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
-    // ── Content ──
-    description: text("description"),
-    heroHeadline: text("hero_headline"),
-    heroSubtext: text("hero_subtext"),
-    heroImageUrl: text("hero_image_url"),
-    videoUrl: text("video_url"),
+// Many-to-many: one project can be both residential and hospitality
+export const projectCategories = pgTable("project_categories", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	projectId: uuid("project_id")
+		.notNull()
+		.references(() => projects.id, { onDelete: "cascade" }),
+	category: projectCategoryEnum("category").notNull(),
+});
 
-    // ── Pricing ── (stored in kobo/smallest unit to avoid decimal issues)
-    startingPriceKobo: bigint("starting_price_kobo", { mode: "number" }),
+// Card-level tags (e.g. "Confirm Current Price")
+export const projectTags = pgTable("project_tags", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	projectId: uuid("project_id")
+		.notNull()
+		.references(() => projects.id, { onDelete: "cascade" }),
+	label: text("label").notNull(),
+	position: integer("position").notNull().default(0),
+});
 
-    // ── Project details ──
-    deliveryTimeline: text("delivery_timeline"),
-    constructionStatus: constructionStatusEnum("construction_status").notNull().default("planning"),
-    titleDocument: text("title_document"), // e.g. "C of O", "Governor's Consent"
-    totalUnits: integer("total_units").default(0),
-    availableUnits: integer("available_units").default(0),
+// Right-hand sidebar facts (Location, Status, Unit Types, etc.)
+export const projectFacts = pgTable("project_facts", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	projectId: uuid("project_id")
+		.notNull()
+		.references(() => projects.id, { onDelete: "cascade" }),
+	label: text("label").notNull(),
+	value: text("value").notNull(),
+	position: integer("position").notNull().default(0),
+});
 
-    // ── JSONB arrays — stored as structured data ──
-    investmentHighlights: jsonb("investment_highlights").$type<string[]>().default([]),
-    locationAdvantages: jsonb("location_advantages").$type<string[]>().default([]),
-    featuresAmenities: jsonb("features_amenities").$type<string[]>().default([]),
+export const projectUnits = pgTable("project_units", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	projectId: uuid("project_id")
+		.notNull()
+		.references(() => projects.id, { onDelete: "cascade" }),
+	name: text("name").notNull(),
+	icon: projectUnitIconEnum("icon").notNull().default("home"),
+	priceLabel: text("price_label").notNull(),
+	availabilityLabel: text("availability_label").notNull(),
+	position: integer("position").notNull().default(0),
+});
 
-    // ── Payment plan (optional structured data) ──
-    paymentPlanDetails: jsonb("payment_plan_details").$type<{
-      description: string;
-      milestones: Array<{ label: string; percentageValue: number }>;
-    } | null>(),
+// Shared table for investment highlights and payment plan items
+export const projectChecklistItems = pgTable("project_checklist_items", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	projectId: uuid("project_id")
+		.notNull()
+		.references(() => projects.id, { onDelete: "cascade" }),
+	kind: projectChecklistKindEnum("kind").notNull(),
+	label: text("label").notNull(),
+	position: integer("position").notNull().default(0),
+});
 
-    // ── Contact ──
-    whatsappNumber: text("whatsapp_number"),
-    callNumber: text("call_number"),
+// icon stores a ProjectAmenityIcon string key (e.g. "camera", "shield-check")
+export const projectAmenities = pgTable("project_amenities", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	projectId: uuid("project_id")
+		.notNull()
+		.references(() => projects.id, { onDelete: "cascade" }),
+	label: text("label").notNull(),
+	icon: text("icon").notNull(),
+	position: integer("position").notNull().default(0),
+});
 
-    // ── SEO ──
-    metaTitle: text("meta_title"),
-    metaDescription: text("meta_description"),
-    focusKeyword: text("focus_keyword"),
-    schemaMarkup: jsonb("schema_markup"),
+// src and cloudinaryPublicId both stored:
+// src = full Cloudinary delivery URL (used by Next/Image directly)
+// cloudinaryPublicId = needed for deletion / transformation calls
+export const projectMedia = pgTable("project_media", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	projectId: uuid("project_id")
+		.notNull()
+		.references(() => projects.id, { onDelete: "cascade" }),
+	type: projectMediaTypeEnum("type").notNull().default("image"),
+	cloudinaryPublicId: text("cloudinary_public_id").notNull(),
+	src: text("src").notNull(),
+	poster: text("poster"),
+	alt: text("alt").notNull(),
+	position: integer("position").notNull().default(0),
+});
 
-    // ── HubSpot ──
-    hubspotDealId: text("hubspot_deal_id"),
-
-    // ── Flags ──
-    isFeatured: boolean("is_featured").notNull().default(false),
-
-    // ── Audit ──
-    createdBy: uuid("created_by").references(() => profiles.id, { onDelete: "set null" }),
-    lastEditedBy: uuid("last_edited_by").references(() => profiles.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (table) => ({
-    slugIdx: index("projects_slug_idx").on(table.slug),
-    statusIdx: index("projects_status_idx").on(table.status),
-    locationAreaIdx: index("projects_location_area_idx").on(table.locationArea),
-  })
-);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// project_units
-// ─────────────────────────────────────────────────────────────────────────────
-export const projectUnits = pgTable(
-  "project_units",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-    name: text("name").notNull(),
-    status: unitStatusEnum("status").notNull().default("active"),
-    totalUnits: integer("total_units").notNull().default(0),
-    availableUnits: integer("available_units").notNull().default(0),
-    launchPriceKobo: bigint("launch_price_kobo", { mode: "number" }),
-    currentPriceKobo: bigint("current_price_kobo", { mode: "number" }),
-    ctaLabel: text("cta_label"),
-    ctaLink: text("cta_link"),
-    imageUrl: text("image_url"),
-    description: text("description"),
-    orderIndex: integer("order_index").notNull().default(0),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (table) => ({
-    projectIdIdx: index("project_units_project_id_idx").on(table.projectId),
-  })
-);
-
-// ─────────────────────────────────────────────────────────────────────────────
-// project_gallery
-// ─────────────────────────────────────────────────────────────────────────────
-export const projectGallery = pgTable(
-  "project_gallery",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
-    mediaId: uuid("media_id").notNull(),
-    orderIndex: integer("order_index").notNull().default(0),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (table) => ({
-    projectIdIdx: index("project_gallery_project_id_idx").on(table.projectId),
-  })
-);
-
-export type Project = typeof projects.$inferSelect;
-export type NewProject = typeof projects.$inferInsert;
-export type ProjectUnit = typeof projectUnits.$inferSelect;
-export type NewProjectUnit = typeof projectUnits.$inferInsert;
-export type ProjectGalleryItem = typeof projectGallery.$inferSelect;
+export type ProjectRow = typeof projects.$inferSelect;
+export type NewProjectRow = typeof projects.$inferInsert;
+export type ProjectFactRow = typeof projectFacts.$inferSelect;
+export type ProjectUnitRow = typeof projectUnits.$inferSelect;
+export type ProjectChecklistItemRow = typeof projectChecklistItems.$inferSelect;
+export type ProjectAmenityRow = typeof projectAmenities.$inferSelect;
+export type ProjectMediaRow = typeof projectMedia.$inferSelect;

@@ -1,60 +1,33 @@
-// lib/db/schema/enums.ts
-// ─────────────────────────────────────────────────────
-// All PostgreSQL enums live here so they can be imported
-// cleanly by any schema file without circular deps.
-// ─────────────────────────────────────────────────────
 import { pgEnum } from "drizzle-orm/pg-core";
 
-// ── Users ─────────────────────────────────────────────
-export const userRoleEnum = pgEnum("user_role", [
-	"super_admin",
-	"website_manager",
-	"content_seo",
-	"sales_crm",
-	"marketing_admin",
-]);
-
-export const userStatusEnum = pgEnum("user_status", ["active", "inactive"]);
-
-export const invitationStatusEnum = pgEnum("invitation_status", [
-	"pending",
-	"accepted",
-	"expired",
-	"revoked",
-]);
-
-// ── Projects ──────────────────────────────────────────
 export const projectStatusEnum = pgEnum("project_status", [
-	"selling_now",
-	"active",
-	"pre_launch",
-	"draft",
-	"sold_out",
+	"completed",
+	"under-development",
 ]);
 
-export const projectTypeEnum = pgEnum("project_type", [
+export const projectCategoryEnum = pgEnum("project_category", [
 	"residential",
-	"commercial",
-	"mixed_use",
 	"hospitality",
-	"land",
 ]);
 
-export const unitStatusEnum = pgEnum("unit_status", [
-	"active",
-	"sold_out",
-	"inactive",
+export const projectUnitIconEnum = pgEnum("project_unit_icon", [
+	"home",
+	"building",
 ]);
 
-// ── Leads ─────────────────────────────────────────────
-export const leadStatusEnum = pgEnum("lead_status", [
-	"new",
-	"contacted",
-	"qualified",
-	"inspection",
-	"negotiation",
-	"closed_won",
-	"closed_lost",
+export const projectChecklistKindEnum = pgEnum("project_checklist_kind", [
+	"investment_highlight",
+	"payment_plan",
+]);
+
+export const projectMediaTypeEnum = pgEnum("project_media_type", [
+	"image",
+	"video",
+]);
+
+export const publishStatusEnum = pgEnum("publish_status", [
+	"draft",
+	"published",
 ]);
 
 export const leadSourceEnum = pgEnum("lead_source", [
@@ -63,45 +36,41 @@ export const leadSourceEnum = pgEnum("lead_source", [
 	"whatsapp",
 	"instagram",
 	"google",
-	"tiktok",
-	"brochure",
 	"referral",
-	"direct",
+	"brochure",
 ]);
 
-export const leadActivityTypeEnum = pgEnum("lead_activity_type", [
-	"form_submitted",
-	"auto_response_sent",
-	"brochure_sent",
-	"sales_notified",
-	"status_changed",
-	"note_added",
-	"called",
-	"whatsapp_sent",
-	"assigned",
-	"hubspot_synced",
+export const leadStatusEnum = pgEnum("lead_status", [
+	"new",
+	"contacted",
+	"qualified",
+	"inspection",
+	"negotiation",
+	"won",
+	"lost",
 ]);
 
-// ── Landing Pages ─────────────────────────────────────
-export const landingPageTypeEnum = pgEnum("landing_page_type", [
-	"investment",
-	"unit_campaign",
-	"realtor",
-	"diaspora",
-	"general",
-]);
-
-export const contentStatusEnum = pgEnum("content_status", [
-	"published",
+export const brochureStatusEnum = pgEnum("brochure_status", [
 	"draft",
-	"archived",
+	"active",
 ]);
 
-// ── Forms ─────────────────────────────────────────────
+export const insightCategoryEnum = pgEnum("insight_category", [
+	"location-analysis",
+	"investment-education",
+	"project-update",
+]);
 
-// formTypeEnum — add "general_contact" to the existing array:
-export const formTypeEnum = pgEnum("form_type", [
-  "project_enquiry", "brochure_download", "diaspora", "realtor", "newsletter", "general_contact",
+export const mediaResourceTypeEnum = pgEnum("media_resource_type", [
+	"image",
+	"video",
+	"raw",
+]);
+
+export const formStatusEnum = pgEnum("form_status", [
+	"active",
+	"review",
+	"draft",
 ]);
 
 export const formFieldTypeEnum = pgEnum("form_field_type", [
@@ -114,67 +83,32 @@ export const formFieldTypeEnum = pgEnum("form_field_type", [
 	"textarea",
 	"hidden",
 	"consent",
-	"country",
-	"checkbox",
 ]);
 
-export const formStatusEnum = pgEnum("form_status", [
-	"active",
-	"review",
-	"inactive",
+export const adminRoleEnum = pgEnum("admin_role", [
+	"super-admin",
+	"website-manager",
+	"content-seo",
+	"sales-crm",
+	"marketing-admin",
 ]);
 
-// ── Brochures ─────────────────────────────────────────
-export const brochureStatusEnum = pgEnum("brochure_status", [
-	"active",
-	"draft",
-	"archived",
+export const adminStatusEnum = pgEnum("admin_status", ["active", "inactive"]);
+
+// ─── New ──────────────────────────────────────────────────────────────────
+// Tracks the lifecycle of an invitation link.
+// pending  → sent, waiting for the recipient to click and sign up
+// accepted → recipient completed signup; a matching admin_users row exists
+// expired  → token passed its expiry window without being used
+// revoked  → SuperAdmin cancelled the invite before it was accepted
+export const invitationStatusEnum = pgEnum("invitation_status", [
+	"pending",
+	"accepted",
+	"expired",
+	"revoked",
 ]);
 
-// ── Media ─────────────────────────────────────────────
-export const mediaFolderEnum = pgEnum("media_folder", [
-	"project_renders",
-	"interior_renders",
-	"construction_updates",
-	"brochures",
-	"team_photos",
-	"logos_icons",
-	"documents",
-	"videos",
-]);
-
-export const mediaUsageTagEnum = pgEnum("media_usage_tag", [
-	"project_render",
-	"interior",
-	"construction",
-	"brochure",
-	"logo",
-	"team",
-	"document",
-	"video",
-]);
-
-// ── Articles ──────────────────────────────────────────
-export const articleCategoryEnum = pgEnum("article_category", [
-	"location_analysis",
-	"investment_education",
-	"project_update",
-	"market_insight",
-	"construction_update",
-]);
-
-// ── Company Pages ─────────────────────────────────────
-export const companyPageTypeEnum = pgEnum("company_page_type", [
-	"home",
-	"about",
-	"services",
-	"corporate_statement",
-	"contact",
-	"custom",
-]);
-
-// ── Tracking ──────────────────────────────────────────
-export const trackingIntegrationEnum = pgEnum("tracking_integration_name", [
+export const trackingPlatformEnum = pgEnum("tracking_platform", [
 	"google_tag_manager",
 	"google_analytics_4",
 	"meta_pixel",
@@ -184,23 +118,65 @@ export const trackingIntegrationEnum = pgEnum("tracking_integration_name", [
 	"snapchat_pixel",
 ]);
 
-export const trackingIntegrationStatusEnum = pgEnum(
-	"tracking_integration_status",
-	["connected", "disconnected", "error"],
-);
-
 export const trackingEventCategoryEnum = pgEnum("tracking_event_category", [
 	"awareness",
 	"lead_generation",
 	"engagement",
+	"conversion",
 ]);
 
 export const trackingEventStatusEnum = pgEnum("tracking_event_status", [
 	"active",
 	"inactive",
+	"testing",
+]);
+// ─── SEO ──────────────────────────────────────────────────────────────────
+
+export const seoPageTypeEnum = pgEnum("seo_page_type", [
+  "home",
+  "insight",
+  "project",
+  "company-page",
+  "landing-page",
 ]);
 
+export const seoIssueTypeEnum = pgEnum("seo_issue_type", [
+  "meta",      // missing title, description
+  "content",   // thin content, missing keywords
+  "images",    // missing alt text
+  "technical", // no-index, duplicate title, canonical missing
+]);
 
-export const listingTypeEnum = pgEnum("listing_type", ["for_sale", "for_rent", "sold"]);
-export const constructionStatusEnum = pgEnum("construction_status", ["planning", "under_construction", "completed"]);
+export const seoIssueSeverityEnum = pgEnum("seo_issue_severity", [
+  "error",    // blocks indexing / ranking
+  "warning",  // degrades performance
+  "info",     // best-practice suggestion
+]);
 
+export const seoIssueStatusEnum = pgEnum("seo_issue_status", [
+  "open",
+  "resolved",
+  "ignored",
+]);
+
+// search_type maps directly to Google Search Console's `searchType` field.
+// ai_overview and ai_mode are the new values added with the June 2026 report.
+export const gscSearchTypeEnum = pgEnum("gsc_search_type", [
+  "web",
+  "image",
+  "news",
+  "discover",
+  "video",
+  "ai_overview", // page appeared inside a Google AI Overview summary
+  "ai_mode",     // page appeared in Google's dedicated AI Mode search
+]);
+
+// Platforms we run manual or automated AI visibility tests against.
+export const aiVisibilityPlatformEnum = pgEnum("ai_visibility_platform", [
+  "chatgpt",
+  "perplexity",
+  "claude",
+  "gemini",
+  "grok",
+  "copilot",
+]);
