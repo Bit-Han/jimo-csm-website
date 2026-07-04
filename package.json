@@ -7,7 +7,12 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint",
-		"seed:admin": "tsx --tsconfig tsconfig.scripts.json scripts/seed-superadmin.ts"
+		"seed:admin": "tsx --tsconfig tsconfig.scripts.json scripts/seed-superadmin.ts",
+		"db:generate": "drizzle-kit generate",
+		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio",
+		"db:migrate": "tsx lib/db/migrate.ts",
+		"db:seed": "tsx lib/db/seeds/index.ts"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.4.0",

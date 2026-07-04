@@ -1,28 +1,25 @@
-// lib/db/index.ts
-// ─────────────────────────────────────────────────────────────────────────────
-// Drizzle client — single instance shared across the app.
-// Uses the postgres package with `prepare: false` because Supabase uses
-// PgBouncer transaction pooling which doesn't support prepared statements.
-// ─────────────────────────────────────────────────────────────────────────────
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
-import * as relations from "./relations";
 
-if (!process.env.DATABASE_URL) {
-	throw new Error("DATABASE_URL environment variable is not set.");
+// Singleton pattern prevents connection proliferation during Next.js hot reloads.
+declare global {
+	// eslint-disable-next-line no-var
+	var __dbClient: postgres.Sql | undefined;
 }
 
-// `prepare: false` is required for Supabase transaction pooler (pgbouncer)
-const queryClient = postgres(process.env.DATABASE_URL, {
-	prepare: false,
-	// Supabase pooler supports max 10 concurrent connections on free tier
-	max: 10,
-});
+function createClient() {
+	return postgres(process.env.DATABASE_URL!, {
+		max: 1, // Supabase pooler handles the real pooling; keep this low.
+		prepare: false, // Required for pgBouncer in transaction mode.
+	});
+}
 
-export const db = drizzle(queryClient, {
-	schema: { ...schema, ...relations },
-	logger: process.env.NODE_ENV === "development",
-});
+const client = globalThis.__dbClient ?? createClient();
 
-export type Database = typeof db;
+if (process.env.NODE_ENV !== "production") {
+	globalThis.__dbClient = client;
+}
+
+export const db = drizzle(client, { schema });
+export type Db = typeof db;

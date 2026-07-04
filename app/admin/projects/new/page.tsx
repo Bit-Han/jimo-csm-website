@@ -1,11 +1,10 @@
-import { AdminPlaceholderPage } from "@/components/admin/AdminPlaceholderPage";
+import type { Metadata } from "next";
+import { ProjectEditorShell } from "@/components/admin/projects/editor/ProjectEditorShell";
+
+export const metadata: Metadata = {
+	title: "New Project | Jimo Command Centre",
+};
 
 export default function AdminNewProjectPage() {
-	return (
-		<AdminPlaceholderPage
-			title="Add New Project"
-			description="Create a new draft project."
-			stageNote="This becomes the project creation form when we build the Projects module."
-		/>
-	);
+	return <ProjectEditorShell project={null} mode="new" />;
 }
