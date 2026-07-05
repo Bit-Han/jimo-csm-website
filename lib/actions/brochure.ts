@@ -51,3 +51,4 @@ export async function submitBrochureRequest(
 
 	redirect(`/brochures/${projectSlug}/thank-you`);
 }
+
