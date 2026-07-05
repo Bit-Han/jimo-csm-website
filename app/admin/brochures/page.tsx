@@ -1,11 +1,36 @@
-import { AdminPlaceholderPage } from "@/components/admin/AdminPlaceholderPage";
+// import { AdminPlaceholderPage } from "@/components/admin/AdminPlaceholderPage";
+
+// export default function AdminBrochuresPage() {
+// 	return (
+// 		<AdminPlaceholderPage
+// 			title="Brochures"
+// 			description="Upload, version, gate and attach project brochures to landing pages and project pages."
+// 			stageNote="This becomes the brochures table once we wire it to Supabase Storage."
+// 		/>
+// 	);
+// }
+
+import type { Metadata } from "next";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { BrochuresExplorer } from "@/components/admin/brochures/BrochuresExplorer";
+import { getAdminBrochures } from "@/lib/data/admin/brochures";
+import { UploadBrochureButton } from "@/components/admin/brochures/UploadBrochureButton";
+
+export const metadata: Metadata = {
+	title: "Brochures | Jimo Command Centre",
+};
 
 export default function AdminBrochuresPage() {
+	const brochures = getAdminBrochures();
+
 	return (
-		<AdminPlaceholderPage
-			title="Brochures"
-			description="Upload, version, gate and attach project brochures to landing pages and project pages."
-			stageNote="This becomes the brochures table once we wire it to Supabase Storage."
-		/>
+		<div className="space-y-6">
+			<AdminPageHeader
+				title="Brochures"
+				description="Upload, version, gate and attach project brochures to landing pages and project pages."
+				action={<UploadBrochureButton />}
+			/>
+			<BrochuresExplorer brochures={brochures} />
+		</div>
 	);
 }
