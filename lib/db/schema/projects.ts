@@ -14,6 +14,7 @@ import {
 	projectUnitIconEnum,
 	publishStatusEnum,
 } from "./enums";
+import { adminUsers } from "./users";
 
 export const projects = pgTable("projects", {
 	id: uuid("id").defaultRandom().primaryKey(),
@@ -34,6 +35,11 @@ export const projects = pgTable("projects", {
 	publishStatus: publishStatusEnum("publish_status").notNull().default("draft"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
+	featured: boolean("featured").notNull().default(false),
+    lastUpdatedByUserId: uuid("last_updated_by_user_id").references(
+  () => adminUsers.id,
+  { onDelete: "set null" },
+	),
 });
 
 // Many-to-many: one project can be both residential and hospitality

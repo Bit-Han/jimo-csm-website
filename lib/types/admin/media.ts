@@ -9,7 +9,9 @@ export type MediaFolder =
 	| "team-photos"
 	| "logos-icons"
 	| "documents"
-	| "videos";
+	| "videos"
+	| "site-images";
+
 
 export interface MediaFolderItem {
 	id: MediaFolder;

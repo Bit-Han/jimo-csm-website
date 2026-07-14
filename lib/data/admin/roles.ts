@@ -70,6 +70,11 @@ export const roleModuleAccess: Record<AdminRole, AdminModule[]> = {
 	],
 };
 
+// lib/data/admin/roles.ts
+
 export function canAccessModule(role: AdminRole, module: AdminModule): boolean {
-	return roleModuleAccess[role].includes(module);
+  // Guard against unrecognized roles — fail safe (deny access)
+  const allowedModules = roleModuleAccess[role as keyof typeof roleModuleAccess];
+  if (!allowedModules) return false;
+  return allowedModules.includes(module);
 }

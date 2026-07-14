@@ -14,8 +14,8 @@ export type CloudinaryFolder =
 	| "jimo-property/team-photos"
 	| "jimo-property/logos-icons"
 	| "jimo-property/documents"
-	| "jimo-property/videos";
-
+	| "jimo-property/videos"
+	| "jimo-property/site-images"; 
 export interface CloudinaryUploadResult {
 	publicId: string;
 	secureUrl: string;
@@ -59,6 +59,12 @@ export async function deleteFromCloudinary(
 	await cloudinary.uploader.destroy(publicId, {
 		resource_type: resourceType,
 	});
+}
+
+export function formatFileSize(bytes: number): string {
+	if (bytes < 1024) return `${bytes} B`;
+	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export { cloudinary };
