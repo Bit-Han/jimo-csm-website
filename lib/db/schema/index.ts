@@ -17,3 +17,4 @@ export * from "./tracking";
 export * from "./settings";
 export * from "./insights";
 export * from "./content";
+export * from "./relations";

@@ -1,27 +1,29 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { AdminSidebar } from "@/components/admin/layout/AdminSidebar";
 import { AdminTopbar } from "@/components/admin/layout/AdminTopbar";
-import { currentAdminUser } from "@/lib/data/admin/current-user";
+import { ActivityTracker } from "@/components/admin/layout/ActivityTracker";
 import { cn } from "@/lib/utils/helpers";
+import type { AuthenticatedAdminUser } from "@/lib/auth/get-admin-user";
 
 const COLLAPSE_STORAGE_KEY = "jimo-admin-sidebar-collapsed";
 
 export interface AdminShellProps {
 	children: ReactNode;
+	currentUser: AuthenticatedAdminUser;
 }
 
-export function AdminShell({ children }: AdminShellProps) {
+export function AdminShell({ children, currentUser }: AdminShellProps) {
 	const [isCollapsed, setIsCollapsed] = useState(false);
 	const [isMobileOpen, setIsMobileOpen] = useState(false);
 
+	// Restore collapse preference after mount to avoid hydration mismatch
 	useEffect(() => {
 		const stored = window.localStorage.getItem(COLLAPSE_STORAGE_KEY);
-		if (stored === "true") {
-			setIsCollapsed(true);
-		}
+		if (stored === "true") setIsCollapsed(true);
 	}, []);
 
 	function toggleCollapse() {
@@ -34,8 +36,11 @@ export function AdminShell({ children }: AdminShellProps) {
 
 	return (
 		<div className="min-h-screen bg-cream-50">
+			{/* Inactivity tracker — renders nothing, just sets up event listeners */}
+			<ActivityTracker />
+
 			<AdminSidebar
-				role={currentAdminUser.role}
+				role={currentUser.role}
 				isCollapsed={isCollapsed}
 				isMobileOpen={isMobileOpen}
 				onMobileClose={() => setIsMobileOpen(false)}
@@ -48,7 +53,7 @@ export function AdminShell({ children }: AdminShellProps) {
 				)}
 			>
 				<AdminTopbar
-					currentUser={currentAdminUser}
+					currentUser={currentUser}
 					isCollapsed={isCollapsed}
 					onToggleCollapse={toggleCollapse}
 					onOpenMobileMenu={() => setIsMobileOpen(true)}

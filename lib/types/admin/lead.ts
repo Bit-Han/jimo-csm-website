@@ -3,6 +3,7 @@ export type LeadSource =
 	| "landing_page"
 	| "whatsapp"
 	| "instagram"
+	| "X"
 	| "google"
 	| "referral"
 	| "brochure";

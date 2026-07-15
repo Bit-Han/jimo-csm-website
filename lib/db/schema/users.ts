@@ -1,20 +1,3 @@
-// import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-// import { adminRoleEnum, adminStatusEnum } from "./enums";
-
-// // id must match the Supabase auth.users id — set this when Supabase Auth is wired up.
-// export const adminUsers = pgTable("admin_users", {
-// 	id: uuid("id").primaryKey(),
-// 	fullName: text("full_name").notNull(),
-// 	email: text("email").notNull().unique(),
-// 	role: adminRoleEnum("role").notNull().default("sales-crm"),
-// 	status: adminStatusEnum("status").notNull().default("active"),
-// 	lastActiveAt: timestamp("last_active_at"),
-// 	createdAt: timestamp("created_at").defaultNow().notNull(),
-// });
-
-// export type AdminUserRow = typeof adminUsers.$inferSelect;
-// export type NewAdminUserRow = typeof adminUsers.$inferInsert;
-
 import {
 	type AnyPgColumn,
 	pgTable,
@@ -95,10 +78,7 @@ export const adminInvitations = pgTable("admin_invitations", {
 	// SuperAdmin sets this when creating the invite.
 	role: adminRoleEnum("role").notNull(),
 
-	// Cryptographically random token embedded in the invite link.
-	// Unique constraint prevents token collisions (vanishingly unlikely
-	// with UUID v4 but enforced defensively).
-	token: text("token").notNull().unique(),
+	token: text("token").unique(),
 
 	status: invitationStatusEnum("status").notNull().default("pending"),
 
