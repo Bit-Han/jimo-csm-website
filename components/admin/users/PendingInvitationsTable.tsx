@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Clock, Loader2, X } from "lucide-react";
-import { revokePendingInvite } from "@/lib/actions/admin/users";
+// import { revokePendingInvite } from "@/lib/actions/admin/users";
 import { adminRoleDefinitions } from "@/lib/data/admin/roles";
 import type { AdminRole } from "@/lib/types/admin/role";
 
@@ -27,10 +27,10 @@ export function PendingInvitationsTable({
 
 	function handleRevoke(id: string) {
 		startTransition(async () => {
-			const result = await revokePendingInvite(id);
-			if (result.success) {
-				setRows((prev) => prev.filter((r) => r.id !== id));
-			}
+			// const result = await revokePendingInvite(id);
+			// if (result.success) {
+			// 	setRows((prev) => prev.filter((r) => r.id !== id));
+			// }
 		});
 	}
 
