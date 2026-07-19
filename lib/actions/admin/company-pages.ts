@@ -8,6 +8,7 @@ import {
 } from "@/lib/db/queries/content";
 import { getAdminUser } from "@/lib/auth/get-admin-user";
 import type { HomePageData } from "@/lib/types/home";
+import { deleteStorageObjectSafe } from "@/lib/integrations/supabase-storage";
 import type {
 	CompanyPromiseData,
 	CompanyServiceData,
@@ -82,14 +83,43 @@ export async function saveCoreValues(
 	}
 }
 
+// export async function saveTeamMembers(
+// 	data: TeamMemberData[],
+// ): Promise<CompanyPageActionResult> {
+// 	try {
+// 		const adminUser = await getAdminUser();
+// 		if (!adminUser) return { success: false, message: "Not authenticated." };
+
+// 		await updateCompanySection("teamMembers", data);
+
+// 		revalidatePath("/about", "layout");
+
+// 		return { success: true, message: "Team members saved." };
+// 	} catch (error) {
+// 		const message =
+// 			error instanceof Error ? error.message : "Unexpected error.";
+// 		return { success: false, message };
+// 	}
+// }
+
 export async function saveTeamMembers(
 	data: TeamMemberData[],
+	pendingImageDeletions: string[] = [],
 ): Promise<CompanyPageActionResult> {
 	try {
 		const adminUser = await getAdminUser();
 		if (!adminUser) return { success: false, message: "Not authenticated." };
 
 		await updateCompanySection("teamMembers", data);
+
+		// Only after the DB write succeeds — deleting speculatively before
+		// the save that references the new photo commits could destroy a
+		// live image if the save then failed for an unrelated reason.
+		await Promise.all(
+			pendingImageDeletions
+				.filter(Boolean)
+				.map((url) => deleteStorageObjectSafe(url)),
+		);
 
 		revalidatePath("/about", "layout");
 
@@ -100,6 +130,8 @@ export async function saveTeamMembers(
 		return { success: false, message };
 	}
 }
+
+
 
 export async function saveServices(
 	data: CompanyServiceData[],
