@@ -1,5 +1,10 @@
-import type { InsightDetail, InsightSummary } from "@/lib/types/insight";
-import type { InsightCategory } from "@/lib/types/insight";
+//
+
+import type {
+	InsightBodyBlock,
+	InsightDetail,
+	InsightSummary,
+} from "@/lib/types/insight";
 
 export interface InsightQueryRow {
 	id: string;
@@ -8,13 +13,16 @@ export interface InsightQueryRow {
 	category: string;
 	categoryLabel: string;
 	excerpt: string;
-	body: string[];
+	body: InsightBodyBlock[];
 	publishedAt: Date | null;
 	readTimeMinutes: number;
 	relatedProjectSlug: string | null;
 	relatedProjectName: string | null;
 	coverImageSrc: string | null;
 	coverImageAlt: string;
+	authorId: string | null;
+	authorName: string;
+	authorAvatarUrl: string | null;
 	seoTitle: string | null;
 	seoDescription: string | null;
 	publishStatus: string;
@@ -30,7 +38,7 @@ export function mapInsightRowToSummary(row: InsightQueryRow): InsightSummary {
 		id: row.id,
 		slug: row.slug,
 		title: row.title,
-		category: row.category as InsightCategory,
+		category: row.category,
 		categoryLabel: row.categoryLabel,
 		excerpt: row.excerpt,
 		publishedAt: formatPublishedAt(row.publishedAt),
@@ -41,9 +49,11 @@ export function mapInsightRowToSummary(row: InsightQueryRow): InsightSummary {
 					name: row.relatedProjectName ?? row.relatedProjectSlug,
 				}
 			: undefined,
-		coverImage: {
-			src: row.coverImageSrc ?? "",
-			alt: row.coverImageAlt,
+		coverImage: { src: row.coverImageSrc ?? "", alt: row.coverImageAlt },
+		author: {
+			id: row.authorId,
+			name: row.authorName || "Jimo Property Development",
+			avatarUrl: row.authorAvatarUrl,
 		},
 	};
 }
@@ -51,6 +61,6 @@ export function mapInsightRowToSummary(row: InsightQueryRow): InsightSummary {
 export function mapInsightRowToDetail(row: InsightQueryRow): InsightDetail {
 	return {
 		...mapInsightRowToSummary(row),
-		body: row.body,
+		body: Array.isArray(row.body) ? row.body : [],
 	};
 }

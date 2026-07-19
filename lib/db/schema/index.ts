@@ -16,5 +16,6 @@ export * from "./seo";
 export * from "./tracking";
 export * from "./settings";
 export * from "./insights";
+export * from "./insight-categories";
 export * from "./content";
 export * from "./relations";

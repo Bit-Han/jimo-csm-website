@@ -13,7 +13,7 @@ export function ContactSection() {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('[v0] Form submitted:', formData);
+    console.log('Form submitted:', formData);
     setFormData({ name: '', email: '', company: '', message: '' });
   };
 

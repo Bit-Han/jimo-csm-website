@@ -1,3 +1,5 @@
+//company-pages/page.tsx
+
 import type { Metadata } from "next";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { CompanyPagesExplorer } from "@/components/admin/company-pages/CompanyPagesExplorer";

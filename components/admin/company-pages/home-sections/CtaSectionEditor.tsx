@@ -1,3 +1,5 @@
+//@components/admin/company-pages/home-sections/AboutSectionEditor.tsx
+
 "use client";
 
 import { useState } from "react";

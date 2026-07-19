@@ -38,16 +38,6 @@ export const mockCompanyPages: AdminCompanyPageListRow[] = [
 		seoStatusNote: "Good",
 		hasPreview: true,
 	},
-	{
-		slug: "corporate-statement",
-		title: "Corporate Statement",
-		type: "Static Page",
-		related: "Global",
-		publishStatus: "draft",
-		seoStatus: "needs-seo",
-		seoStatusNote: "Needs SEO",
-		hasPreview: false,
-	},
 ];
 
 export function getCompanyPages(): AdminCompanyPageListRow[] {
@@ -66,6 +56,4 @@ export const companyPageEditorLabels: Record<CompanyPageSlug, string> = {
 	about: "Edit Who We Are copy, team members, core values, and mission/vision.",
 	services:
 		"Edit services list, what we develop categories, and the company promise.",
-	"corporate-statement":
-		"Edit the corporate statement — company position and long-term vision.",
 };

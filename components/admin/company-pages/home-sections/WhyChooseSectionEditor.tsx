@@ -1,3 +1,5 @@
+//@components/admin/company-pages/home-sections/WhyChooseSectionEditor.tsx
+
 "use client";
 
 import { useState } from "react";

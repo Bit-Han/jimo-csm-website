@@ -3,7 +3,6 @@ import {
 	Building2,
 	ClipboardList,
 	FileText,
-	Image as ImageIcon,
 	LayoutDashboard,
 	Map,
 	Newspaper,
@@ -64,12 +63,6 @@ export const adminNavItems: AdminNavItem[] = [
 		label: "Company Pages",
 		href: "/admin/company-pages",
 		icon: Building,
-	},
-	{
-		module: "media-library",
-		label: "Media Library",
-		href: "/admin/media-library",
-		icon: ImageIcon,
 	},
 	{
 		module: "seo-centre",

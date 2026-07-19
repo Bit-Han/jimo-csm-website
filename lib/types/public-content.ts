@@ -1,4 +1,4 @@
-
+//@types/public-content.ts
 export type HeroSectionContent = {
 	headline: string;
 	subtext: string;

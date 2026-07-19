@@ -2,18 +2,22 @@
 
 import { useState } from "react";
 import { InsightCard } from "./InsightCard";
-import { insightCategoryOptions } from "@/lib/data/insight-categories";
 import { cn } from "@/lib/utils/helpers";
-import type { InsightCategory, InsightSummary } from "@/lib/types/insight";
-
-type InsightFilterId = "all" | InsightCategory;
+import type {
+	InsightCategoryOption,
+	InsightSummary,
+} from "@/lib/types/insight";
 
 export interface InsightsExplorerProps {
 	insights: InsightSummary[];
+	categories: InsightCategoryOption[];
 }
 
-export function InsightsExplorer({ insights }: InsightsExplorerProps) {
-	const [activeFilter, setActiveFilter] = useState<InsightFilterId>("all");
+export function InsightsExplorer({
+	insights,
+	categories,
+}: InsightsExplorerProps) {
+	const [activeFilter, setActiveFilter] = useState<string>("all");
 
 	const visibleInsights = insights.filter(
 		(insight) => activeFilter === "all" || insight.category === activeFilter,
@@ -27,7 +31,7 @@ export function InsightsExplorer({ insights }: InsightsExplorerProps) {
 					isActive={activeFilter === "all"}
 					onClick={() => setActiveFilter("all")}
 				/>
-				{insightCategoryOptions.map((option) => (
+				{categories.map((option) => (
 					<FilterButton
 						key={option.value}
 						label={option.label}

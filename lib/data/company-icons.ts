@@ -1,3 +1,4 @@
+//lib/data/company-icons.ts
 import {
 	BedDouble,
 	Briefcase,

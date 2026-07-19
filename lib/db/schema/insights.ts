@@ -1,97 +1,90 @@
-// // lib/db/schema/articles.ts
-// import {
-// 	pgTable,
-// 	uuid,
-// 	text,
-// 	timestamp,
-// 	integer,
-// 	jsonb,
-// 	index,
-// } from "drizzle-orm/pg-core";
-// import { articleCategoryEnum, contentStatusEnum } from "./enums";
-// import { profiles } from "./users";
+// //@lib/db/schema/insights
+// import { integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+// import { insightCategoryEnum, publishStatusEnum } from "./enums";
 
-// export const articles = pgTable(
-// 	"articles",
-// 	{
-// 		id: uuid("id").primaryKey().defaultRandom(),
-// 		title: text("title").notNull(),
-// 		slug: text("slug").notNull().unique(),
-// 		category: articleCategoryEnum("category").notNull(),
+// export const insights = pgTable("insights", {
+//   id: uuid("id").defaultRandom().primaryKey(),
+//   slug: text("slug").notNull().unique(),
+//   title: text("title").notNull(),
+//   category: insightCategoryEnum("category").notNull(),
+//   categoryLabel: text("category_label").notNull(),
+//   excerpt: text("excerpt").notNull(),
+//   body: text("body").array().notNull().default([]),
+//   publishedAt: timestamp("published_at"),
+//   readTimeMinutes: integer("read_time_minutes").notNull().default(3),
 
-// 		// Optional project this article belongs to
-// 		projectId: uuid("project_id"),
+//   // Optional backlink to a project
+//   relatedProjectSlug: text("related_project_slug"),
+//   relatedProjectName: text("related_project_name"),
 
-// 		// TipTap stores content as JSON (ProseMirror JSON)
-// 		content: jsonb("content").$type<Record<string, unknown>>(),
+//   // Cloudinary URL
+//   coverImageSrc: text("cover_image_src"),
+//   coverImageAlt: text("cover_image_alt").notNull().default(""),
 
-// 		// Plain text excerpt for previews and SEO
-// 		excerpt: text("excerpt"),
+//   // SEO fields (editable in Article Editor)
+//   seoTitle: text("seo_title"),
+//   seoDescription: text("seo_description"),
 
-// 		// Featured image (FK → media.id resolved in relations.ts)
-// 		featuredImageId: uuid("featured_image_id"),
-// 		featuredImageUrl: text("featured_image_url"), // denormalised for quick access
+//   publishStatus: publishStatusEnum("publish_status").notNull().default("draft"),
+//   createdAt: timestamp("created_at").defaultNow().notNull(),
+//   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+// });
 
-// 		status: contentStatusEnum("status").notNull().default("draft"),
+// export type InsightRow = typeof insights.$inferSelect;
+// export type NewInsightRow = typeof insights.$inferInsert;
 
-// 		// SEO
-// 		metaTitle: text("meta_title"),
-// 		metaDescription: text("meta_description"),
-// 		focusKeyword: text("focus_keyword"),
-// 		internalLinksCount: integer("internal_links_count").default(0),
-
-// 		publishedAt: timestamp("published_at", { withTimezone: true }),
-// 		createdBy: uuid("created_by").references(() => profiles.id, {
-// 			onDelete: "set null",
-// 		}),
-// 		createdAt: timestamp("created_at", { withTimezone: true })
-// 			.notNull()
-// 			.defaultNow(),
-// 		updatedAt: timestamp("updated_at", { withTimezone: true })
-// 			.notNull()
-// 			.defaultNow(),
-// 	},
-// 	(table) => ({
-// 		slugIdx: index("articles_slug_idx").on(table.slug),
-// 		statusIdx: index("articles_status_idx").on(table.status),
-// 		categoryIdx: index("articles_category_idx").on(table.category),
-// 	}),
-// );
-
-// export type Article = typeof articles.$inferSelect;
-// export type NewArticle = typeof articles.$inferInsert;
-
-
-
-import { integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { insightCategoryEnum, publishStatusEnum } from "./enums";
+import {
+	integer,
+	jsonb,
+	pgTable,
+	text,
+	timestamp,
+	uuid,
+} from "drizzle-orm/pg-core";
+import { publishStatusEnum } from "./enums";
+import { adminUsers } from "./users";
+import type { InsightBodyBlock } from "@/lib/types/insight";
 
 export const insights = pgTable("insights", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  slug: text("slug").notNull().unique(),
-  title: text("title").notNull(),
-  category: insightCategoryEnum("category").notNull(),
-  categoryLabel: text("category_label").notNull(),
-  excerpt: text("excerpt").notNull(),
-  body: text("body").array().notNull().default([]),
-  publishedAt: timestamp("published_at"),
-  readTimeMinutes: integer("read_time_minutes").notNull().default(3),
+	id: uuid("id").defaultRandom().primaryKey(),
+	slug: text("slug").notNull().unique(),
+	title: text("title").notNull(),
 
-  // Optional backlink to a project
-  relatedProjectSlug: text("related_project_slug"),
-  relatedProjectName: text("related_project_name"),
+	// Free text, validated against insight_categories.value at the app
+	// layer rather than a Postgres enum — lets admins add categories from
+	// the editor without a schema migration. No FK either: if a category is
+	// later deleted, existing articles just keep the orphaned label rather
+	// than breaking.
+	category: text("category").notNull(),
+	categoryLabel: text("category_label").notNull(),
 
-  // Cloudinary URL
-  coverImageSrc: text("cover_image_src"),
-  coverImageAlt: text("cover_image_alt").notNull().default(""),
+	excerpt: text("excerpt").notNull(),
+	body: jsonb("body").$type<InsightBodyBlock[]>().notNull().default([]),
+	publishedAt: timestamp("published_at"),
+	readTimeMinutes: integer("read_time_minutes").notNull().default(3),
 
-  // SEO fields (editable in Article Editor)
-  seoTitle: text("seo_title"),
-  seoDescription: text("seo_description"),
+	relatedProjectSlug: text("related_project_slug"),
+	relatedProjectName: text("related_project_name"),
 
-  publishStatus: publishStatusEnum("publish_status").notNull().default("draft"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+	coverImageSrc: text("cover_image_src"),
+	coverImageAlt: text("cover_image_alt").notNull().default(""),
+
+	// Author is snapshotted (name + avatar copied) at save time, so public
+	// reads never need to join admin_users, and a published article keeps
+	// showing the byline it went live with even if that admin later changes
+	// their name/photo or is deactivated. authorId stays for reassignment.
+	authorId: uuid("author_id").references(() => adminUsers.id, {
+		onDelete: "set null",
+	}),
+	authorName: text("author_name").notNull().default(""),
+	authorAvatarUrl: text("author_avatar_url"),
+
+	seoTitle: text("seo_title"),
+	seoDescription: text("seo_description"),
+
+	publishStatus: publishStatusEnum("publish_status").notNull().default("draft"),
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export type InsightRow = typeof insights.$inferSelect;

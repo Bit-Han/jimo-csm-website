@@ -40,7 +40,6 @@ export const mockMediaAssets: MediaAsset[] = [
 		tagColorClass: TAG_COLORS["Project Render"]!,
 		resourceType: "image",
 		format: "JPG",
-		sizeLabel: "2.4 MB",
 	},
 	{
 		id: "ma-2",
@@ -52,7 +51,6 @@ export const mockMediaAssets: MediaAsset[] = [
 		tagColorClass: TAG_COLORS["Interior"]!,
 		resourceType: "image",
 		format: "JPG",
-		sizeLabel: "2.4 MB",
 	},
 	{
 		id: "ma-3",
@@ -64,7 +62,6 @@ export const mockMediaAssets: MediaAsset[] = [
 		tagColorClass: TAG_COLORS["Construction"]!,
 		resourceType: "image",
 		format: "JPG",
-		sizeLabel: "2.4 MB",
 	},
 	{
 		id: "ma-4",
@@ -76,7 +73,6 @@ export const mockMediaAssets: MediaAsset[] = [
 		tagColorClass: TAG_COLORS["Brochure"]!,
 		resourceType: "image",
 		format: "JPG",
-		sizeLabel: "2.4 MB",
 	},
 	{
 		id: "ma-5",
@@ -88,7 +84,6 @@ export const mockMediaAssets: MediaAsset[] = [
 		tagColorClass: TAG_COLORS["Project Render"]!,
 		resourceType: "image",
 		format: "JPG",
-		sizeLabel: "2.4 MB",
 	},
 	{
 		id: "ma-6",
@@ -100,7 +95,6 @@ export const mockMediaAssets: MediaAsset[] = [
 		tagColorClass: TAG_COLORS["Interior"]!,
 		resourceType: "image",
 		format: "JPG",
-		sizeLabel: "2.4 MB",
 	},
 	{
 		id: "ma-7",
@@ -112,7 +106,6 @@ export const mockMediaAssets: MediaAsset[] = [
 		tagColorClass: TAG_COLORS["Construction"]!,
 		resourceType: "image",
 		format: "JPG",
-		sizeLabel: "2.4 MB",
 	},
 	{
 		id: "ma-8",
@@ -124,7 +117,6 @@ export const mockMediaAssets: MediaAsset[] = [
 		tagColorClass: TAG_COLORS["Brochure"]!,
 		resourceType: "video",
 		format: "MP4",
-		sizeLabel: "2.4 MB",
 	},
 ];
 
