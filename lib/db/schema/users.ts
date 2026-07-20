@@ -22,6 +22,7 @@ export const adminUsers = pgTable("admin_users", {
 	id: uuid("id").primaryKey(),
 
 	fullName: text("full_name").notNull(),
+	avatarUrl: text("avatar_url"),
 
 	// Chosen by the user during the accept-invite signup form.
 	// Shown in the topbar and throughout the CMS.

@@ -1,39 +1,3 @@
-// import { createServerClient } from "@supabase/ssr";
-// import { type NextRequest, NextResponse } from "next/server";
-
-// export async function updateSession(request: NextRequest) {
-// 	const supabaseResponse = NextResponse.next({ request });
-
-// 	const supabase = createServerClient(
-// 		process.env.SUPABASE_URL!,
-// 		process.env.SUPABASE_PUBLISHABLE_KEY!,
-// 		{
-// 			cookies: {
-// 				getAll() {
-// 					return request.cookies.getAll();
-// 				},
-// 				setAll(cookiesToSet) {
-// 					for (const { name, value } of cookiesToSet) {
-// 						request.cookies.set(name, value);
-// 					}
-// 					for (const { name, value, options } of cookiesToSet) {
-// 						supabaseResponse.cookies.set(name, value, options);
-// 					}
-// 				},
-// 			},
-// 		},
-// 	);
-
-// 	// Refreshes the session and returns the authenticated user.
-// 	// IMPORTANT: always use getUser() not getSession() — getUser() validates
-// 	// the JWT with Supabase servers; getSession() trusts client-side cookies.
-// 	const {
-// 		data: { user },
-// 	} = await supabase.auth.getUser();
-
-// 	return { supabaseResponse, user };
-// }
-
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 

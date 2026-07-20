@@ -1,8 +1,8 @@
+// @/lib/types/admin/company-pages.ts
 export type CompanyPageSlug =
 	| "home"
 	| "about"
 	| "services"
-	| "corporate-statement";
 
 export type CompanyPageSeoStatus = "good" | "needs-seo";
 

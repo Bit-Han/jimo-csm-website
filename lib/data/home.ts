@@ -1,3 +1,4 @@
+//lib/data/home.ts
 import type { HomePageData } from "@/lib/types/home";
 
 export const homePageData: HomePageData = {

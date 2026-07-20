@@ -1,3 +1,5 @@
+
+//lib/db/schema/content.ts
 import { integer, jsonb, pgTable, timestamp } from "drizzle-orm/pg-core";
 import type { HomePageData } from "@/lib/types/home";
 

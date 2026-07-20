@@ -1,7 +1,7 @@
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { mediaAssets } from "@/lib/db/schema";
-import { formatFileSize } from "@/lib/integrations/cloudinary";
+// import { formatFileSize } from "@/lib/integrations/cloudinary";
 import type { MediaAsset } from "@/lib/types/admin/media";
 
 const FOLDER_ID_MAP: Record<string, string> = {
@@ -55,7 +55,6 @@ export async function getAdminMediaAssets(
     tagColorClass: TAG_COLOR_MAP[row.folder] ?? "bg-stone-100 text-stone-600",
     resourceType: row.resourceType,
     format: row.format,
-    sizeLabel: formatFileSize(row.sizeBytes),
   }));
 }
 

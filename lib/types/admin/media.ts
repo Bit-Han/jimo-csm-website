@@ -29,7 +29,6 @@ export interface MediaAsset {
 	tagColorClass: string;
 	resourceType: MediaResourceType;
 	format: string;
-	sizeLabel: string;
 }
 
 export type MediaViewMode = "grid" | "list";

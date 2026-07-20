@@ -1,3 +1,5 @@
+//@components/admin/company-pages/CompanyPagesExplorer.tsx
+
 "use client";
 
 import { useState, useTransition } from "react";

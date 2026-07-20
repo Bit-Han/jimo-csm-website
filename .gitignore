@@ -36,6 +36,8 @@ yarn-error.log*
 .env.local
 .env*.local
 dist-scripts/
+# mds
+scope.md
 # vercel
 .vercel
 # local script

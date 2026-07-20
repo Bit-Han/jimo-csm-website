@@ -2,16 +2,32 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 
-// Singleton pattern prevents connection proliferation during Next.js hot reloads.
 declare global {
 	// eslint-disable-next-line no-var
 	var __dbClient: postgres.Sql | undefined;
 }
 
 function createClient() {
+	const isProduction = process.env.NODE_ENV === "production";
+
 	return postgres(process.env.DATABASE_URL!, {
-		max: 1, // Supabase pooler handles the real pooling; keep this low.
-		prepare: false, // Required for pgBouncer in transaction mode.
+		// Serverless prod (Vercel): each function instance gets its own process,
+		// so keep this at 1 — Supabase's pooler multiplies this by however many
+		// instances are running concurrently.
+		// Dev (`next dev`): one persistent process serves everything, so a
+		// pool of 1 serializes your ENTIRE app through a single connection.
+		max: isProduction ? 1 : 10,
+
+		prepare: false, // required for Supabase pgbouncer in transaction mode
+
+		// Without these, a connection that silently dies (pooler-side idle
+		// drop, network blip) sits in the pool looking "available" forever,
+		// and every query after it hangs until you restart the server.
+		idle_timeout: 20, // seconds — close connections idle this long
+		max_lifetime: 60 * 30, // seconds — recycle connections every 30 min regardless
+		connect_timeout: 10, // seconds — fail fast if Postgres is unreachable, don't hang
+
+		onnotice: () => {}, // suppress noisy Postgres NOTICE logs in dev
 	});
 }
 

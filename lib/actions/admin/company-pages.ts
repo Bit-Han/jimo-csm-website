@@ -1,36 +1,4 @@
-// "use server";
-
-// export interface CompanyPageActionResult {
-// 	success: boolean;
-// 	message: string;
-// }
-
-// export async function saveCompanyPageContent(
-// 	pageSlug: string,
-// 	content: unknown,
-// ): Promise<CompanyPageActionResult> {
-// 	// TODO (integration stage):
-// 	// For "home":
-// 	//   db.update(homeContent).set({ data: content, updatedAt: new Date() }).where(eq(homeContent.id, 1))
-// 	//   revalidatePath("/")
-// 	// For "about" | "services" | "corporate-statement":
-// 	//   db.update(companyContent).set({ [section]: content, updatedAt: new Date() }).where(eq(companyContent.id, 1))
-// 	//   revalidatePath(`/${pageSlug}`)
-// 	console.log("[saveCompanyPageContent]", pageSlug, content);
-// 	await new Promise((res) => setTimeout(res, 400));
-// 	return { success: true, message: "Page content saved." };
-// }
-
-// export async function publishCompanyPage(
-// 	pageSlug: string,
-// ): Promise<CompanyPageActionResult> {
-// 	// TODO (integration stage):
-// 	// Update publishStatus on the relevant content table row
-// 	// revalidatePath(`/${pageSlug === "home" ? "" : pageSlug}`)
-// 	console.log("[publishCompanyPage]", pageSlug);
-// 	return { success: true, message: "Page published." };
-// }
-
+// lib/actions/admin/company-pages.ts
 "use server";
 
 import { revalidatePath } from "next/cache";
@@ -40,6 +8,7 @@ import {
 } from "@/lib/db/queries/content";
 import { getAdminUser } from "@/lib/auth/get-admin-user";
 import type { HomePageData } from "@/lib/types/home";
+import { deleteStorageObjectSafe } from "@/lib/integrations/supabase-storage";
 import type {
 	CompanyPromiseData,
 	CompanyServiceData,
@@ -114,14 +83,43 @@ export async function saveCoreValues(
 	}
 }
 
+// export async function saveTeamMembers(
+// 	data: TeamMemberData[],
+// ): Promise<CompanyPageActionResult> {
+// 	try {
+// 		const adminUser = await getAdminUser();
+// 		if (!adminUser) return { success: false, message: "Not authenticated." };
+
+// 		await updateCompanySection("teamMembers", data);
+
+// 		revalidatePath("/about", "layout");
+
+// 		return { success: true, message: "Team members saved." };
+// 	} catch (error) {
+// 		const message =
+// 			error instanceof Error ? error.message : "Unexpected error.";
+// 		return { success: false, message };
+// 	}
+// }
+
 export async function saveTeamMembers(
 	data: TeamMemberData[],
+	pendingImageDeletions: string[] = [],
 ): Promise<CompanyPageActionResult> {
 	try {
 		const adminUser = await getAdminUser();
 		if (!adminUser) return { success: false, message: "Not authenticated." };
 
 		await updateCompanySection("teamMembers", data);
+
+		// Only after the DB write succeeds — deleting speculatively before
+		// the save that references the new photo commits could destroy a
+		// live image if the save then failed for an unrelated reason.
+		await Promise.all(
+			pendingImageDeletions
+				.filter(Boolean)
+				.map((url) => deleteStorageObjectSafe(url)),
+		);
 
 		revalidatePath("/about", "layout");
 
@@ -132,6 +130,8 @@ export async function saveTeamMembers(
 		return { success: false, message };
 	}
 }
+
+
 
 export async function saveServices(
 	data: CompanyServiceData[],

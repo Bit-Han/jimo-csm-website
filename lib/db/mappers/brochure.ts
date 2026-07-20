@@ -1,3 +1,5 @@
+// mappers/brochure
+
 import type { AdminBrochureListRow } from "@/lib/types/admin/brochure";
 
 export interface BrochureQueryRow {
