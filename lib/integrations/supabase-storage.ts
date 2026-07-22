@@ -1,3 +1,4 @@
+//@lib/integrations/supabase-storage
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const STORAGE_BUCKET = "jimo-public";
@@ -9,7 +10,8 @@ export const STORAGE_BUCKET = "jimo-public";
 // Supabase-Storage-backed image field is added.
 // Currently only Team Member photos use Supabase Storage — everything
 // else (brochures, insights, home/about hero images) is on Cloudinary.
-export const ALLOWED_STORAGE_FOLDERS = new Set(["team-photos", "general"]);
+// Only this line changes:
+export const ALLOWED_STORAGE_FOLDERS = new Set(["team-photos", "general", "insights-body"]);
 
 // MIME type -> extension, so the stored object's extension is always
 // derived from a value already validated against a fixed allow-list

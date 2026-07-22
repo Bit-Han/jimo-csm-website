@@ -1,3 +1,4 @@
+//@components/admin/projects/editor/LivePreviewPanel.tsx
 import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 // import { cn } from "@/lib/utils/helpers";

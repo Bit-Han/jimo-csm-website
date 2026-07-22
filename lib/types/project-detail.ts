@@ -1,4 +1,4 @@
-
+//@lib/types/project-detail.ts
 import type { Project } from "@/lib/types/project";
 import type { ProjectAmenityIcon } from "@/lib/types/amenity";
 

@@ -1,3 +1,5 @@
+
+//@lib/db/schema/projects.ts
 import {
 	boolean,
 	integer,

@@ -1,18 +1,39 @@
 import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import { projects } from "@/lib/db/schema";
 import { getPublishedProjects } from "@/lib/db/queries/projects";
+import { getAdminUser } from "@/lib/auth/get-admin-user";
 
-// DELETE THIS FILE before deploying to production.
-// Only for local debugging — confirms DB queries return data.
 export async function GET() {
+	const adminUser = await getAdminUser();
+	if (!adminUser)
+		return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+
+	const allRows = await db
+		.select({
+			id: projects.id,
+			slug: projects.slug,
+			name: projects.name,
+			publishStatus: projects.publishStatus,
+			coverImageSrc: projects.coverImageSrc,
+			updatedAt: projects.updatedAt,
+		})
+		.from(projects);
+
+	let publishedViaQuery: unknown[] = [];
+	let queryError: string | null = null;
 	try {
-		const projects = await getPublishedProjects();
-		return NextResponse.json({
-			count: projects.length,
-			slugs: projects.map((p) => p.slug),
-			names: projects.map((p) => p.name),
-		});
-	} catch (error) {
-		const message = error instanceof Error ? error.message : String(error);
-		return NextResponse.json({ error: message }, { status: 500 });
+		publishedViaQuery = await getPublishedProjects();
+	} catch (err) {
+		queryError = err instanceof Error ? err.message : String(err);
 	}
+
+	return NextResponse.json({
+		totalRowsInDb: allRows.length,
+		allRows,
+		publishedCountRaw: allRows.filter((r) => r.publishStatus === "published")
+			.length,
+		publishedViaGetPublishedProjectsQuery: publishedViaQuery,
+		queryErrorIfAny: queryError,
+	});
 }

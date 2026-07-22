@@ -1,8 +1,8 @@
-// //@lib/types/admin/article.ts
-// import type { InsightCategory } from "@/lib/types/insight";
+// // //@lib/types/admin/article.ts
+
+// import type { InsightBodyBlock, InsightCategory } from "@/lib/types/insight";
 
 // export type ArticlePublishStatus = "draft" | "published";
-
 // export type ArticleSeoStatus =
 // 	| "good"
 // 	| "needs-attention"
@@ -20,13 +20,20 @@
 // 	readTimeMinutes: number;
 // }
 
+// export interface AuthorOption {
+// 	id: string;
+// 	fullName: string;
+// 	avatarUrl: string | null;
+// 	role: string;
+// }
+
 // export interface ArticleEditorState {
 // 	slug: string;
 // 	title: string;
 // 	category: InsightCategory;
 // 	categoryLabel: string;
 // 	excerpt: string;
-// 	body: string[];
+// 	body: InsightBodyBlock[];
 // 	coverImageSrc: string;
 // 	coverImageAlt: string;
 // 	relatedProjectSlug: string;
@@ -37,6 +44,9 @@
 // 	seoDescription: string;
 // 	focusKeyword: string;
 // 	publishStatus: ArticlePublishStatus;
+// 	authorId: string;
+// 	authorName: string;
+// 	authorAvatarUrl: string;
 // }
 
 // export type ArticleSaveStatus = "idle" | "saving" | "saved" | "error";
@@ -44,10 +54,10 @@
 // export const DEFAULT_ARTICLE_STATE: ArticleEditorState = {
 // 	slug: "",
 // 	title: "",
-// 	category: "location-analysis",
-// 	categoryLabel: "Location Analysis",
+// 	category: "",
+// 	categoryLabel: "",
 // 	excerpt: "",
-// 	body: [""],
+// 	body: [{ id: "block-initial", type: "paragraph", text: "" }],
 // 	coverImageSrc: "",
 // 	coverImageAlt: "",
 // 	relatedProjectSlug: "",
@@ -58,6 +68,9 @@
 // 	seoDescription: "",
 // 	focusKeyword: "",
 // 	publishStatus: "draft",
+// 	authorId: "",
+// 	authorName: "",
+// 	authorAvatarUrl: "",
 // };
 
 // export interface ArticleFilterState {
@@ -67,7 +80,12 @@
 // 	sort: "newest" | "oldest";
 // }
 
-import type { InsightBodyBlock, InsightCategory } from "@/lib/types/insight";
+
+
+// lib/types/admin/article.ts
+import type { JSONContent } from "@tiptap/react";
+import type { InsightCategory } from "@/lib/types/insight";
+import { EMPTY_TIPTAP_DOC } from "@/lib/utils/tiptap";
 
 export type ArticlePublishStatus = "draft" | "published";
 export type ArticleSeoStatus =
@@ -100,7 +118,7 @@ export interface ArticleEditorState {
 	category: InsightCategory;
 	categoryLabel: string;
 	excerpt: string;
-	body: InsightBodyBlock[];
+	content: JSONContent;
 	coverImageSrc: string;
 	coverImageAlt: string;
 	relatedProjectSlug: string;
@@ -124,7 +142,7 @@ export const DEFAULT_ARTICLE_STATE: ArticleEditorState = {
 	category: "",
 	categoryLabel: "",
 	excerpt: "",
-	body: [{ id: "block-initial", type: "paragraph", text: "" }],
+	content: EMPTY_TIPTAP_DOC,
 	coverImageSrc: "",
 	coverImageAlt: "",
 	relatedProjectSlug: "",

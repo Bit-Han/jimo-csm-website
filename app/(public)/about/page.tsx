@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 		"Jimo Property Development Limited builds premium residential, hospitality, and investment-led real estate with structure, insight, and long-term value.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function AboutPage() {
 	const [companyData, homeData] = await Promise.all([

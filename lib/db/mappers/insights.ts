@@ -1,10 +1,7 @@
-//
-
-import type {
-	InsightBodyBlock,
-	InsightDetail,
-	InsightSummary,
-} from "@/lib/types/insight";
+// lib/db/mappers/insights.ts
+import type { JSONContent } from "@tiptap/react";
+import type { InsightDetail, InsightSummary } from "@/lib/types/insight";
+import { EMPTY_TIPTAP_DOC, isValidTiptapDoc } from "@/lib/utils/tiptap";
 
 export interface InsightQueryRow {
 	id: string;
@@ -13,7 +10,7 @@ export interface InsightQueryRow {
 	category: string;
 	categoryLabel: string;
 	excerpt: string;
-	body: InsightBodyBlock[];
+	content: JSONContent;
 	publishedAt: Date | null;
 	readTimeMinutes: number;
 	relatedProjectSlug: string | null;
@@ -61,6 +58,10 @@ export function mapInsightRowToSummary(row: InsightQueryRow): InsightSummary {
 export function mapInsightRowToDetail(row: InsightQueryRow): InsightDetail {
 	return {
 		...mapInsightRowToSummary(row),
-		body: Array.isArray(row.body) ? row.body : [],
+		// Strict shape check — not just "is it an object." Old block-array
+		// data from before the body→content migration, or a malformed/empty
+		// doc, silently falls back to a valid empty document instead of
+		// crashing Tiptap's schema builder.
+		content: isValidTiptapDoc(row.content) ? row.content : EMPTY_TIPTAP_DOC,
 	};
 }

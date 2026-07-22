@@ -8,6 +8,7 @@ import {
 	projectOfInterestOptions,
 } from "@/lib/data/contact";
 import { Button } from "@/components/ui/Button";
+import { PhoneNumberField } from "@/components/ui/PhoneNumberField";
 import { FormField, formControlClassName } from "@/components/ui/FormField";
 import type { ContactFormState } from "@/lib/types/contact";
 
@@ -42,11 +43,15 @@ export function ContactForm({ defaultProjectSlug }: ContactFormProps) {
 			</FormField>
 
 			<FormField label="Phone Number" error={state.fieldErrors.phoneNumber}>
-				<input
+				{/* <input
 					type="tel"
 					name="phoneNumber"
 					placeholder="Your phone number"
 					className={formControlClassName}
+				/> */}
+				<PhoneNumberField
+					name="phoneNumber"
+					error={state.fieldErrors.phoneNumber}
 				/>
 			</FormField>
 

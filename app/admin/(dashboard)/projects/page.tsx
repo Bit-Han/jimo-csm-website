@@ -1,5 +1,5 @@
 
-
+//@app/admin/projects/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus } from "lucide-react";

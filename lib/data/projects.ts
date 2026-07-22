@@ -1,3 +1,4 @@
+//@lib/data/projects.ts
 import type { Project } from "@/lib/types/project";
 
 export const featuredProjects: Project[] = [

@@ -1,3 +1,4 @@
+//@components/admin/projects/editor/tabs/SeoTab.tsx
 import { EditorField, inputCls } from "@/components/admin/ui/EditorField";
 import type { ProjectEditorState } from "@/lib/types/admin/project-editor";
 
