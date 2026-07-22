@@ -1,3 +1,4 @@
+//@lib/integrations/cloudinary.ts
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
@@ -130,6 +131,34 @@ export async function deleteCloudinaryAssetSafe(
   } catch (err) {
     console.warn("[deleteCloudinaryAssetSafe] failed to delete", publicId, err);
   }
+}
+
+export async function deleteCloudinaryAssetById(
+	publicId: string,
+	resourceType: "image" | "video" | "raw" = "image",
+): Promise<void> {
+	await withTimeout(
+		cloudinary.uploader.destroy(publicId, { resource_type: resourceType }),
+		8000,
+		"Cloudinary delete",
+	);
+}
+
+/**
+ * Inserts Cloudinary's automatic quality/format optimization into a
+ * delivery URL — this is applied only at display time, never at upload,
+ * so nothing extra is stored and no duplicate transformed copies are
+ * created. This is what "great quality, still keep space" actually means
+ * in Cloudinary: store the original once, let Cloudinary pick the
+ * smallest acceptable format/quality per requesting browser on the fly.
+ */
+export function withAutoQuality(url: string): string {
+	const marker = "/upload/";
+	const index = url.indexOf(marker);
+	if (index === -1) return url;
+	const insertAt = index + marker.length;
+	if (url.slice(insertAt).startsWith("q_auto")) return url; // avoid double-inserting
+	return `${url.slice(0, insertAt)}q_auto,f_auto/${url.slice(insertAt)}`;
 }
 
 export { cloudinary };

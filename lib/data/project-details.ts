@@ -1,3 +1,5 @@
+//@lib/data/project-details.ts
+
 import type { Project } from "@/lib/types/project";
 import type { ProjectDetail } from "@/lib/types/project-detail";
 import { featuredProjects } from "@/lib/data/projects";

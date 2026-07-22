@@ -1,3 +1,5 @@
+//@components/admin/projects/ProjectSummaryCards.tsx
+
 import Link from "next/link";
 import { cn } from "@/lib/utils/helpers";
 import { BookOpen, FileSearch, LayoutDashboard } from "lucide-react";

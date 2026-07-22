@@ -104,6 +104,8 @@
 //   }
 // }
 
+//@app/api/admin/storage/upload/route.ts
+
 import { type NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getAdminUser } from "@/lib/auth/get-admin-user";

@@ -1,3 +1,4 @@
+//@app/admin/(dashboard)/news-insights/[slug]/edit/page.tsx
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArticleEditorShell } from "@/components/admin/insights/article-editor/ArticleEditorShell";
@@ -48,9 +49,9 @@ export default async function AdminArticleEditPage({
 		category: insight.category,
 		categoryLabel: insight.categoryLabel,
 		excerpt: insight.excerpt,
-		body:
-			insight.body.length > 0
-				? insight.body
+		content:
+			insight.content.length > 0
+				? insight.content
 				: [{ id: "block-initial", type: "paragraph", text: "" }],
 		coverImageSrc: insight.coverImage.src,
 		coverImageAlt: insight.coverImage.alt,

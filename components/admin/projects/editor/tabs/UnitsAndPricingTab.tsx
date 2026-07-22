@@ -1,3 +1,5 @@
+//@components/admin/projects/editor/tabs/UnitsAndPricingTab.tsx
+
 import { Building2, GripVertical, Home, Plus, Trash2 } from "lucide-react";
 import { EditorField, inputCls } from "@/components/admin/ui/EditorField";
 import { cn } from "@/lib/utils/helpers";

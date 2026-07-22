@@ -1,3 +1,5 @@
+
+//@components/admin/projects/editor/tabs/PaymentPlanTab.tsx
 import { Plus, Trash2 } from "lucide-react";
 import { inputCls } from "@/components/admin/ui/EditorField";
 import type {

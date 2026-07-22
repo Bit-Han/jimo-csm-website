@@ -1,3 +1,4 @@
+//@/lib/types/admin/project.ts
 export type AdminDisplayStatus =
 	| "completed"
 	| "active"

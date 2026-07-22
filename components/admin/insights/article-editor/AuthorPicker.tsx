@@ -1,3 +1,4 @@
+//@components/admin/news-insights/article-editor/AuthorPicker.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";

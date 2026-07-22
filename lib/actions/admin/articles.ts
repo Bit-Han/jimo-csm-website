@@ -15,6 +15,12 @@
 // 	slug?: string;
 // }
 
+// interface AuthorSnapshot {
+// 	authorId: string | null;
+// 	authorName: string;
+// 	authorAvatarUrl: string | null;
+// }
+
 // function buildSlug(title: string): string {
 // 	return title
 // 		.toLowerCase()
@@ -30,23 +36,23 @@
 // 	);
 // }
 
-// async function resolveAuthorSnapshot(authorId: string | null | undefined) {
+// /** Resolves an authorId to a live admin_users row. Returns a blank
+//  * snapshot (authorId: null) if none was given, or if the given id no
+//  * longer resolves to a real admin — e.g. deleted between being selected
+//  * in the editor and the publish click landing. Callers that require a
+//  * valid author (publishArticle) must check authorId !== null themselves;
+//  * this function only resolves, it doesn't decide whether blank is
+//  * acceptable — saveDraftArticle allows it, publishArticle must not. */
+// async function resolveAuthorSnapshot(
+// 	authorId: string | null | undefined,
+// ): Promise<AuthorSnapshot> {
 // 	if (!authorId)
-// 		return {
-// 			authorId: null,
-// 			authorName: "",
-// 			authorAvatarUrl: null as string | null,
-// 		};
+// 		return { authorId: null, authorName: "", authorAvatarUrl: null };
 
 // 	const author = await db.query.adminUsers.findFirst({
 // 		where: eq(adminUsers.id, authorId),
 // 	});
-// 	if (!author)
-// 		return {
-// 			authorId: null,
-// 			authorName: "",
-// 			authorAvatarUrl: null as string | null,
-// 		};
+// 	if (!author) return { authorId: null, authorName: "", authorAvatarUrl: null };
 
 // 	return {
 // 		authorId: author.id,
@@ -58,9 +64,9 @@
 // async function upsertInsight(
 // 	state: ArticleEditorState,
 // 	publishStatus: "draft" | "published",
+// 	authorSnapshot: AuthorSnapshot,
 // ): Promise<string> {
 // 	const slug = state.slug || buildSlug(state.title);
-// 	const authorSnapshot = await resolveAuthorSnapshot(state.authorId || null);
 
 // 	const values = {
 // 		slug,
@@ -117,7 +123,11 @@
 // 		if (!state.title.trim())
 // 			return { success: false, message: "Article title is required." };
 
-// 		const slug = await upsertInsight(state, "draft");
+// 		// Drafts are allowed to be incomplete — author/category may not be
+// 		// set yet. resolveAuthorSnapshot degrades to a blank snapshot rather
+// 		// than erroring, which is correct here.
+// 		const authorSnapshot = await resolveAuthorSnapshot(state.authorId || null);
+// 		const slug = await upsertInsight(state, "draft", authorSnapshot);
 // 		await cleanupImages(pendingImageDeletions);
 
 // 		revalidatePath("/admin/news-insights", "layout");
@@ -147,8 +157,34 @@
 // 				success: false,
 // 				message: "An excerpt is required before publishing.",
 // 			};
+// 		if (!state.category.trim() || !state.categoryLabel.trim())
+// 			return {
+// 				success: false,
+// 				message: "Select a category before publishing.",
+// 			};
+// 		if (!state.authorId.trim())
+// 			return {
+// 				success: false,
+// 				message: "Select an author before publishing.",
+// 			};
 
-// 		const slug = await upsertInsight(state, "published");
+// 		// Re-resolve against the database rather than trusting
+// 		// state.authorName/state.authorAvatarUrl — those are just whatever
+// 		// the client last had in memory, and could be stale if the admin was
+// 		// renamed, had their photo changed, or was deleted since the editor
+// 		// loaded. This also catches the case the earlier checks can't: an
+// 		// authorId that was valid when selected but no longer resolves to a
+// 		// real admin by the time Publish is clicked.
+// 		const authorSnapshot = await resolveAuthorSnapshot(state.authorId);
+// 		if (!authorSnapshot.authorId) {
+// 			return {
+// 				success: false,
+// 				message:
+// 					"The selected author could not be found. Please choose an author again.",
+// 			};
+// 		}
+
+// 		const slug = await upsertInsight(state, "published", authorSnapshot);
 // 		await cleanupImages(pendingImageDeletions);
 
 // 		revalidatePath("/insights", "layout");
@@ -241,12 +277,13 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import type { JSONContent } from "@tiptap/react";
 import { db } from "@/lib/db";
 import { insights, adminUsers } from "@/lib/db/schema";
 import { getAdminUser } from "@/lib/auth/get-admin-user";
 import { deleteCloudinaryAssetSafe } from "@/lib/integrations/cloudinary";
+import { extractImageUrls } from "@/lib/utils/tiptap";
 import type { ArticleEditorState } from "@/lib/types/admin/article";
-import type { InsightBodyBlock } from "@/lib/types/insight";
 
 export interface ArticleActionResult {
 	success: boolean;
@@ -313,10 +350,7 @@ async function upsertInsight(
 		category: state.category,
 		categoryLabel: state.categoryLabel,
 		excerpt: state.excerpt,
-		// Drop empty blocks (blank paragraph or image never uploaded to) before persisting.
-		body: state.body.filter((b) =>
-			b.type === "paragraph" ? b.text.trim() : b.src,
-		) as InsightBodyBlock[],
+		content: state.content,
 		coverImageSrc: state.coverImageSrc || null,
 		coverImageAlt: state.coverImageAlt,
 		relatedProjectSlug: state.relatedProjectSlug || null,
@@ -474,7 +508,8 @@ export async function unpublishArticle(
 
 /** Only path that permanently destroys images — removes the DB row AND
  * every Cloudinary asset the article referenced (cover + inline body
- * images), matching the confirm-dialog warning shown before this runs. */
+ * images, walked out of the Tiptap JSON doc), matching the confirm-dialog
+ * warning shown before this runs. */
 export async function deleteArticle(
 	slug: string,
 ): Promise<ArticleActionResult> {
@@ -491,12 +526,7 @@ export async function deleteArticle(
 
 		const imageUrls = [
 			existing.coverImageSrc,
-			...((existing.body as InsightBodyBlock[]) ?? [])
-				.filter(
-					(b): b is Extract<InsightBodyBlock, { type: "image" }> =>
-						b.type === "image",
-				)
-				.map((b) => b.src),
+			...extractImageUrls(existing.content as JSONContent | null),
 		].filter((u): u is string => Boolean(u));
 
 		await cleanupImages(imageUrls);
