@@ -8,7 +8,7 @@ declare global {
 }
 
 function createClient() {
-	const isProduction = process.env.NODE_ENV === "production";
+	// const isProduction = process.env.NODE_ENV === "production";
 
 	return postgres(process.env.DATABASE_URL!, {
 		// Serverless prod (Vercel): each function instance gets its own process,
@@ -16,7 +16,8 @@ function createClient() {
 		// instances are running concurrently.
 		// Dev (`next dev`): one persistent process serves everything, so a
 		// pool of 1 serializes your ENTIRE app through a single connection.
-		max: isProduction ? 1 : 10,
+		// max: isProduction ? 1 : 10,
+		max: 1,
 
 		prepare: false, // required for Supabase pgbouncer in transaction mode
 
@@ -24,7 +25,7 @@ function createClient() {
 		// drop, network blip) sits in the pool looking "available" forever,
 		// and every query after it hangs until you restart the server.
 		idle_timeout: 20, // seconds — close connections idle this long
-		max_lifetime: 60 * 30, // seconds — recycle connections every 30 min regardless
+		// max_lifetime: 60 * 30, // seconds — recycle connections every 30 min regardless
 		connect_timeout: 10, // seconds — fail fast if Postgres is unreachable, don't hang
 
 		onnotice: () => {}, // suppress noisy Postgres NOTICE logs in dev
