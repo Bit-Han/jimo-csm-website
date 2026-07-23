@@ -58,6 +58,8 @@
 // 	);
 // }
 
+//@component/admin/leads/LeadsSummaryCards.tsx
+
 import { CheckCircle2, Users, Wifi, WifiOff } from "lucide-react";
 import type { LeadSummaryStats } from "@/lib/types/admin/lead";
 

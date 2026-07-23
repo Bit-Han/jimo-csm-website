@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 	title: "Users & Roles | Jimo Command Centre",
 };
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 
 export default async function AdminUsersRolesPage() {
 	// Read real admin users from DB

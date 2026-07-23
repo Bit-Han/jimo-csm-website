@@ -16,6 +16,9 @@ export const metadata: Metadata = {
 	title: "Tracking & Analytics | Jimo Command Centre",
 };
 
+export const dynamic = 'force-dynamic';
+
+
 export default function AdminTrackingAnalyticsPage() {
 	return (
 		<div className="space-y-6">

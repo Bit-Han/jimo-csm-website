@@ -38,11 +38,11 @@ export const projects = pgTable("projects", {
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 	featured: boolean("featured").notNull().default(false),
-    lastUpdatedByUserId: uuid("last_updated_by_user_id").references(
-  () => adminUsers.id,
-  { onDelete: "set null" },
+	lastUpdatedByUserId: uuid("last_updated_by_user_id").references(
+		() => adminUsers.id,
+		{ onDelete: "set null" },
 	),
-});
+}).enableRLS();
 
 // Many-to-many: one project can be both residential and hospitality
 export const projectCategories = pgTable("project_categories", {
@@ -51,7 +51,7 @@ export const projectCategories = pgTable("project_categories", {
 		.notNull()
 		.references(() => projects.id, { onDelete: "cascade" }),
 	category: projectCategoryEnum("category").notNull(),
-});
+}).enableRLS();
 
 // Card-level tags (e.g. "Confirm Current Price")
 export const projectTags = pgTable("project_tags", {
@@ -61,7 +61,7 @@ export const projectTags = pgTable("project_tags", {
 		.references(() => projects.id, { onDelete: "cascade" }),
 	label: text("label").notNull(),
 	position: integer("position").notNull().default(0),
-});
+}).enableRLS();
 
 // Right-hand sidebar facts (Location, Status, Unit Types, etc.)
 export const projectFacts = pgTable("project_facts", {
@@ -72,7 +72,7 @@ export const projectFacts = pgTable("project_facts", {
 	label: text("label").notNull(),
 	value: text("value").notNull(),
 	position: integer("position").notNull().default(0),
-});
+}).enableRLS();
 
 export const projectUnits = pgTable("project_units", {
 	id: uuid("id").defaultRandom().primaryKey(),
@@ -84,7 +84,7 @@ export const projectUnits = pgTable("project_units", {
 	priceLabel: text("price_label").notNull(),
 	availabilityLabel: text("availability_label").notNull(),
 	position: integer("position").notNull().default(0),
-});
+}).enableRLS();
 
 // Shared table for investment highlights and payment plan items
 export const projectChecklistItems = pgTable("project_checklist_items", {
@@ -95,7 +95,7 @@ export const projectChecklistItems = pgTable("project_checklist_items", {
 	kind: projectChecklistKindEnum("kind").notNull(),
 	label: text("label").notNull(),
 	position: integer("position").notNull().default(0),
-});
+}).enableRLS();
 
 // icon stores a ProjectAmenityIcon string key (e.g. "camera", "shield-check")
 export const projectAmenities = pgTable("project_amenities", {
@@ -106,7 +106,7 @@ export const projectAmenities = pgTable("project_amenities", {
 	label: text("label").notNull(),
 	icon: text("icon").notNull(),
 	position: integer("position").notNull().default(0),
-});
+}).enableRLS();
 
 // src and cloudinaryPublicId both stored:
 // src = full Cloudinary delivery URL (used by Next/Image directly)
@@ -122,7 +122,7 @@ export const projectMedia = pgTable("project_media", {
 	poster: text("poster"),
 	alt: text("alt").notNull(),
 	position: integer("position").notNull().default(0),
-});
+}).enableRLS();
 
 export type ProjectRow = typeof projects.$inferSelect;
 export type NewProjectRow = typeof projects.$inferInsert;

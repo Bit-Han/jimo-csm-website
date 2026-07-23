@@ -10,6 +10,9 @@ import { getAdminUser } from "@/lib/auth/get-admin-user";
 export const metadata: Metadata = {
 	title: "New Article | Jimo Command Centre",
 };
+// // export const dynamic = "force-dynamic";
+// export const revalidate = 60;
+
 export const dynamic = "force-dynamic";
 
 export default async function AdminNewArticlePage() {

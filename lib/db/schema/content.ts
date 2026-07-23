@@ -10,7 +10,7 @@ export const homeContent = pgTable("home_content", {
 	id: integer("id").primaryKey().default(1),
 	data: jsonb("data").$type<HomePageData>().notNull(),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}).enableRLS();
 
 // ─── Company content ───────────────────────────────────────────────────────
 // About Us, Services, and team members split into separate JSONB columns
@@ -76,7 +76,7 @@ export const companyContent = pgTable("company_content", {
 		.notNull(),
 	teamMembers: jsonb("team_members").$type<TeamMemberData[]>().notNull(),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}).enableRLS();
 
 export type HomeContentRow = typeof homeContent.$inferSelect;
 export type CompanyContentRow = typeof companyContent.$inferSelect;

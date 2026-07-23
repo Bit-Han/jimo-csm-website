@@ -1,3 +1,4 @@
+//@app/admin/(dasahboard)/landing-pages/[slug]/edit/page.tsx
 import { AdminPlaceholderPage } from "@/components/admin/AdminPlaceholderPage";
 
 interface AdminLandingPageEditProps {

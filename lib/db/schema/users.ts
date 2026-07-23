@@ -46,7 +46,7 @@ export const adminUsers = pgTable("admin_users", {
 
 	lastActiveAt: timestamp("last_active_at"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}).enableRLS();
 
 // ─────────────────────────────────────────────────────────────────────────────
 // admin_invitations
@@ -105,7 +105,7 @@ export const adminInvitations = pgTable("admin_invitations", {
 
 	acceptedAt: timestamp("accepted_at"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}).enableRLS();;
 
 export type AdminUserRow = typeof adminUsers.$inferSelect;
 export type NewAdminUserRow = typeof adminUsers.$inferInsert;

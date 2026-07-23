@@ -1,3 +1,5 @@
+
+//@component/admin/leads/lead-profile/SourcesTrackingPanel.tsx
 import type { LeadDetail } from "@/lib/types/admin/lead";
 
 const ROW_LABEL =
