@@ -1,5 +1,4 @@
 
-
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Plus } from "lucide-react";
@@ -9,6 +8,8 @@ import { getAdminFormListRows } from "@/lib/db/queries/forms";
 
 export const metadata: Metadata = { title: "Forms | Jimo Command Centre" };
 
+
+export const dynamic = 'force-dynamic';
 
 export default async function AdminFormsPage() {
 	const forms = await getAdminFormListRows();

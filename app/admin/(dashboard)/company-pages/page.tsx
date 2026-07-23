@@ -10,6 +10,9 @@ export const metadata: Metadata = {
 	title: "Company Pages | Jimo Command Centre",
 };
 
+export const dynamic = 'force-dynamic';
+
+
 export default function AdminCompanyPagesPage() {
 	const pages = getCompanyPages();
 

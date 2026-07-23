@@ -13,6 +13,8 @@ export const metadata: Metadata = {
 // // export const dynamic = "force-dynamic";
 // export const revalidate = 60;
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminNewArticlePage() {
 	const [categories, authors, currentAdmin] = await Promise.all([
 		getInsightCategories(),

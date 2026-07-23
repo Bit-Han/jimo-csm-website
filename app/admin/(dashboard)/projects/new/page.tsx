@@ -18,6 +18,9 @@ export const metadata: Metadata = {
 	title: "New Project | Jimo Command Centre",
 };
 
+
+export const dynamic = 'force-dynamic';
+
 export default async function AdminNewProjectPage() {
 	const suggestions = await getProjectFieldSuggestions();
 

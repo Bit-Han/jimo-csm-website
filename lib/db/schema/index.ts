@@ -18,4 +18,5 @@ export * from "./settings";
 export * from "./insights";
 export * from "./insight-categories";
 export * from "./content";
+export * from "./landing-page";
 export * from "./relations";
