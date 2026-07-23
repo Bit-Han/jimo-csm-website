@@ -1,3 +1,5 @@
+//@component/admin/leads/lead-profile/ActivityTimelinePanel.tsx
+
 import { cn } from "@/lib/utils/helpers";
 import type { LeadDetail } from "@/lib/types/admin/lead";
 

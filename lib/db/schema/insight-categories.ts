@@ -6,7 +6,7 @@ export const insightCategories = pgTable("insight_categories", {
 	label: text("label").notNull(),
 	position: integer("position").notNull().default(0),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}).enableRLS();
 
 export type InsightCategoryRow = typeof insightCategories.$inferSelect;
 export type NewInsightCategoryRow = typeof insightCategories.$inferInsert;

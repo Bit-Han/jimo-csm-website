@@ -1,3 +1,4 @@
+//@lib/types/admin/lead.ts
 export type LeadSource =
 	| "website"
 	| "landing_page"

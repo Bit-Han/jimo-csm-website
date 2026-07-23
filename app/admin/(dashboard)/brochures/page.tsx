@@ -13,9 +13,6 @@ export const metadata: Metadata = {
 	title: "Brochures | Jimo Command Centre",
 };
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
 export default async function AdminBrochuresPage() {
 	// Run in parallel — brochure list and project selector options
 	const [brochureRows, projectOptions] = await Promise.all([

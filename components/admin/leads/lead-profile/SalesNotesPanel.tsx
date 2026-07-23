@@ -1,3 +1,5 @@
+
+//@component/admin/leads/lead-profile/SalesNotesPanel.tsx
 "use client";
 
 import { useTransition } from "react";

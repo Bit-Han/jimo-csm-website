@@ -1,3 +1,5 @@
+
+//@/admin/(dashboard)/leads/[leadId]/page.tsx
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { LeadProfileHeader } from "@/components/admin/leads/lead-profile/LeadProfileHeader";

@@ -35,7 +35,7 @@ export const leads = pgTable("leads", {
 	),
 
 	createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}).enableRLS();
 
 export type LeadRow = typeof leads.$inferSelect;
 export type NewLeadRow = typeof leads.$inferInsert;

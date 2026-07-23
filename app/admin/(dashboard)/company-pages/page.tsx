@@ -5,7 +5,6 @@ import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { CompanyPagesExplorer } from "@/components/admin/company-pages/CompanyPagesExplorer";
 import { getCompanyPages } from "@/lib/data/admin/company-pages";
 
-export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
 	title: "Company Pages | Jimo Command Centre",

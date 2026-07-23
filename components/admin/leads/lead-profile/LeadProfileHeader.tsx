@@ -1,3 +1,4 @@
+//@component/admin/leads/lead-profile/LeadProfileHeader.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -10,7 +11,6 @@ import {
 	MessageCircle,
 	MoreHorizontal,
 	Phone,
-	UserCheck,
 } from "lucide-react";
 import { AdminBadge } from "@/components/admin/ui/AdminBadge";
 import type { AdminBadgeVariant } from "@/components/admin/ui/AdminBadge";

@@ -24,7 +24,7 @@ export const mediaAssets = pgTable("media_assets", {
 		onDelete: "set null",
 	}),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}).enableRLS();
 
 export type MediaAssetRow = typeof mediaAssets.$inferSelect;
 export type NewMediaAssetRow = typeof mediaAssets.$inferInsert;

@@ -1,3 +1,5 @@
+//@lib/types/contact.ts
+
 export type EnquiryType =
 	| "buyer"
 	| "investor"

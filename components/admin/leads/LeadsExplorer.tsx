@@ -1,3 +1,5 @@
+//@component/admin/leads/LeadsExplorer.tsx
+
 "use client";
 
 import { useMemo, useState } from "react";

@@ -2,7 +2,7 @@
 
 import { useTransition, useState } from "react";
 import Link from "next/link";
-import { ArrowDownToLine, ArrowUpFromLine, CheckCircle2, Loader2, WifiOff } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, Loader2, WifiOff } from "lucide-react";
 import type { LeadDetail } from "@/lib/types/admin/lead";
 
 export function HubSpotSyncPanel({ lead }: { lead: LeadDetail }) {

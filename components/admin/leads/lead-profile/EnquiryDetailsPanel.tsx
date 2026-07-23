@@ -1,3 +1,4 @@
+//@component/admin/leads/lead-profile/EnquiryDetailsPanel.tsx
 import type { LeadDetail } from "@/lib/types/admin/lead";
 
 const DETAIL_LABEL =

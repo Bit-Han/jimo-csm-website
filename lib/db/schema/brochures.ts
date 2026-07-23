@@ -15,7 +15,7 @@ export const brochures = pgTable("brochures", {
 	fileUrl: text("file_url").notNull(),
 	status: brochureStatusEnum("status").notNull().default("draft"),
 	uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
-});
+}).enableRLS();
 
 export type BrochureRow = typeof brochures.$inferSelect;
 export type NewBrochureRow = typeof brochures.$inferInsert;
