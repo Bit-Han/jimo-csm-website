@@ -92,7 +92,14 @@ export function ArticleContentPanel({ state, onChange, onQueueImageDeletion }: A
 					</p>
 				</div>
 
+				{/* <RichTextEditor
+					content={state.content}
+					onChange={(json) => onChange("content", json)}
+					uploadFolder="insights-body"
+				/> */}
+
 				<RichTextEditor
+					key={state.slug || "new-article"}
 					content={state.content}
 					onChange={(json) => onChange("content", json)}
 					uploadFolder="insights-body"
