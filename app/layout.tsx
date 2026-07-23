@@ -1,5 +1,7 @@
-import type { Metadata } from 'next'
-import './globals.css'
+import type { Metadata } from 'next';
+import './globals.css';
+import { ChunkErrorRecovery } from "@/components/ChunkErrorRecovery";
+
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -35,8 +37,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" >
-      <body suppressHydrationWarning>{children}</body>
-    </html>
-  )
+		<html lang="en">
+			<body suppressHydrationWarning>
+				<ChunkErrorRecovery />
+				{children}
+			</body>
+		</html>
+	);
 }
