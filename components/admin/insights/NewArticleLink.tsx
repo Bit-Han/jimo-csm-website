@@ -17,6 +17,10 @@ export function NewArticleLink() {
   return (
     <Link
       href="/admin/news-insights/new"
+			// Loading this server route starts the editor's database reads. Do that
+			// only after an intentional click; the editor JavaScript is still warmed
+			// separately on hover below.
+			prefetch={false}
       onMouseEnter={prefetchRichTextEditor}
       onFocus={prefetchRichTextEditor}
       onTouchStart={prefetchRichTextEditor}
