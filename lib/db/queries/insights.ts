@@ -1,5 +1,6 @@
 // //@lib/db/queries/insights
 import { asc, desc, eq } from "drizzle-orm";
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { insights, adminUsers } from "@/lib/db/schema";
 import { mapInsightRowToDetail, mapInsightRowToSummary } from "@/lib/db/mappers/insights";
@@ -45,9 +46,11 @@ export async function getAdminArticleRows(): Promise<AdminArticleListRow[]> {
   }));
 }
 
-export async function getAdminArticleEditorState(slug: string) {
+// The edit page and generateMetadata both need this row. React's request cache
+// makes those consumers share one query during a single navigation.
+export const getAdminArticleEditorState = cache(async (slug: string) => {
   return db.query.insights.findFirst({ where: eq(insights.slug, slug) });
-}
+});
 
 /** For the author picker in the article editor — limited to active admins. */
 export async function getActiveAdminUsersForAuthorSelect(): Promise<AuthorOption[]> {
