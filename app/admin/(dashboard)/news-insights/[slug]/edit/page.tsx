@@ -10,6 +10,7 @@ import { getInsightCategories } from "@/lib/db/queries/insight-categories";
 import { mapInsightRowToDetail } from "@/lib/db/mappers/insights";
 import { isValidTiptapDoc, EMPTY_TIPTAP_DOC } from "@/lib/utils/tiptap";
 import type { ArticleEditorState } from "@/lib/types/admin/article";
+import { timed } from "@/lib/utils/timed";
 
 interface AdminArticleEditPageProps {
 	params: Promise<{ slug: string }>;
@@ -35,9 +36,12 @@ export default async function AdminArticleEditPage({
 	const { slug } = await params;
 
 	const [row, categories, authors] = await Promise.all([
-		getAdminArticleEditorState(slug),
-		getInsightCategories(),
-		getActiveAdminUsersForAuthorSelect(),
+		timed("getAdminArticleEditorState", getAdminArticleEditorState(slug)),
+		timed("getInsightCategories", getInsightCategories()),
+		timed(
+			"getActiveAdminUsersForAuthorSelect",
+			getActiveAdminUsersForAuthorSelect(),
+		),
 	]);
 
 	if (!row) notFound();

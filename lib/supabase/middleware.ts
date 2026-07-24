@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { withTimeout } from "@/lib/utils/timeout";
 
 export async function updateSession(request: NextRequest) {
   // Create the response ONCE and mutate it — never reassign
@@ -28,8 +29,8 @@ export async function updateSession(request: NextRequest) {
   );
 
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+		data: { user },
+	} = await withTimeout(supabase.auth.getUser(), 8000, "Middleware getUser");
 
   return { supabaseResponse, user };
 }

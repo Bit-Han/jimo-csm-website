@@ -6,6 +6,7 @@ import { DEFAULT_ARTICLE_STATE } from "@/lib/types/admin/article";
 import { getInsightCategories } from "@/lib/db/queries/insight-categories";
 import { getActiveAdminUsersForAuthorSelect } from "@/lib/db/queries/insights";
 import { getAdminUser } from "@/lib/auth/get-admin-user";
+import { timed } from "@/lib/utils/timed";
 
 export const metadata: Metadata = {
 	title: "New Article | Jimo Command Centre",
@@ -15,9 +16,12 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminNewArticlePage() {
 	const [categories, authors, currentAdmin] = await Promise.all([
-		getInsightCategories(),
-		getActiveAdminUsersForAuthorSelect(),
-		getAdminUser(),
+		timed("getInsightCategories", getInsightCategories()),
+		timed(
+			"getActiveAdminUsersForAuthorSelect",
+			getActiveAdminUsersForAuthorSelect(),
+		),
+		timed("getAdminUser", getAdminUser()),
 	]);
 
 	const firstCategory = categories[0];
