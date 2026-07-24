@@ -22,7 +22,7 @@ function createClient() {
 		// instances are running concurrently.
 		// Dev (`next dev`) uses a larger local pool so independent requests do
 		// not wait behind one another.
-		max: isProduction ? 1 : 10,
+		max: isProduction ? 3 : 10,
 
 		prepare: false, // required for Supabase pgbouncer in transaction mode
 		// Supabase pooler endpoints require TLS. The local DATABASE_URL omits
@@ -38,7 +38,7 @@ function createClient() {
 		connect_timeout: 10, // seconds — fail fast if Postgres is unreachable, don't hang
 		max_lifetime: 60 * 30,
 		connection: {
-			statement_timeout: 10_000, // ms
+			statement_timeout: 8000, // ms
 		},
 		onnotice: () => {}, // suppress noisy Postgres NOTICE logs in dev
 	});
