@@ -1,3 +1,4 @@
+//@/lib/types/admin/role.ts
 export type AdminRole =
 	| "super-admin"
 	| "website-manager"

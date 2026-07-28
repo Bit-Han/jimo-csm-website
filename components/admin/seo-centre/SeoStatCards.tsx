@@ -1,3 +1,5 @@
+
+//@/component/admin/seo-center/SeoStatCards.tsx
 import { cn } from "@/lib/utils/helpers";
 import type { SeoHealthStat } from "@/lib/types/admin/seo-centre";
 

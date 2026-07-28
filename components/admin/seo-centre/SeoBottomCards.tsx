@@ -1,3 +1,4 @@
+//@/component/admin/seo-center/SeoBottomCards.tsx
 "use client";
 
 import { useState, useTransition } from "react";

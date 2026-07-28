@@ -1,3 +1,4 @@
+//lib/data/admin/nav.ts
 import {
 	Building,
 	Building2,

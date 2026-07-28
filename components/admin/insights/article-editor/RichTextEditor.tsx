@@ -223,7 +223,7 @@ export function RichTextEditor({
 
 	if (!editor) {
 		return (
-			<div className="flex min-h-[380px] items-center justify-center rounded-xl border border-stone-200 bg-stone-50">
+			<div className="flex min-h-95 items-center justify-center rounded-xl border border-stone-200 bg-stone-50">
 				<Loader2 className="h-5 w-5 animate-spin text-stone-400" />
 			</div>
 		);

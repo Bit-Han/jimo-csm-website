@@ -93,6 +93,7 @@ async function upsertInsight(
 					: null,
 		seoTitle: state.seoTitle || null,
 		seoDescription: state.seoDescription || null,
+		focusKeyword: state.focusKeyword || null,
 		publishStatus,
 		...authorSnapshot,
 		updatedAt: new Date(),

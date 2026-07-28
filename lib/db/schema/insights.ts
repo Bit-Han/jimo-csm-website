@@ -61,6 +61,7 @@ export const insights = pgTable("insights", {
 
 	seoTitle: text("seo_title"),
 	seoDescription: text("seo_description"),
+	focusKeyword: text("focus_keyword"),
 
 	publishStatus: publishStatusEnum("publish_status").notNull().default("draft"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),

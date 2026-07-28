@@ -1,3 +1,4 @@
+//@/components/admin/tracking/TrackingEventsTable.tsx
 import { AdminBadge } from "@/components/admin/ui/AdminBadge";
 import type { AdminBadgeVariant } from "@/components/admin/ui/AdminBadge";
 import type {

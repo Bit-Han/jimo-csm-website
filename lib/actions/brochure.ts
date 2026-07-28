@@ -21,7 +21,7 @@ export async function submitBrochureRequest(
 	const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
 
 	const fieldErrors: BrochureLeadFormState["fieldErrors"] = {};
-	if (fullName.length < 10) fieldErrors.fullName = "Enter your full name.";
+	if (fullName.length < 8) fieldErrors.fullName = "Enter your full name.";
 	if (!emailPattern.test(email))
 		fieldErrors.email = "Enter a valid email address.";
 	if (phoneNumber.length < 11)

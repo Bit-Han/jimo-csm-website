@@ -1,62 +1,48 @@
+// //@app/admin/auth/accept-invite/page.tsx
+
 // import type { Metadata } from "next";
-// import { notFound } from "next/navigation";
-// import { and, eq, gt } from "drizzle-orm";
+// import { redirect } from "next/navigation";
 // import { AcceptInviteForm } from "@/components/admin/auth/AcceptInviteForm";
-// import { db } from "@/lib/db";
-// import { adminInvitations } from "@/lib/db/schema";
+// import { getAdminUser } from "@/lib/auth/get-admin-user";
+// import { createClient } from "@/lib/supabase/server";
 // import { adminRoleDefinitions } from "@/lib/data/admin/roles";
+// import { db } from "@/lib/db";
+// import { adminUsers } from "@/lib/db/schema";
+// import { eq } from "drizzle-orm";
 // import type { AdminRole } from "@/lib/types/admin/role";
 
 // export const metadata: Metadata = {
-// 	title: "Accept Invite | Jimo Command Centre",
+// 	title: "Create Account | Jimo Command Centre",
 // };
 
-// interface AcceptInvitePageProps {
-// 	searchParams: Promise<{ token?: string }>;
-// }
+// export default async function AcceptInvitePage() {
+// 	const supabase = await createClient();
+// 	const {
+// 		data: { user: authUser },
+// 	} = await supabase.auth.getUser();
 
-// export default async function AcceptInvitePage({
-// 	searchParams,
-// }: AcceptInvitePageProps) {
-// 	const { token } = await searchParams;
-
-// 	if (!token) {
-// 		notFound();
+// 	// Not authenticated — the callback didn't run or expired
+// 	if (!authUser) {
+// 		redirect("/admin/auth/login?error=invite_expired");
 // 	}
 
-// 	// Validate the invitation server-side before rendering the form
-// 	const invitation = await db.query.adminInvitations.findFirst({
-// 		where: and(
-// 			eq(adminInvitations.token, token),
-// 			eq(adminInvitations.status, "pending"),
-// 			gt(adminInvitations.expiresAt, new Date()),
-// 		),
+// 	// Already completed signup — go to dashboard
+// 	const existingAdmin = await db.query.adminUsers.findFirst({
+// 		where: eq(adminUsers.id, authUser.id),
 // 	});
 
-// 	if (!invitation) {
-// 		return (
-// 			<div className="flex min-h-screen items-center justify-center bg-navy-950 px-4">
-// 				<div className="w-full max-w-sm rounded-2xl border border-red-400/30 bg-red-400/10 p-8 text-center">
-// 					<p className="text-base font-bold text-red-300">
-// 						Invite link invalid or expired
-// 					</p>
-// 					<p className="mt-2 text-xs text-white/50">
-// 						This link may have already been used, or it expired after 7 days.
-// 						Ask your Super Admin to send a new invite.
-// 					</p>
-// 				</div>
-// 			</div>
-// 		);
+// 	if (existingAdmin) {
+// 		redirect("/admin/dashboard");
 // 	}
 
+// 	// Role stored in user_metadata by inviteUserByEmail
+// 	const role = (authUser.user_metadata?.adminRole ?? "sales-crm") as AdminRole;
 // 	const roleLabel =
-// 		adminRoleDefinitions.find((r) => r.id === (invitation.role as AdminRole))
-// 			?.label ?? invitation.role;
+// 		adminRoleDefinitions.find((r) => r.id === role)?.label ?? role;
 
 // 	return (
 // 		<div className="flex min-h-screen items-center justify-center bg-navy-950 px-4">
 // 			<div className="w-full max-w-sm">
-// 				{/* Logo */}
 // 				<div className="mb-8 text-center">
 // 					<div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gold-500">
 // 						<span className="text-2xl font-bold text-navy-950">J</span>
@@ -67,19 +53,15 @@
 
 // 				<div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
 // 					<h1 className="text-base font-bold text-white">
-// 						Create your account
+// 						Complete your account
 // 					</h1>
 // 					<p className="mt-0.5 text-xs text-white/50">
-// 						You have been invited to Jimo Command Centre. Complete your signup
-// 						below.
+// 						Welcome to Jimo Command Centre. Enter your name and set a password
+// 						to get started.
 // 					</p>
 
 // 					<div className="mt-5">
-// 						<AcceptInviteForm
-// 							token={token}
-// 							email={invitation.email}
-// 							roleLabel={roleLabel}
-// 						/>
+// 						<AcceptInviteForm email={authUser.email!} roleLabel={roleLabel} />
 // 					</div>
 // 				</div>
 // 			</div>
@@ -89,13 +71,12 @@
 
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { and, eq, lt, sql } from "drizzle-orm";
 import { AcceptInviteForm } from "@/components/admin/auth/AcceptInviteForm";
-import { getAdminUser } from "@/lib/auth/get-admin-user";
 import { createClient } from "@/lib/supabase/server";
 import { adminRoleDefinitions } from "@/lib/data/admin/roles";
 import { db } from "@/lib/db";
-import { adminUsers } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { adminInvitations, adminUsers } from "@/lib/db/schema";
 import type { AdminRole } from "@/lib/types/admin/role";
 
 export const metadata: Metadata = {
@@ -108,22 +89,55 @@ export default async function AcceptInvitePage() {
 		data: { user: authUser },
 	} = await supabase.auth.getUser();
 
-	// Not authenticated — the callback didn't run or expired
 	if (!authUser) {
 		redirect("/admin/auth/login?error=invite_expired");
 	}
 
-	// Already completed signup — go to dashboard
 	const existingAdmin = await db.query.adminUsers.findFirst({
 		where: eq(adminUsers.id, authUser.id),
 	});
-
 	if (existingAdmin) {
 		redirect("/admin/dashboard");
 	}
 
-	// Role stored in user_metadata by inviteUserByEmail
-	const role = (authUser.user_metadata?.adminRole ?? "sales-crm") as AdminRole;
+	// NEW: our own enforcement of the 1-day window, independent of (but
+	// matched to) Supabase's own OTP expiry. This is what lets us show a
+	// clear, specific message instead of Supabase's generic auth error —
+	// and what actually marks the invitation "expired" in our own records
+	// so the Users & Roles list reflects reality.
+	const email = authUser.email!.toLowerCase();
+	const invitation = await db.query.adminInvitations.findFirst({
+		where: and(
+			eq(adminInvitations.email, email),
+			eq(adminInvitations.status, "pending"),
+		),
+	});
+
+	if (!invitation) {
+		// Authenticated via a real Supabase session, but no matching
+		// pending invite on our side — a stale or already-used link.
+		// Never let signup proceed silently in this state.
+		redirect("/admin/auth/login?error=invite_not_found");
+	}
+
+	const expiredInvitation = await db.query.adminInvitations.findFirst({
+		where: and(
+			eq(adminInvitations.id, invitation.id),
+			lt(adminInvitations.expiresAt, sql`now()`),
+		),
+	});
+
+	if (expiredInvitation) {
+		await db
+			.update(adminInvitations)
+			.set({ status: "expired" })
+			.where(eq(adminInvitations.id, expiredInvitation.id));
+		redirect("/admin/auth/login?error=invite_expired");
+	}
+
+	const role = (authUser.user_metadata?.adminRole ??
+		invitation.role ??
+		"sales-crm") as AdminRole;
 	const roleLabel =
 		adminRoleDefinitions.find((r) => r.id === role)?.label ?? role;
 
@@ -146,7 +160,6 @@ export default async function AcceptInvitePage() {
 						Welcome to Jimo Command Centre. Enter your name and set a password
 						to get started.
 					</p>
-
 					<div className="mt-5">
 						<AcceptInviteForm email={authUser.email!} roleLabel={roleLabel} />
 					</div>

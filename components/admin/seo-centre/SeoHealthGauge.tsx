@@ -1,3 +1,4 @@
+//@/component/admin/seo-center/SeoHealthGauge.tsx
 import { cn } from "@/lib/utils/helpers";
 
 export function SeoHealthGauge({ score }: { score: number }) {
