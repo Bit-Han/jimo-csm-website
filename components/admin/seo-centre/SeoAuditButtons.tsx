@@ -1,3 +1,4 @@
+//@/component/admin/seo-center/SendAuditButton.tsx
 "use client";
 
 import { useTransition } from "react";

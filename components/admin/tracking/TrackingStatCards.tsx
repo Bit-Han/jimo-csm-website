@@ -1,3 +1,5 @@
+//@/components/admin/tracking/TrackingStatCard.tsx
+
 import { TrendingUp } from "lucide-react";
 import type { TrackingStatCard } from "@/lib/types/admin/tracking-analytics";
 

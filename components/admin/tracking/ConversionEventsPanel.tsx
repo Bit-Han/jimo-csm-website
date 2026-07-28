@@ -1,3 +1,4 @@
+//@/components/admin/tracking/ConversionEventsPanel.tsx
 import { cn } from "@/lib/utils/helpers";
 import type { ConversionEventBar } from "@/lib/types/admin/tracking-analytics";
 

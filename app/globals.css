@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* Tiptap empty-state placeholder */
 .ProseMirror p.is-editor-empty:first-child::before {

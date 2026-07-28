@@ -1,3 +1,5 @@
+//@/lib/types/admin/users-roles.ts
+
 import type { AdminRole } from "@/lib/types/admin/role";
 
 export interface AdminUserListRow {

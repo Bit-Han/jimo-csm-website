@@ -1,3 +1,5 @@
+
+//@/components/admin/users/PendingInvitationsTable.tsx
 "use client";
 
 import { useState, useTransition } from "react";

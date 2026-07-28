@@ -89,3 +89,64 @@ export const EMPTY_LANDING_HERO: LandingHeroContent = {
 	primaryCta: { label: "Register Interest", formId: "" },
 	secondaryCta: null,
 };
+
+
+export interface PublicFormField {
+	id: string;
+	type: string;
+	label: string;
+	placeholder: string | null;
+	required: boolean;
+	options: { label: string; value: string }[] | null;
+}
+
+export interface PublicFormForOverlay {
+	id: string;
+	title: string;
+	fields: PublicFormField[];
+}
+
+export interface PublicLandingPage {
+	slug: string;
+	title: string;
+	hero: LandingHeroContent;
+	primaryForm: PublicFormForOverlay | null;
+	secondaryForm: PublicFormForOverlay | null;
+}
+
+export interface UtmParams {
+	utmSource?: string;
+	utmMedium?: string;
+	utmCampaign?: string;
+}
+
+// Add to the existing lib/types/landing-page.ts — everything else in that file stays as-is
+
+export interface PublicFormField {
+	id: string;
+	type: string;
+	label: string;
+	placeholder: string | null;
+	required: boolean;
+	options: { label: string; value: string }[] | null;
+}
+
+export interface PublicFormForOverlay {
+	id: string;
+	title: string;
+	fields: PublicFormField[];
+}
+
+export interface PublicLandingPage {
+	slug: string;
+	title: string;
+	hero: LandingHeroContent;
+	primaryForm: PublicFormForOverlay | null;
+	secondaryForm: PublicFormForOverlay | null;
+}
+
+export interface UtmParams {
+	utmSource?: string;
+	utmMedium?: string;
+	utmCampaign?: string;
+}

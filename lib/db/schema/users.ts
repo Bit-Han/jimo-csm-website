@@ -1,3 +1,4 @@
+//@/lib/db/schema/users.ts
 import {
 	type AnyPgColumn,
 	pgTable,
@@ -105,7 +106,7 @@ export const adminInvitations = pgTable("admin_invitations", {
 
 	acceptedAt: timestamp("accepted_at"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
-}).enableRLS();;
+}).enableRLS();
 
 export type AdminUserRow = typeof adminUsers.$inferSelect;
 export type NewAdminUserRow = typeof adminUsers.$inferInsert;

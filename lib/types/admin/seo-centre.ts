@@ -1,3 +1,4 @@
+// @/lib/types/admin/seo-centre
 export type SeoIssueType = "meta" | "content" | "images" | "seo" | "technical";
 
 export interface SeoHealthStat {

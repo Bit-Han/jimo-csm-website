@@ -1,3 +1,4 @@
+//@/components/admin/users/PermissionMatrixTable.tsx
 import { Check, Minus, X } from "lucide-react";
 import { adminRoleDefinitions } from "@/lib/data/admin/roles";
 import type {

@@ -13,6 +13,7 @@ export * from "./leads";
 export * from "./brochures";
 export * from "./insights";
 export * from "./seo";
+export * from "./tracking-logs";
 export * from "./tracking";
 export * from "./settings";
 export * from "./insights";

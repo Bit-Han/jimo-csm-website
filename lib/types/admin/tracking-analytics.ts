@@ -1,3 +1,5 @@
+// //@lib/types/admin/tracking-analytics
+
 export type AdminTrackingPlatform =
 	| "google_tag_manager"
 	| "google_analytics_4"

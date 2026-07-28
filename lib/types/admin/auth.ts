@@ -1,3 +1,4 @@
+//@/lib/types/admin/auth.ts
 export interface LoginFormState {
 	status: "idle" | "error";
 	message: string;

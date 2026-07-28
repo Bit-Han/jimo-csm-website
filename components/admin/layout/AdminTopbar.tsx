@@ -1,18 +1,23 @@
+// //components/admin/layout/AdminTopbar.tsx
 // "use client";
 
+// import { useTransition } from "react";
 // import {
 // 	Bell,
 // 	ChevronDown,
+// 	LogOut,
 // 	Menu,
 // 	PanelLeftClose,
 // 	PanelLeftOpen,
 // 	Search,
 // } from "lucide-react";
+// import { useState } from "react";
+// import { logoutAction } from "@/lib/actions/admin/auth";
 // import { adminRoleDefinitions } from "@/lib/data/admin/roles";
-// import type { AdminUser } from "@/lib/types/admin/role";
+// import type { AuthenticatedAdminUser } from "@/lib/auth/get-admin-user";
 
 // export interface AdminTopbarProps {
-// 	currentUser: AdminUser;
+// 	currentUser: AuthenticatedAdminUser;
 // 	isCollapsed: boolean;
 // 	onToggleCollapse: () => void;
 // 	onOpenMobileMenu: () => void;
@@ -24,15 +29,25 @@
 // 	onToggleCollapse,
 // 	onOpenMobileMenu,
 // }: AdminTopbarProps) {
+// 	const [menuOpen, setMenuOpen] = useState(false);
+// 	const [isPending, startTransition] = useTransition();
+
 // 	const roleLabel =
-// 		adminRoleDefinitions.find((role) => role.id === currentUser.role)?.label ??
+// 		adminRoleDefinitions.find((r) => r.id === currentUser.role)?.label ??
 // 		currentUser.role;
+
 // 	const initials = currentUser.fullName
 // 		.split(" ")
 // 		.map((part) => part[0])
 // 		.join("")
 // 		.slice(0, 2)
 // 		.toUpperCase();
+
+// 	function handleSignOut() {
+// 		startTransition(async () => {
+// 			await logoutAction();
+// 		});
+// 	}
 
 // 	return (
 // 		<header className="sticky top-0 z-30 flex h-20 items-center gap-4 border-b border-stone-200 bg-white px-4 sm:px-6">
@@ -79,18 +94,56 @@
 // 					</span>
 // 				</button>
 
-// 				<button type="button" className="flex items-center gap-2">
-// 					<span className="hidden text-right sm:block">
-// 						<span className="block text-sm font-semibold text-ink-950">
-// 							{currentUser.fullName}
+// 				{/* User menu */}
+// 				<div className="relative">
+// 					<button
+// 						type="button"
+// 						onClick={() => setMenuOpen((o) => !o)}
+// 						className="flex items-center gap-2"
+// 					>
+// 						<span className="hidden text-right sm:block">
+// 							<span className="block text-sm font-semibold text-ink-950">
+// 								{currentUser.fullName}
+// 							</span>
+// 							<span className="block text-xs text-stone-500">{roleLabel}</span>
 // 						</span>
-// 						<span className="block text-xs text-stone-500">{roleLabel}</span>
-// 					</span>
-// 					<span className="flex h-9 w-9 items-center justify-center rounded-full bg-red-700 text-sm font-semibold text-white">
-// 						{initials}
-// 					</span>
-// 					<ChevronDown className="hidden h-4 w-4 text-stone-400 sm:block" />
-// 				</button>
+// 						<span className="flex h-9 w-9 items-center justify-center rounded-full bg-red-700 text-sm font-semibold text-white">
+// 							{initials}
+// 						</span>
+// 						<ChevronDown className="hidden h-4 w-4 text-stone-400 sm:block" />
+// 					</button>
+
+// 					{menuOpen ? (
+// 						<>
+// 							<button
+// 								type="button"
+// 								className="fixed inset-0 z-10"
+// 								onClick={() => setMenuOpen(false)}
+// 								aria-label="Close menu"
+// 							/>
+// 							<div className="absolute right-0 top-full z-20 mt-2 w-52 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-xl">
+// 								<div className="border-b border-stone-100 px-4 py-3">
+// 									<p className="text-sm font-semibold text-ink-950">
+// 										{currentUser.fullName}
+// 									</p>
+// 									<p className="text-xs text-stone-500">{currentUser.email}</p>
+// 									<p className="mt-0.5 text-xs font-medium text-red-600">
+// 										{roleLabel}
+// 									</p>
+// 								</div>
+// 								<button
+// 									type="button"
+// 									onClick={handleSignOut}
+// 									disabled={isPending}
+// 									className="flex w-full items-center gap-2 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+// 								>
+// 									<LogOut className="h-4 w-4" />
+// 									Sign Out
+// 								</button>
+// 							</div>
+// 						</>
+// 					) : null}
+// 				</div>
 // 			</div>
 // 		</header>
 // 	);
@@ -98,7 +151,7 @@
 
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import {
 	Bell,
 	ChevronDown,
@@ -107,10 +160,11 @@ import {
 	PanelLeftClose,
 	PanelLeftOpen,
 	Search,
+	UserCog,
 } from "lucide-react";
-import { useState } from "react";
 import { logoutAction } from "@/lib/actions/admin/auth";
 import { adminRoleDefinitions } from "@/lib/data/admin/roles";
+import { EditProfileModal } from "@/components/admin/layout/EditProfileModal";
 import type { AuthenticatedAdminUser } from "@/lib/auth/get-admin-user";
 
 export interface AdminTopbarProps {
@@ -127,6 +181,7 @@ export function AdminTopbar({
 	onOpenMobileMenu,
 }: AdminTopbarProps) {
 	const [menuOpen, setMenuOpen] = useState(false);
+	const [profileOpen, setProfileOpen] = useState(false);
 	const [isPending, startTransition] = useTransition();
 
 	const roleLabel =
@@ -179,7 +234,8 @@ export function AdminTopbar({
 					⌘K
 				</span>
 			</div>
-			<div className="flex items-center gap-4 ml-auto">
+
+			<div className="ml-auto flex items-center gap-4">
 				<button
 					type="button"
 					aria-label="Notifications"
@@ -191,7 +247,6 @@ export function AdminTopbar({
 					</span>
 				</button>
 
-				{/* User menu */}
 				<div className="relative">
 					<button
 						type="button"
@@ -204,9 +259,18 @@ export function AdminTopbar({
 							</span>
 							<span className="block text-xs text-stone-500">{roleLabel}</span>
 						</span>
-						<span className="flex h-9 w-9 items-center justify-center rounded-full bg-red-700 text-sm font-semibold text-white">
-							{initials}
-						</span>
+						{currentUser.avatarUrl ? (
+							// eslint-disable-next-line @next/next/no-img-element
+							<img
+								src={currentUser.avatarUrl}
+								alt={currentUser.fullName}
+								className="h-9 w-9 rounded-full object-cover"
+							/>
+						) : (
+							<span className="flex h-9 w-9 items-center justify-center rounded-full bg-red-700 text-sm font-semibold text-white">
+								{initials}
+							</span>
+						)}
 						<ChevronDown className="hidden h-4 w-4 text-stone-400 sm:block" />
 					</button>
 
@@ -230,6 +294,17 @@ export function AdminTopbar({
 								</div>
 								<button
 									type="button"
+									onClick={() => {
+										setMenuOpen(false);
+										setProfileOpen(true);
+									}}
+									className="flex w-full items-center gap-2 px-4 py-3 text-sm font-medium text-ink-950 hover:bg-stone-50"
+								>
+									<UserCog className="h-4 w-4" />
+									Edit Profile
+								</button>
+								<button
+									type="button"
 									onClick={handleSignOut}
 									disabled={isPending}
 									className="flex w-full items-center gap-2 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
@@ -242,6 +317,13 @@ export function AdminTopbar({
 					) : null}
 				</div>
 			</div>
+
+			{profileOpen ? (
+				<EditProfileModal
+					currentUser={currentUser}
+					onClose={() => setProfileOpen(false)}
+				/>
+			) : null}
 		</header>
 	);
 }

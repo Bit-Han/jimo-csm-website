@@ -1,3 +1,4 @@
+// lib/data/admin/seo-centre.ts
 import type {
 	AdminSeoIssueRow,
 	SeoChecklistItem,

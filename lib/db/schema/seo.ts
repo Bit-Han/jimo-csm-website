@@ -12,7 +12,6 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 import {
-	aiVisibilityPlatformEnum,
 	gscSearchTypeEnum,
 	seoIssueStatusEnum,
 	seoIssueSeverityEnum,
@@ -46,7 +45,7 @@ export const seoGlobalSettings = pgTable("seo_global_settings", {
 	// Generated and edited from the SEO Centre; served by a Next.js route handler.
 	llmsTxtEnabled: boolean("llms_txt_enabled").notNull().default(false),
 	llmsTxtContent: text("llms_txt_content"),
-
+	sitemapLastGeneratedAt: timestamp("sitemap_last_generated_at"),
 	updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }).enableRLS();
 
@@ -108,6 +107,7 @@ export const seoIssues = pgTable("seo_issues", {
 
 	// The public URL of the page that has the issue, e.g. /insights/why-yaba
 	pageUrl: text("page_url").notNull(),
+	pageTitle: text("page_title").notNull(),
 	pageType: seoPageTypeEnum("page_type"),
 	issueType: seoIssueTypeEnum("issue_type").notNull(),
 	severity: seoIssueSeverityEnum("severity").notNull(),
@@ -182,47 +182,6 @@ export const aiVisibilityPrompts = pgTable("ai_visibility_prompts", {
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 }).enableRLS();
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ai_visibility_results
-//
-// One row per prompt-platform-date test run.
-// Populated manually (admin runs the prompt and records what they see)
-// or automatically via a tool integration in the future.
-//
-// wasMentioned = brand name "Jimo" appeared anywhere in the response
-// wasCited = the actual site URL was linked/referenced
-// citedUrl = which specific page was cited if wasCited is true
-// sentiment = rough classification of how the brand was framed
-// responseSnippet = the relevant excerpt (never the full response — copyright)
-// ─────────────────────────────────────────────────────────────────────────────
-export const aiVisibilityResults = pgTable("ai_visibility_results", {
-	id: uuid("id").defaultRandom().primaryKey(),
-
-	promptId: uuid("prompt_id")
-		.notNull()
-		.references(() => aiVisibilityPrompts.id, { onDelete: "cascade" }),
-	platform: aiVisibilityPlatformEnum("platform").notNull(),
-
-	wasMentioned: boolean("was_mentioned").notNull().default(false),
-	wasCited: boolean("was_cited").notNull().default(false),
-	citedUrl: text("cited_url"),
-	sentiment: text("sentiment", {
-		enum: ["positive", "neutral", "negative", "not_mentioned"],
-	})
-		.notNull()
-		.default("not_mentioned"),
-
-	// A short excerpt from the AI response showing context around the mention.
-	// Store the smallest snippet needed — never the full response.
-	responseSnippet: text("response_snippet"),
-
-	testedAt: timestamp("tested_at").defaultNow().notNull(),
-	// Which admin ran this test (for audit trail)
-	testedByUserId: uuid("tested_by_user_id").references(() => adminUsers.id, {
-		onDelete: "set null",
-	}),
-}).enableRLS();
-
 export type SeoGlobalSettingsRow = typeof seoGlobalSettings.$inferSelect;
 export type SeoConfigRow = typeof seoConfigs.$inferSelect;
 export type NewSeoConfigRow = typeof seoConfigs.$inferInsert;
@@ -230,5 +189,3 @@ export type SeoIssueRow = typeof seoIssues.$inferSelect;
 export type NewSeoIssueRow = typeof seoIssues.$inferInsert;
 export type GscPerformanceCacheRow = typeof gscPerformanceCache.$inferSelect;
 export type NewGscPerformanceCacheRow = typeof gscPerformanceCache.$inferInsert;
-export type AiVisibilityPromptRow = typeof aiVisibilityPrompts.$inferSelect;
-export type AiVisibilityResultRow = typeof aiVisibilityResults.$inferSelect;

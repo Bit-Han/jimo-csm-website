@@ -1,4 +1,4 @@
-
+//@/lib/db/schema/tracking
 import {
 	boolean,
 	jsonb,

@@ -1,3 +1,4 @@
+//@app/admin/(dashboard)/layout.tsx
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/admin/layout/AdminShell";

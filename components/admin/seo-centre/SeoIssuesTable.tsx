@@ -1,3 +1,4 @@
+//@/component/admin/seo-center/SeoIssuesTable.tsx
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
