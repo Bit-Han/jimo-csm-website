@@ -1,3 +1,4 @@
+//@/lib/auth/require-module-access.ts
 import { redirect } from "next/navigation";
 import { getAdminUser } from "@/lib/auth/get-admin-user";
 import { canAccessModule } from "@/lib/data/admin/roles";

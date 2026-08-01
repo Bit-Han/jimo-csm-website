@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { formFields, landingPages, leads } from "@/lib/db/schema";
 import { withTimeout } from "@/lib/utils/timeout";
 import type { UtmParams } from "@/lib/types/landing-page";
+import { trackingEventLogs } from "@/lib/db/schema";
 
 const DB_TIMEOUT_MS = 8000;
 
@@ -88,5 +89,24 @@ export async function submitLandingPageLead(input: {
 			message:
 				"We couldn't save your details right now. Please try again or contact us directly.",
 		};
+	}
+
+	// lib/actions/landing-page-lead.ts — right after the successful leads insert
+	try {
+		await withTimeout(
+			db.insert(trackingEventLogs).values({
+				eventName: "form_submit",
+				pagePath: `/lp/${input.landingPageSlug}`,
+				landingPageSlug: input.landingPageSlug,
+				metadata: {},
+			}),
+			5000,
+			"submitLandingPageLead:trackEvent",
+		);
+	} catch (err) {
+		console.error(
+			"[submitLandingPageLead] tracking log failed (non-blocking):",
+			err,
+		);
 	}
 }

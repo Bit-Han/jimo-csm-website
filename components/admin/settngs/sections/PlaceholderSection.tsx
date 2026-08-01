@@ -1,3 +1,5 @@
+
+//@/compoenents/admin/settings/sections/PlaceholderSection.tsx
 import { Construction } from "lucide-react";
 import type { SettingsSection } from "@/lib/types/admin/settings";
 
@@ -5,18 +7,8 @@ const SECTION_NOTES: Record<SettingsSection, string> = {
 	"company-information": "",
 	"website-defaults":
 		"Global defaults: default meta title template, favicon, theme colour, footer links. Wired to siteSettings table in the integration stage.",
-	"crm-integration":
-		"HubSpot API key, pipeline mapping, contact sync settings. Connected once the HubSpot integration stage is reached.",
-	"email-settings":
-		"SMTP / SendGrid / Resend configuration for transactional emails: lead auto-responses, brochure delivery, invite emails.",
 	notifications:
 		"Slack webhook, email digest, in-app alert preferences per admin role.",
-	security:
-		"Password change, 2FA setup (TOTP), active session management, IP allowlist.",
-	backup:
-		"Daily automated backup schedule, manual backup trigger, restore points. Managed via Supabase database backups.",
-	"api-keys":
-		"Generate and revoke API keys for headless integrations, partner portals, or external marketing tools.",
 };
 
 export function PlaceholderSection({

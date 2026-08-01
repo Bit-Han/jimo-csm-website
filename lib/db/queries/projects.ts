@@ -1,21 +1,26 @@
-//@lib/db/queries/projects.ts
-import { asc, count, desc, eq } from "drizzle-orm";
+
+
+
+//@lib/db/queries/projects.ts — add these imports at the top
+import { and, asc, count, desc, eq, inArray, isNotNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
-  leads,
-  projectAmenities,
-  projectCategories,
-  projectChecklistItems,
-  projectFacts,
-  projectMedia,
-  projects,
-  projectTags,
-  projectUnits,
+	brochures,
+	leads,
+	projectAmenities,
+	projectCategories,
+	projectChecklistItems,
+	projectFacts,
+	projectMedia,
+	projects,
+	projectTags,
+	projectUnits,
+	seoConfigs,
 } from "@/lib/db/schema";
 import { mapProjectRowToSummary, mapProjectRowToDetail } from "@/lib/db/mappers/project";
 import type { Project } from "@/lib/types/project";
 import type { ProjectDetail } from "@/lib/types/project-detail";
-import type { AdminProjectListRow } from "@/lib/types/admin/project";
+import type { AdminProjectListRow, AdminProjectSummaryStats } from "@/lib/types/admin/project";
 
 // ─── Full project row type (with all relations loaded) ────────────────────
 
@@ -130,6 +135,61 @@ export async function getAdminProjectListRows(): Promise<AdminProjectListRow[]> 
     };
   });
 }
+
+// ── everything above getAdminProjectListRows stays exactly as it was ──
+
+// ─── New: real summary stats for the three cards at the bottom of the
+// Projects admin page — previously mock data. Only published projects
+// count toward "missing brochure" / "missing SEO," since those are the
+// ones actually visible to the public with a real gap. ─────────────────
+
+export async function getAdminProjectSummaryStats(): Promise<AdminProjectSummaryStats> {
+	const publishedProjects = await db.query.projects.findMany({
+		where: eq(projects.publishStatus, "published"),
+		columns: { id: true, slug: true },
+	});
+
+	const publishedIds = publishedProjects.map((p) => p.id);
+	const publishedSlugs = publishedProjects.map((p) => p.slug);
+
+	const [activeBrochureRows, seoConfigRows, draftCountRows] = await Promise.all([
+		publishedIds.length > 0
+			? db
+					.selectDistinct({ projectId: brochures.projectId })
+					.from(brochures)
+					.where(
+						and(inArray(brochures.projectId, publishedIds), eq(brochures.status, "active")),
+					)
+			: Promise.resolve([]),
+		publishedSlugs.length > 0
+			? db
+					.select({ pageSlug: seoConfigs.pageSlug })
+					.from(seoConfigs)
+					.where(
+						and(
+							eq(seoConfigs.pageType, "project"),
+							inArray(seoConfigs.pageSlug, publishedSlugs),
+							isNotNull(seoConfigs.metaTitle),
+						),
+					)
+			: Promise.resolve([]),
+		db.select({ c: count() }).from(projects).where(eq(projects.publishStatus, "draft")),
+	]);
+
+	const withBrochure = new Set(activeBrochureRows.map((r) => r.projectId));
+	const withSeo = new Set(seoConfigRows.map((r) => r.pageSlug));
+
+	return {
+		missingBrochure: publishedIds.filter((id) => !withBrochure.has(id)).length,
+		missingBrochureNote: "Visible projects without a brochure",
+		missingSeo: publishedSlugs.filter((slug) => !withSeo.has(slug)).length,
+		missingSeoNote: "Missing meta titles/descriptions",
+		draftProjects: draftCountRows[0]?.c ?? 0,
+		draftProjectsNote: "Not visible on the website",
+	};
+}
+
+// ── getAdminProjectEditorState at the bottom stays exactly as it was ──
 
 export async function getAdminProjectEditorState(slug: string) {
   return fetchProjectWithRelations(slug);

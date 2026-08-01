@@ -1,7 +1,8 @@
+// app/layout.tsx
 import type { Metadata } from 'next';
 import './globals.css';
 import { ChunkErrorRecovery } from "@/components/ChunkErrorRecovery";
-
+import { HeadScripts, GtmNoscriptBody } from "@/components/public/tracking/HeadScripts";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -38,7 +39,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
 		<html lang="en">
+			<head>
+				<HeadScripts />
+			</head>
 			<body suppressHydrationWarning>
+				<GtmNoscriptBody />
 				<ChunkErrorRecovery />
 				{children}
 			</body>

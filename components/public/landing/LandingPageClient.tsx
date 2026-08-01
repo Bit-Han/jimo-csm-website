@@ -9,6 +9,7 @@ import type {
 	PublicFormForOverlay,
 	UtmParams,
 } from "@/lib/types/landing-page";
+import { PageViewTracker } from "@/components/public/tracking/PageViewTracker";
 
 export function LandingPageClient({
 	hero,
@@ -29,6 +30,7 @@ export function LandingPageClient({
 
 	return (
 		<>
+			<PageViewTracker metadata={{ landingPageSlug: slug }} />
 			<HeroThemeRenderer
 				hero={hero}
 				onPrimaryCtaClick={() => primaryForm && setActiveForm(primaryForm)}
