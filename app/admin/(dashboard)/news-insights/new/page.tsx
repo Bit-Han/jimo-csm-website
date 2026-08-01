@@ -16,12 +16,10 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminNewArticlePage() {
 	const [categories, authors, currentAdmin] = await Promise.all([
-		timed("getInsightCategories", getInsightCategories()),
-		timed(
-			"getActiveAdminUsersForAuthorSelect",
-			getActiveAdminUsersForAuthorSelect(),
-		),
-		timed("getAdminUser", getAdminUser()),
+		getInsightCategories(),
+
+		getActiveAdminUsersForAuthorSelect(),
+		getAdminUser(),
 	]);
 
 	const firstCategory = categories[0];

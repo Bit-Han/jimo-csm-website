@@ -8,6 +8,8 @@ import { sendBrochureEmail } from "@/lib/email/resend";
 import { getBrochureByProjectSlug } from "@/lib/db/queries/brochures";
 import { siteConfig } from "@/lib/data/site";
 import type { BrochureLeadFormState } from "@/lib/types/brochure";
+import { trackingEventLogs } from "@/lib/db/schema";
+import { withTimeout } from "@/lib/utils/timeout";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -84,6 +86,26 @@ export async function submitBrochureRequest(
 			fieldErrors: {},
 		};
 	}
+
+
+try {
+	await withTimeout(
+		db.insert(trackingEventLogs).values({
+			eventName: "brochure_form_submit",
+			pagePath: `/brochures/${projectSlug}`,
+			projectSlug,
+			metadata: {},
+		}),
+		5000,
+		"submitBrochureRequest:trackEvent",
+	);
+} catch (err) {
+	console.error(
+		"[submitBrochureRequest] tracking log failed (non-blocking):",
+		err,
+	);
+}
+
 
 	redirect(`/brochures/${projectSlug}/thank-you`);
 }

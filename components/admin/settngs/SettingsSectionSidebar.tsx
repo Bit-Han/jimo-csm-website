@@ -1,3 +1,4 @@
+//@/compoenents/admin/settings/SettingsSectionSidebar.tsx
 import { cn } from "@/lib/utils/helpers";
 import type {
 	SettingsSection,

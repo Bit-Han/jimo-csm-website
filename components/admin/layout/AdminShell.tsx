@@ -30,23 +30,6 @@ export interface AdminShellProps {
 }
 
 export function AdminShell({ children, currentUser }: AdminShellProps) {
-	// const [isCollapsed, setIsCollapsed] = useState(false);
-	// const [isMobileOpen, setIsMobileOpen] = useState(false);
-
-	// // Restore collapse preference after mount to avoid hydration mismatch
-	// useEffect(() => {
-	// 	const stored = window.localStorage.getItem(COLLAPSE_STORAGE_KEY);
-	// 	if (stored === "true") setIsCollapsed(true);
-	// }, []);
-
-	// function toggleCollapse() {
-	// 	setIsCollapsed((current) => {
-	// 		const next = !current;
-	// 		window.localStorage.setItem(COLLAPSE_STORAGE_KEY, String(next));
-	// 		return next;
-	// 	});
-	// }
-	// Pull directly from localStorage with zero hydration errors
 	const isCollapsed = useSyncExternalStore(
 		subscribe,
 		getSnapshot,

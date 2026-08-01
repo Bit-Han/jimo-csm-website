@@ -7,6 +7,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { leads, projects } from "@/lib/db/schema";
 import type { ContactFormState } from "@/lib/types/contact";
+import { trackingEventLogs } from "@/lib/db/schema";
+import { withTimeout } from "@/lib/utils/timeout";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -94,6 +96,8 @@ export async function submitContactEnquiry(
 				: "Something went wrong saving your enquiry.";
 		console.error("[submitContactEnquiry] DB error:", message);
 
+
+
 		return {
 			status: "error",
 			message:
@@ -101,6 +105,24 @@ export async function submitContactEnquiry(
 			fieldErrors: {},
 		};
 	}
+
+try {
+	await withTimeout(
+		db.insert(trackingEventLogs).values({
+			eventName: "form_submit",
+			pagePath: "/contact",
+			projectSlug: projectOfInterest === "general" ? null : projectOfInterest,
+			metadata: { enquiryType },
+		}),
+		5000,
+		"submitContactEnquiry:trackEvent",
+	);
+} catch (err) {
+	console.error(
+		"[submitContactEnquiry] tracking log failed (non-blocking):",
+		err,
+	);
+}
 
 	// redirect() is called OUTSIDE the try/catch so it isn't caught as an error
 	redirect("/contact/thank-you");

@@ -2,13 +2,16 @@
 import type { MetadataRoute } from "next";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { projects, insights, landingPages } from "@/lib/db/schema";
+import { projects, insights } from "@/lib/db/schema";
+
+export const dynamic = "force-dynamic";
+
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const base =
 		process.env.NEXT_PUBLIC_SITE_URL ?? "https://jimopropertydevelopment.com";
 
-	const [publishedProjects, publishedInsights, publishedLandingPages] =
+	const [publishedProjects, publishedInsights] =
 		await Promise.all([
 			db.query.projects.findMany({
 				where: eq(projects.publishStatus, "published"),
@@ -16,9 +19,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			db.query.insights.findMany({
 				where: eq(insights.publishStatus, "published"),
 			}),
-			db.query.landingPages.findMany({
-				where: eq(landingPages.publishStatus, "published"),
-			}),
+			// landingPages deliberately excluded from the public sitemap — they
+			// carry noindex/nofollow (see app/lp/[slug]/page.tsx from the
+			// Landing Pages build) since campaign pages shouldn't compete for
+			// organic search.
 		]);
 
 	return [

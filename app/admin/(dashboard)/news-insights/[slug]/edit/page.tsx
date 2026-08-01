@@ -36,12 +36,10 @@ export default async function AdminArticleEditPage({
 	const { slug } = await params;
 
 	const [row, categories, authors] = await Promise.all([
-		timed("getAdminArticleEditorState", getAdminArticleEditorState(slug)),
-		timed("getInsightCategories", getInsightCategories()),
-		timed(
-			"getActiveAdminUsersForAuthorSelect",
-			getActiveAdminUsersForAuthorSelect(),
-		),
+		getAdminArticleEditorState(slug),
+		getInsightCategories(),
+
+		getActiveAdminUsersForAuthorSelect(),
 	]);
 
 	if (!row) notFound();

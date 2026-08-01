@@ -21,7 +21,6 @@
 
 // export const dynamic = 'force-dynamic';
 
-
 // export default function AdminSeoCentrePage() {
 // 	return (
 // 		<div className="space-y-6">
@@ -71,14 +70,15 @@ export const metadata: Metadata = { title: "SEO Centre | Jimo Command Centre" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminSeoCentrePage() {
-	const [score, stats, issues, settings, checklist, sitemapStats] = await Promise.all([
-		timed("getSeoScore", getSeoScore()),
-		timed("getSeoHealthStats", getSeoHealthStats()),
-		timed("getAdminSeoIssues", getAdminSeoIssues()),
-		timed("getSeoGlobalSettings", getSeoGlobalSettings()),
-		timed("getSeoChecklist", getSeoChecklist()),
-		timed("getSitemapStats", getSitemapStats()),
-	]);
+	const [score, stats, issues, settings, checklist, sitemapStats] =
+		await Promise.all([
+			getSeoScore(),
+			getSeoHealthStats(),
+			getAdminSeoIssues(),
+			getSeoGlobalSettings(),
+			getSeoChecklist(),
+			getSitemapStats(),
+		]);
 
 	return (
 		<div className="space-y-6">
@@ -94,7 +94,11 @@ export default async function AdminSeoCentrePage() {
 				<SeoStatCards stats={stats} />
 			</div>
 			<SeoIssuesTable issues={issues} />
-			<SeoBottomCards settings={settings} checklist={checklist} sitemap={sitemapStats} />
+			<SeoBottomCards
+				settings={settings}
+				checklist={checklist}
+				sitemap={sitemapStats}
+			/>
 		</div>
 	);
 }

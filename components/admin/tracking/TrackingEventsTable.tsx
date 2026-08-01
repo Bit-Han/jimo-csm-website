@@ -28,7 +28,7 @@ export function TrackingEventsTable({
 	return (
 		<div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
 			<div className="overflow-x-auto">
-				<table className="w-full min-w-[680px] text-left text-sm">
+				<table className="w-full min-w-170 text-left text-sm">
 					<thead>
 						<tr className="border-b border-stone-100 bg-stone-50/60">
 							{[

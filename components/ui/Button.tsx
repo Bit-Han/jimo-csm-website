@@ -46,3 +46,6 @@ export interface ButtonLinkProps
 export function ButtonLink({ className, variant, size, ...props }: ButtonLinkProps) {
   return <Link className={cn(buttonVariants({ variant, size }), className)} {...props} />;
 }
+export function ButtonDesign({ className, variant, size, ...props }: ButtonProps) {
+  return <button className={cn(buttonVariants({ variant, size }), className)} {...props} />;
+}

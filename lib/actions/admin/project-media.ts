@@ -1,3 +1,4 @@
+//@/lib/actions/admin/project-media.ts
 "use server";
 
 import { getAdminUser } from "@/lib/auth/get-admin-user";
