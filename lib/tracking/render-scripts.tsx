@@ -1,6 +1,7 @@
 // lib/tracking/render-scripts.tsx
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { cache } from "react";
 import { trackingIntegrations } from "@/lib/db/schema";
 import type {
 	GtmConfig,
@@ -30,7 +31,7 @@ export interface ResolvedTrackingConfig {
  * here; those belong to a future server-side Measurement
  * Protocol/Conversions API call, not anything sent to the browser.
  */
-export async function getResolvedTrackingConfig(): Promise<ResolvedTrackingConfig> {
+export const getResolvedTrackingConfig = cache(async (): Promise<ResolvedTrackingConfig> => {
 	const rows = await db.query.trackingIntegrations.findMany({
 		where: eq(trackingIntegrations.isConnected, true),
 	});
@@ -47,4 +48,4 @@ export async function getResolvedTrackingConfig(): Promise<ResolvedTrackingConfi
 		x: (byPlatform.get("x_pixel") as XPixelConfig) ?? null,
 		snapchat: (byPlatform.get("snapchat_pixel") as SnapchatPixelConfig) ?? null,
 	};
-}
+});
