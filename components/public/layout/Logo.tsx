@@ -14,8 +14,8 @@ export function Logo({ className, surface = "on-light" }: LogoProps) {
 			<Image
 								src={siteLogo}
 								alt="Jimo Property Development Logo"
-								width={100}
-								height={100}
+								width={90}
+								height={90}
 							/>
 		</Link>
 	);

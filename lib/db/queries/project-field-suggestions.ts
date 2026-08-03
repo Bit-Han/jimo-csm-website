@@ -1,3 +1,4 @@
+//@/lib/db/queries/project-field-suggestions.ts
 import { db } from "@/lib/db";
 import { projects } from "@/lib/db/schema";
 
