@@ -69,13 +69,26 @@ export async function submitBrochureRequest(
 			? brochure.fileUrl
 			: `${appUrl}${brochure.fileUrl}`;
 
-		await sendBrochureEmail({
+		const emailResult = await sendBrochureEmail({
 			to: email,
 			recipientName: fullName,
 			projectName: project?.name ?? projectSlug,
 			brochureDownloadUrl: downloadUrl,
 			whatsappHref: siteConfig.whatsappHref,
 		});
+
+		if (!emailResult.success) {
+			console.error(
+				"[submitBrochureRequest] brochure email failed:",
+				emailResult.message,
+			);
+			return {
+				status: "error",
+				message:
+					"Your request was received, but we could not send the brochure email right now. Please try again or contact us directly.",
+				fieldErrors: {},
+			};
+		}
 	} catch (error) {
 		const message =
 			error instanceof Error ? error.message : "Unexpected error.";
