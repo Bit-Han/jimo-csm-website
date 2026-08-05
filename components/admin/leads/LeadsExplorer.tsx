@@ -1,494 +1,514 @@
-//@component/admin/leads/LeadsExplorer.tsx
-
 "use client";
 
-import { useMemo, useState } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import {
-	AtSign,
 	BookOpen,
-	ChevronDown,
-	Columns,
+	ChevronLeft,
+	ChevronRight,
 	FileText,
 	Globe2,
+	Loader2,
 	MessageCircle,
-  X,
 	Search,
-	SortDesc,
 	Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { AdminBadge } from "@/components/admin/ui/AdminBadge";
-import type { AdminBadgeVariant } from "@/components/admin/ui/AdminBadge";
 import { cn } from "@/lib/utils/helpers";
 import type {
-	LeadColumnKey,
-	LeadFilterState,
+	LeadFilterOptions,
+	LeadFilters,
 	LeadListRow,
 	LeadSource,
 	LeadStatus,
+	PaginatedLeadsResult,
 } from "@/lib/types/admin/lead";
 
-const SOURCE_CONFIG: Record<
-	LeadSource,
-	{ icon: LucideIcon; label: string; iconClass: string }
-> = {
-	website: { icon: Globe2, label: "Website", iconClass: "text-blue-500" },
+// ─── Source display ────────────────────────────────────────────────────────
+
+const SOURCE_CONFIG: Record<LeadSource, { icon: LucideIcon; label: string; colorClass: string }> = {
+	website: { icon: Globe2, label: "Contact Form", colorClass: "text-blue-500" },
+	brochure: {
+		icon: BookOpen,
+		label: "Brochure",
+		colorClass: "text-orange-500",
+	},
 	landing_page: {
 		icon: FileText,
 		label: "Landing Page",
-		iconClass: "text-violet-500",
+		colorClass: "text-violet-500",
 	},
 	whatsapp: {
 		icon: MessageCircle,
 		label: "WhatsApp",
-		iconClass: "text-emerald-500",
+		colorClass: "text-emerald-500",
 	},
-	X: {
-		icon: X,
-		label: "X",
-		iconClass: "text-gray-700",
-	},
-	instagram: { icon: AtSign, label: "Instagram", iconClass: "text-pink-500" },
-	google: { icon: Search, label: "Google", iconClass: "text-amber-500" },
-	referral: { icon: Users, label: "Referral", iconClass: "text-sky-500" },
-	brochure: { icon: BookOpen, label: "Brochure", iconClass: "text-orange-500" },
+	instagram: { icon: Users, label: "Instagram", colorClass: "text-pink-500" },
+	google: { icon: Search, label: "Google", colorClass: "text-amber-500" },
+	referral: { icon: Users, label: "Referral", colorClass: "text-sky-500" },
 };
 
-const STATUS_BADGE: Record<LeadStatus, AdminBadgeVariant> = {
-	new: "new",
-	contacted: "contacted",
-	qualified: "qualified",
-	inspection: "inspection",
-	negotiation: "negotiation",
-	won: "won",
-	lost: "lost",
+// ─── Status badge ──────────────────────────────────────────────────────────
+
+const STATUS_STYLE: Record<LeadStatus, string> = {
+	new: "bg-blue-50 text-blue-700",
+	contacted: "bg-amber-50 text-amber-700",
+	qualified: "bg-emerald-50 text-emerald-700",
+	inspection: "bg-violet-50 text-violet-700",
+	negotiation: "bg-orange-50 text-orange-700",
+	won: "bg-green-100 text-green-800",
+	lost: "bg-stone-100 text-stone-500",
 };
 
-const STATUS_OPTIONS: { value: string; label: string }[] = [
-	{ value: "all", label: "Status — All" },
-	{ value: "new", label: "New" },
-	{ value: "contacted", label: "Contacted" },
-	{ value: "qualified", label: "Qualified" },
-	{ value: "inspection", label: "Inspection" },
-	{ value: "negotiation", label: "Negotiation" },
-	{ value: "won", label: "Won" },
-	{ value: "lost", label: "Lost" },
-];
+const STATUS_LABEL: Record<LeadStatus, string> = {
+	new: "New",
+	contacted: "Contacted",
+	qualified: "Qualified",
+	inspection: "Inspection",
+	negotiation: "Negotiation",
+	won: "Won",
+	lost: "Lost",
+};
 
-const BUDGET_OPTIONS: { value: string; label: string }[] = [
-	{ value: "all", label: "Budget — All" },
-	{ value: "under-50m", label: "Under ₦50M" },
-	{ value: "50m-100m", label: "₦50M–₦100M" },
-	{ value: "100m-200m", label: "₦100M–₦200M" },
-	{ value: "200m-plus", label: "₦200M+" },
-];
+// ─── Filter bar ────────────────────────────────────────────────────────────
 
-const ALL_COLUMNS: { key: LeadColumnKey; label: string }[] = [
-	{ key: "phone", label: "Phone" },
-	{ key: "projectPage", label: "Project / Page" },
-	{ key: "budget", label: "Budget" },
-	{ key: "source", label: "Source" },
-	{ key: "assignedTo", label: "Assigned" },
-	{ key: "date", label: "Date" },
-];
+const SELECT_CN =
+	"rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600/20 disabled:opacity-60";
 
-const selectCn =
-	"rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600/20";
+function LeadsFilterBar({
+	filters,
+	filterOptions,
+	isLoading,
+	onChange,
+}: {
+	filters: LeadFilters;
+	filterOptions: LeadFilterOptions;
+	isLoading: boolean;
+	onChange: (patch: Partial<LeadFilters>) => void;
+}) {
+	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-function matchesBudget(budget: string, filter: string): boolean {
-	if (filter === "all") return true;
-	const raw = budget.replace(/₦|M|\+|–/g, "").trim();
-	const nums = raw
-		.split(" ")
-		.map((n) => parseInt(n, 10))
-		.filter(Boolean);
-	const low = nums[0] ?? 0;
-	if (filter === "under-50m") return low < 50;
-	if (filter === "50m-100m") return low >= 50 && low < 100;
-	if (filter === "100m-200m") return low >= 100 && low < 200;
-	if (filter === "200m-plus") return budget.includes("200M+") || low >= 200;
-	return true;
+	function handleSearch(value: string) {
+		if (debounceRef.current) clearTimeout(debounceRef.current);
+		debounceRef.current = setTimeout(() => onChange({ search: value }), 400);
+	}
+
+	return (
+		<div className="flex flex-wrap items-center gap-3">
+			<div className="relative">
+				{isLoading ? (
+					<Loader2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-stone-400" />
+				) : (
+					<Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+				)}
+				<input
+					type="text"
+					placeholder="Search name, phone, email..."
+					defaultValue={filters.search ?? ""}
+					onChange={(e) => handleSearch(e.target.value)}
+					className="rounded-lg border border-stone-200 bg-white py-2 pl-9 pr-4 text-sm placeholder:text-stone-400 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600/20"
+				/>
+			</div>
+
+			<select
+				value={filters.status ?? "all"}
+				onChange={(e) => onChange({ status: e.target.value })}
+				disabled={isLoading}
+				className={SELECT_CN}
+			>
+				<option value="all">Status — All</option>
+				<option value="new">New</option>
+				<option value="contacted">Contacted</option>
+				<option value="qualified">Qualified</option>
+				<option value="inspection">Inspection</option>
+				<option value="negotiation">Negotiation</option>
+				<option value="won">Won</option>
+				<option value="lost">Lost</option>
+			</select>
+
+			<select
+				value={filters.source ?? "all"}
+				onChange={(e) => onChange({ source: e.target.value })}
+				disabled={isLoading}
+				className={SELECT_CN}
+			>
+				<option value="all">Source — All</option>
+				<option value="website">Contact Form</option>
+				<option value="brochure">Brochure</option>
+				<option value="landing_page">Landing Page</option>
+				<option value="whatsapp">WhatsApp</option>
+				<option value="instagram">Instagram</option>
+				<option value="google">Google</option>
+				<option value="referral">Referral</option>
+			</select>
+
+			{filterOptions.projects.length > 0 ? (
+				<select
+					value={filters.projectSlug ?? "all"}
+					onChange={(e) => onChange({ projectSlug: e.target.value })}
+					disabled={isLoading}
+					className={SELECT_CN}
+				>
+					<option value="all">Project — All</option>
+					{filterOptions.projects.map((p) => (
+						<option key={p.slug} value={p.slug}>
+							{p.name}
+						</option>
+					))}
+				</select>
+			) : null}
+
+			{filterOptions.landingPages.length > 0 ? (
+				<select
+					value={filters.landingPageSlug ?? "all"}
+					onChange={(e) => onChange({ landingPageSlug: e.target.value })}
+					disabled={isLoading}
+					className={SELECT_CN}
+				>
+					<option value="all">Landing Page — All</option>
+					{filterOptions.landingPages.map((p) => (
+						<option key={p.slug} value={p.slug}>
+							{p.name}
+						</option>
+					))}
+				</select>
+			) : null}
+
+			<select
+				value={filters.sort ?? "newest"}
+				onChange={(e) =>
+					onChange({ sort: e.target.value as "newest" | "oldest" })
+				}
+				disabled={isLoading}
+				className={SELECT_CN}
+			>
+				<option value="newest">Date — Newest</option>
+				<option value="oldest">Date — Oldest</option>
+			</select>
+		</div>
+	);
 }
+
+// ─── Main component ────────────────────────────────────────────────────────
 
 export interface LeadsExplorerProps {
-	leads: LeadListRow[];
+	result: PaginatedLeadsResult;
+	currentFilters: LeadFilters;
+	filterOptions: LeadFilterOptions;
+	isLoading: boolean;
+	selectedIds: Set<string>;
+	onSelectedIdsChange: (ids: Set<string>) => void;
+	onFilterChange: (patch: Partial<LeadFilters>) => void;
+	onPageChange: (page: number) => void;
 }
 
-export function LeadsExplorer({ leads }: LeadsExplorerProps) {
-	const [filters, setFilters] = useState<LeadFilterState>({
-		project: "all",
-		budget: "all",
-		status: "all",
-		search: "",
-		sort: "newest",
-	});
-
-	const [visibleColumns, setVisibleColumns] = useState<Set<LeadColumnKey>>(
-		new Set<LeadColumnKey>([
-			"phone",
-			"projectPage",
-			"budget",
-			"source",
-			"assignedTo",
-			"date",
-		]),
-	);
-
-	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-	const [columnsOpen, setColumnsOpen] = useState(false);
-	const [sortOpen, setSortOpen] = useState(false);
-
-	const uniqueProjects = useMemo(
-		() =>
-			Array.from(
-				new Set(leads.map((l) => l.projectPage.split(" · ")[0] ?? "")),
-			).sort(),
-		[leads],
-	);
-
-	const filtered = useMemo(() => {
-		let rows = leads.filter((l) => {
-			const matchSearch =
-				!filters.search ||
-				l.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-				l.phone.includes(filters.search);
-			const matchProject =
-				filters.project === "all" || l.projectPage.startsWith(filters.project);
-			const matchBudget = matchesBudget(l.budget, filters.budget);
-			const matchStatus =
-				filters.status === "all" || l.status === filters.status;
-			return matchSearch && matchProject && matchBudget && matchStatus;
-		});
-
-		if (filters.sort === "oldest") {
-			rows = [...rows].reverse();
-		}
-
-		return rows;
-	}, [leads, filters]);
-
+export function LeadsExplorer({
+	result,
+	currentFilters,
+	filterOptions,
+	isLoading,
+	selectedIds,
+	onSelectedIdsChange,
+	onFilterChange,
+	onPageChange,
+}: LeadsExplorerProps) {
+	const { rows, page, totalPages, totalCount } = result;
 	const allSelected =
-		filtered.length > 0 && filtered.every((l) => selectedIds.has(l.id));
+		rows.length > 0 && rows.every((r) => selectedIds.has(r.id));
 
 	function toggleAll() {
 		if (allSelected) {
-			setSelectedIds(new Set());
+			onSelectedIdsChange(new Set());
 		} else {
-			setSelectedIds(new Set(filtered.map((l) => l.id)));
+			onSelectedIdsChange(new Set(rows.map((r) => r.id)));
 		}
 	}
 
 	function toggleRow(id: string) {
-		setSelectedIds((prev) => {
-			const next = new Set(prev);
-			if (next.has(id)) next.delete(id);
-			else next.add(id);
-			return next;
-		});
-	}
-
-	function toggleColumn(key: LeadColumnKey) {
-		setVisibleColumns((prev) => {
-			const next = new Set(prev);
-			if (next.has(key)) next.delete(key);
-			else next.add(key);
-			return next;
-		});
-	}
-
-	function set<K extends keyof LeadFilterState>(
-		key: K,
-		value: LeadFilterState[K],
-	) {
-		setFilters((prev) => ({ ...prev, [key]: value }));
+		const next = new Set(selectedIds);
+		if (next.has(id)) next.delete(id);
+		else next.add(id);
+		onSelectedIdsChange(next);
 	}
 
 	return (
 		<div className="space-y-4">
-			{/* Filter bar */}
-			<div className="flex flex-wrap items-center gap-3">
-				<div className="relative">
-					<Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
-					<input
-						type="text"
-						placeholder="Search leads..."
-						value={filters.search}
-						onChange={(e) => set("search", e.target.value)}
-						className="rounded-lg border border-stone-200 bg-white py-2 pl-9 pr-4 text-sm placeholder:text-stone-400 focus:border-red-600 focus:outline-none focus:ring-2 focus:ring-red-600/20"
-					/>
-				</div>
+			<LeadsFilterBar
+				filters={currentFilters}
+				filterOptions={filterOptions}
+				isLoading={isLoading}
+				onChange={onFilterChange}
+			/>
 
-				<select
-					value={filters.project}
-					onChange={(e) => set("project", e.target.value)}
-					className={selectCn}
-				>
-					<option value="all">Project — All</option>
-					{uniqueProjects.map((p) => (
-						<option key={p} value={p}>
-							{p}
-						</option>
-					))}
-				</select>
-
-				<select
-					value={filters.budget}
-					onChange={(e) => set("budget", e.target.value)}
-					className={selectCn}
-				>
-					{BUDGET_OPTIONS.map((opt) => (
-						<option key={opt.value} value={opt.value}>
-							{opt.label}
-						</option>
-					))}
-				</select>
-
-				<select
-					value={filters.status}
-					onChange={(e) => set("status", e.target.value)}
-					className={selectCn}
-				>
-					{STATUS_OPTIONS.map((opt) => (
-						<option key={opt.value} value={opt.value}>
-							{opt.label}
-						</option>
-					))}
-				</select>
-			</div>
-
-			{/* Count row + column/sort controls */}
-			<div className="flex items-center justify-between">
-				<p className="text-sm font-medium text-stone-600">
-					{filtered.length} lead{filtered.length !== 1 ? "s" : ""} found
-				</p>
-
-				<div className="flex items-center gap-2">
-					{/* Columns toggle */}
-					<div className="relative">
-						<button
-							type="button"
-							onClick={() => {
-								setColumnsOpen((o) => !o);
-								setSortOpen(false);
-							}}
-							className="flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-600 hover:bg-stone-50"
-						>
-							<Columns className="h-4 w-4" />
-							Columns
-						</button>
-						{columnsOpen ? (
-							<div className="absolute right-0 top-full z-10 mt-1 w-48 overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg">
-								{ALL_COLUMNS.map(({ key, label }) => (
-									<label
-										key={key}
-										className="flex cursor-pointer items-center gap-3 px-4 py-2.5 text-sm hover:bg-stone-50"
-									>
-										<input
-											type="checkbox"
-											checked={visibleColumns.has(key)}
-											onChange={() => toggleColumn(key)}
-											className="h-4 w-4 rounded border-stone-300 text-red-600"
-										/>
-										{label}
-									</label>
-								))}
-							</div>
-						) : null}
-					</div>
-
-					{/* Sort */}
-					<div className="relative">
-						<button
-							type="button"
-							onClick={() => {
-								setSortOpen((o) => !o);
-								setColumnsOpen(false);
-							}}
-							className="flex items-center gap-1.5 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm font-medium text-stone-600 hover:bg-stone-50"
-						>
-							<SortDesc className="h-4 w-4" />
-							{filters.sort === "newest" ? "Newest" : "Oldest"}
-							<ChevronDown className="h-3.5 w-3.5" />
-						</button>
-						{sortOpen ? (
-							<div className="absolute right-0 top-full z-10 mt-1 w-36 overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg">
-								{(["newest", "oldest"] as const).map((s) => (
-									<button
-										key={s}
-										type="button"
-										onClick={() => {
-											set("sort", s);
-											setSortOpen(false);
-										}}
-										className={cn(
-											"flex w-full px-4 py-2.5 text-sm capitalize",
-											filters.sort === s
-												? "bg-red-50 font-semibold text-red-600"
-												: "text-stone-600 hover:bg-stone-50",
-										)}
-									>
-										{s}
-									</button>
-								))}
-							</div>
-						) : null}
-					</div>
-				</div>
-			</div>
-
-			{/* Table */}
-			<div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
-				<div className="overflow-x-auto">
-					<table className="w-full min-w-[700px] text-left text-sm">
-						<thead>
-							<tr className="border-b border-stone-100 bg-stone-50/60">
-								<th className="w-10 px-4 py-3.5">
-									<input
-										type="checkbox"
-										checked={allSelected}
-										onChange={toggleAll}
-										className="h-4 w-4 rounded border-stone-300 text-red-600 focus:ring-red-600"
-									/>
-								</th>
-								<th className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
-									Name
-								</th>
-								{visibleColumns.has("phone") ? (
-									<th className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
-										Phone
-									</th>
-								) : null}
-								{visibleColumns.has("projectPage") ? (
-									<th className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
-										Project / Page
-									</th>
-								) : null}
-								{visibleColumns.has("budget") ? (
-									<th className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
-										Budget
-									</th>
-								) : null}
-								{visibleColumns.has("source") ? (
-									<th className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
-										Source
-									</th>
-								) : null}
-								<th className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
-									Status
-								</th>
-								{visibleColumns.has("assignedTo") ? (
-									<th className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
-										Assigned
-									</th>
-								) : null}
-								{visibleColumns.has("date") ? (
-									<th className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
-										Date
-									</th>
-								) : null}
-								<th className="px-4 py-3.5" />
-							</tr>
-						</thead>
-
-						<tbody>
-							{filtered.length === 0 ? (
-								<tr>
-									<td
-										colSpan={10}
-										className="px-4 py-12 text-center text-sm text-stone-400"
-									>
-										No leads match your current filters.
-									</td>
-								</tr>
-							) : (
-								filtered.map((lead) => {
-									const {
-										icon: Icon,
-										label: sourceLabel,
-										iconClass,
-									} = SOURCE_CONFIG[lead.source];
-									return (
-										<tr
+			<div
+				className={cn(
+					"transition-opacity duration-150",
+					isLoading && "pointer-events-none opacity-60",
+				)}
+			>
+				{/* Desktop table */}
+				<div className="hidden overflow-hidden rounded-2xl border border-stone-200 bg-white sm:block">
+					{rows.length === 0 ? (
+						<div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
+							<Users className="h-10 w-10 text-stone-300" />
+							<p className="text-sm font-semibold text-stone-500">
+								No leads yet
+							</p>
+							<p className="max-w-sm text-xs text-stone-400">
+								Leads appear here as people fill in the contact form, request
+								brochures, or submit landing page forms. Try adjusting your
+								filters, or wait for the first enquiry to come in.
+							</p>
+						</div>
+					) : (
+						<div className="overflow-x-auto">
+							<table className="w-full min-w-[800px] text-left text-sm">
+								<thead>
+									<tr className="border-b border-stone-100 bg-stone-50/60">
+										<th className="w-10 px-4 py-3.5">
+											<input
+												type="checkbox"
+												checked={allSelected}
+												onChange={toggleAll}
+												className="h-4 w-4 rounded border-stone-300 text-red-600 focus:ring-red-600"
+											/>
+										</th>
+										{[
+											"Name",
+											"Contact",
+											"Project / Page",
+											"Source",
+											"Status",
+											"Assigned",
+											"Date",
+											"",
+										].map((h) => (
+											<th
+												key={h}
+												className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-stone-500"
+											>
+												{h}
+											</th>
+										))}
+									</tr>
+								</thead>
+								<tbody>
+									{rows.map((lead) => (
+										<LeadTableRow
 											key={lead.id}
-											className={cn(
-												"border-b border-stone-100 transition-colors last:border-none",
-												selectedIds.has(lead.id)
-													? "bg-red-50/40"
-													: "hover:bg-stone-50",
-											)}
-										>
-											<td className="px-4 py-4">
-												<input
-													type="checkbox"
-													checked={selectedIds.has(lead.id)}
-													onChange={() => toggleRow(lead.id)}
-													className="h-4 w-4 rounded border-stone-300 text-red-600 focus:ring-red-600"
-												/>
-											</td>
-											<td className="px-4 py-4 font-semibold text-ink-950">
-												{lead.name}
-											</td>
-											{visibleColumns.has("phone") ? (
-												<td className="px-4 py-4 font-mono text-xs text-stone-600">
-													{lead.phone}
-												</td>
-											) : null}
-											{visibleColumns.has("projectPage") ? (
-												<td className="px-4 py-4 text-stone-600">
-													{lead.projectPage}
-												</td>
-											) : null}
-											{visibleColumns.has("budget") ? (
-												<td className="px-4 py-4 text-stone-600">
-													{lead.budget}
-												</td>
-											) : null}
-											{visibleColumns.has("source") ? (
-												<td className="px-4 py-4">
-													<span className="flex items-center gap-1.5">
-														<Icon className={cn("h-3.5 w-3.5", iconClass)} />
-														<span className="text-stone-600">
-															{sourceLabel}
-														</span>
-													</span>
-												</td>
-											) : null}
-											<td className="px-4 py-4">
-												<AdminBadge variant={STATUS_BADGE[lead.status]} />
-											</td>
-											{visibleColumns.has("assignedTo") ? (
-												<td className="px-4 py-4 text-stone-600">
-													{lead.assignedTo ?? (
-														<span className="text-stone-400">Unassigned</span>
-													)}
-												</td>
-											) : null}
-											{visibleColumns.has("date") ? (
-												<td className="px-4 py-4">
-													<p className="text-stone-600">{lead.date}</p>
-													<p className="mt-0.5 text-xs text-stone-400">
-														{lead.time}
-													</p>
-												</td>
-											) : null}
-											<td className="pr-4 py-4 text-right">
-												<Link
-													href={`/admin/leads/${lead.id}`}
-													prefetch={false}
-													className="text-sm font-medium text-red-600 hover:text-red-700"
-												>
-													View
-												</Link>
-											</td>
-										</tr>
-									);
-								})
-							)}
-						</tbody>
-					</table>
+											lead={lead}
+											selected={selectedIds.has(lead.id)}
+											onToggle={() => toggleRow(lead.id)}
+										/>
+									))}
+								</tbody>
+							</table>
+						</div>
+					)}
+				</div>
+
+				{/* Mobile cards */}
+				<div className="space-y-3 sm:hidden">
+					{rows.length === 0 ? (
+						<div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-stone-200 bg-white px-6 py-12 text-center">
+							<Users className="h-8 w-8 text-stone-300" />
+							<p className="text-sm text-stone-400">
+								No leads match your current filters.
+							</p>
+						</div>
+					) : (
+						rows.map((lead) => (
+							<LeadMobileCard
+								key={lead.id}
+								lead={lead}
+								selected={selectedIds.has(lead.id)}
+								onToggle={() => toggleRow(lead.id)}
+							/>
+						))
+					)}
 				</div>
 			</div>
+
+			{/* Pagination */}
+			{totalPages > 1 || totalCount > 0 ? (
+				<div className="flex items-center justify-between border-t border-stone-100 pt-3">
+					<p className="text-xs text-stone-500">
+						{totalCount.toLocaleString()} total lead
+						{totalCount !== 1 ? "s" : ""}
+					</p>
+					{totalPages > 1 ? (
+						<div className="flex items-center gap-2">
+							<button
+								type="button"
+								onClick={() => onPageChange(page - 1)}
+								disabled={page <= 1 || isLoading}
+								className="flex items-center gap-1 rounded-lg border border-stone-200 px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+							>
+								<ChevronLeft className="h-3.5 w-3.5" /> Prev
+							</button>
+							<span className="text-xs font-medium text-stone-600">
+								{page} / {totalPages}
+							</span>
+							<button
+								type="button"
+								onClick={() => onPageChange(page + 1)}
+								disabled={page >= totalPages || isLoading}
+								className="flex items-center gap-1 rounded-lg border border-stone-200 px-3 py-1.5 text-xs font-medium text-stone-600 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-40"
+							>
+								Next <ChevronRight className="h-3.5 w-3.5" />
+							</button>
+						</div>
+					) : null}
+				</div>
+			) : null}
+		</div>
+	);
+}
+
+// ─── Table row ─────────────────────────────────────────────────────────────
+
+function LeadTableRow({
+	lead,
+	selected,
+	onToggle,
+}: {
+	lead: LeadListRow;
+	selected: boolean;
+	onToggle: () => void;
+}) {
+	const cfg = SOURCE_CONFIG[lead.source as LeadSource];
+	const Icon = cfg?.icon ?? Globe2;
+
+	return (
+		<tr
+			className={cn(
+				"border-b border-stone-100 transition-colors last:border-none",
+				selected ? "bg-red-50/40" : "hover:bg-stone-50",
+			)}
+		>
+			<td className="px-4 py-4">
+				<input
+					type="checkbox"
+					checked={selected}
+					onChange={onToggle}
+					className="h-4 w-4 rounded border-stone-300 text-red-600 focus:ring-red-600"
+				/>
+			</td>
+			<td className="px-4 py-4 font-semibold text-ink-950">{lead.name}</td>
+			<td className="px-4 py-4">
+				<p className="font-mono text-xs text-stone-600">{lead.phone}</p>
+			</td>
+			<td className="px-4 py-4 text-stone-600">{lead.projectPage}</td>
+			<td className="px-4 py-4">
+				<span
+					className={cn(
+						"flex items-center gap-1.5 text-xs font-medium",
+						cfg?.colorClass ?? "text-stone-500",
+					)}
+				>
+					<Icon className="h-3.5 w-3.5 shrink-0" />
+					{cfg?.label ?? lead.source}
+				</span>
+			</td>
+			<td className="px-4 py-4">
+				<span
+					className={cn(
+						"inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold",
+						STATUS_STYLE[lead.status],
+					)}
+				>
+					{STATUS_LABEL[lead.status]}
+				</span>
+			</td>
+			<td className="px-4 py-4 text-stone-600">
+				{lead.assignedTo ?? (
+					<span className="text-stone-400">Unassigned</span>
+				)}
+			</td>
+			<td className="px-4 py-4">
+				<p className="text-xs text-stone-600">{lead.date}</p>
+				<p className="text-[11px] text-stone-400">{lead.time}</p>
+			</td>
+			<td className="py-4 pr-4 text-right">
+				<Link
+					href={`/admin/leads/${lead.id}`}
+					className="text-sm font-medium text-red-600 hover:text-red-700"
+				>
+					View
+				</Link>
+			</td>
+		</tr>
+	);
+}
+
+// ─── Mobile card ───────────────────────────────────────────────────────────
+
+function LeadMobileCard({
+	lead,
+	selected,
+	onToggle,
+}: {
+	lead: LeadListRow;
+	selected: boolean;
+	onToggle: () => void;
+}) {
+	const cfg = SOURCE_CONFIG[lead.source as LeadSource];
+	const Icon = cfg?.icon ?? Globe2;
+
+	return (
+		<div
+			className={cn(
+				"rounded-2xl border bg-white p-4",
+				selected ? "border-red-300 bg-red-50/40" : "border-stone-200",
+			)}
+		>
+			<div className="flex items-start justify-between gap-3">
+				<div className="flex items-start gap-3">
+					<input
+						type="checkbox"
+						checked={selected}
+						onChange={onToggle}
+						className="mt-1 h-4 w-4 shrink-0 rounded border-stone-300 text-red-600"
+					/>
+					<div>
+						<p className="font-semibold text-ink-950">{lead.name}</p>
+						<p className="mt-0.5 font-mono text-xs text-stone-500">
+							{lead.phone}
+						</p>
+					</div>
+				</div>
+				<span
+					className={cn(
+						"shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold",
+						STATUS_STYLE[lead.status],
+					)}
+				>
+					{STATUS_LABEL[lead.status]}
+				</span>
+			</div>
+
+			<div className="mt-3 space-y-1 text-xs text-stone-600">
+				<p>{lead.projectPage}</p>
+				<p
+					className={cn(
+						"flex items-center gap-1.5",
+						cfg?.colorClass ?? "text-stone-500",
+					)}
+				>
+					<Icon className="h-3.5 w-3.5" />
+					{cfg?.label ?? lead.source}
+				</p>
+				<p className="text-stone-400">
+					{lead.date} · {lead.time}
+				</p>
+			</div>
+
+			<Link
+				href={`/admin/leads/${lead.id}`}
+				className="mt-3 flex w-full items-center justify-center rounded-lg border border-stone-200 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+			>
+				View Lead
+			</Link>
 		</div>
 	);
 }

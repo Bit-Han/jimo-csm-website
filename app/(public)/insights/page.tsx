@@ -6,13 +6,15 @@ import { InsightsExplorer } from "@/components/public/insight/InsightsExplorer";
 import { getPublishedInsights } from "@/lib/db/queries/insights";
 import { getInsightCategories } from "@/lib/db/queries/insight-categories";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
 	title: "Insights",
 	description:
 		"Market insight, investment education, and project updates from Jimo Property Development Limited.",
 };
 
-export const revalidate = 60;
+// export const revalidate = 60;
 
 export default async function InsightsPage() {
 	const [insights, categories] = await Promise.all([

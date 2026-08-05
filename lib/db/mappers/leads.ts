@@ -1,168 +1,134 @@
-// import type {
-// 	LeadActivityEvent,
-// 	LeadDetail,
-// 	LeadListRow,
-// 	LeadSource,
-// 	LeadStatus,
-// } from "@/lib/types/admin/lead";
+import type {
+	LeadDetail,
+	LeadListRow,
+	LeadSource,
+	LeadStatus,
+} from "@/lib/types/admin/lead";
 
-// // ─── Raw row shape from the joined select query ───────────────────────────
-// export interface LeadQueryRow {
-// 	id: string;
-// 	fullName: string;
-// 	phoneNumber: string | null;
-// 	email: string | null;
-// 	projectSlug: string | null;
-// 	projectName: string | null;
-// 	budgetRange: string | null;
-// 	source: string;
-// 	status: string;
-// 	assigneeFullName: string | null;
-// 	assigneeId: string | null;
-// 	createdAt: Date;
-// 	enquiryType: string | null;
-// 	message: string | null;
-// 	notes: string | null;
-// 	utmSource: string | null;
-// 	utmMedium: string | null;
-// 	utmCampaign: string | null;
-// }
+export const SOURCE_LABELS: Record<string, string> = {
+	website: "Contact Form",
+	brochure: "Brochure Request",
+	landing_page: "Landing Page",
+	whatsapp: "WhatsApp",
+	instagram: "Instagram",
+	google: "Google",
+	referral: "Referral",
+};
 
-// function formatDate(date: Date): string {
-// 	return date.toLocaleDateString("en-GB", {
-// 		day: "numeric",
-// 		month: "short",
-// 	});
-// }
+// Shape that the queries return — flat because we use explicit LEFT JOINs,
+// not Drizzle relational queries, to avoid depending on what's in relations.ts.
+export interface MappableLeadRow {
+	id: string;
+	fullName: string;
+	email: string | null;
+	phoneNumber: string | null;
+	projectSlug: string | null;
+	landingPageSlug: string | null;
+	budgetRange: string | null;
+	source: string;
+	status: string;
+	enquiryType: string | null;
+	message: string | null;
+	notes: string | null;
+	utmSource: string | null;
+	utmMedium: string | null;
+	utmCampaign: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+	// From LEFT JOINs — null when the related row was deleted or never existed
+	projectName: string | null;
+	assignedToFullName: string | null;
+	landingPageTitle: string | null;
+}
 
-// function formatTime(date: Date): string {
-// 	return date.toLocaleTimeString("en-GB", {
-// 		hour: "2-digit",
-// 		minute: "2-digit",
-// 	});
-// }
+function buildProjectPage(row: MappableLeadRow): string {
+	if (row.source === "landing_page") {
+		// Prefer the joined title; fall back to the denormalized slug
+		const name = row.landingPageTitle ?? row.landingPageSlug ?? "Landing Page";
+		return `${name} · Landing Page`;
+	}
+	if (row.projectName) {
+		return `${row.projectName} · ${SOURCE_LABELS[row.source] ?? row.source}`;
+	}
+	if (row.projectSlug) {
+		// Project was deleted after the lead was created — slug still intact
+		return `${row.projectSlug} · ${SOURCE_LABELS[row.source] ?? row.source}`;
+	}
+	return "General Enquiry";
+}
 
-// function formatFullDateTime(date: Date): string {
-// 	return date.toLocaleString("en-GB", {
-// 		day: "numeric",
-// 		month: "short",
-// 		year: "numeric",
-// 		hour: "2-digit",
-// 		minute: "2-digit",
-// 	});
-// }
+function getInitials(name: string): string {
+	const parts = name.trim().split(/\s+/).filter(Boolean);
+	if (parts.length === 0) return "?";
+	if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+	return `${parts[0]![0]}${parts[parts.length - 1]![0]}`.toUpperCase();
+}
 
-// function getInitials(fullName: string): string {
-// 	return fullName
-// 		.split(" ")
-// 		.map((part) => part[0] ?? "")
-// 		.join("")
-// 		.slice(0, 2)
-// 		.toUpperCase();
-// }
+function formatDate(date: Date): { date: string; time: string; full: string } {
+	const d = date.toLocaleDateString("en-GB", {
+		day: "numeric",
+		month: "short",
+		year: "numeric",
+	});
+	const t = date.toLocaleTimeString("en-GB", {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+	return { date: d, time: t, full: `${d}, ${t}` };
+}
 
-// function buildProjectPage(
-// 	projectName: string | null,
-// 	projectSlug: string | null,
-// ): string {
-// 	if (projectName) return projectName;
-// 	if (projectSlug) {
-// 		return projectSlug
-// 			.split("-")
-// 			.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-// 			.join(" ");
-// 	}
-// 	return "General Enquiry";
-// }
+export function mapLeadRowToListRow(row: MappableLeadRow): LeadListRow {
+	const { date, time } = formatDate(row.createdAt);
+	return {
+		id: row.id,
+		name: row.fullName,
+		phone: row.phoneNumber ?? "—",
+		projectPage: buildProjectPage(row),
+		projectSlug: row.projectSlug ?? "",
+		budget: row.budgetRange ?? "Not specified",
+		source: row.source as LeadSource,
+		status: row.status as LeadStatus,
+		assignedTo: row.assignedToFullName ?? null,
+		date,
+		time,
+	};
+}
 
-// function buildActivityTimeline(
-// 	status: string,
-// 	source: string,
-// 	assigneeFullName: string | null,
-// 	createdAt: Date,
-// ): LeadActivityEvent[] {
-// 	const timeStr = formatFullDateTime(createdAt);
-// 	const events: LeadActivityEvent[] = [];
+export function mapLeadRowToDetail(row: MappableLeadRow): LeadDetail {
+	const summary = mapLeadRowToListRow(row);
+	const { full: enquiredAt } = formatDate(row.createdAt);
+	const sourceLabel = SOURCE_LABELS[row.source] ?? row.source;
 
-// 	events.push({
-// 		id: "evt-submit",
-// 		label: source === "brochure" ? "Brochure downloaded" : "Form submitted",
-// 		timestamp: timeStr,
-// 	});
-
-// 	events.push({
-// 		id: "evt-response",
-// 		label: "Auto-response sent",
-// 		timestamp: timeStr,
-// 	});
-
-// 	if (assigneeFullName) {
-// 		events.push({
-// 			id: "evt-assigned",
-// 			label: `Assigned to ${assigneeFullName}`,
-// 			timestamp: timeStr,
-// 		});
-// 	}
-
-// 	const currentLabels: Record<string, string> = {
-// 		new: "Awaiting contact",
-// 		contacted: "Lead contacted",
-// 		qualified: "Lead qualified",
-// 		inspection: "Inspection scheduled",
-// 		negotiation: "Negotiation in progress",
-// 		won: "Deal closed",
-// 		lost: "Lead marked as lost",
-// 	};
-
-// 	events.push({
-// 		id: "evt-current",
-// 		label: currentLabels[status] ?? "Status updated",
-// 		timestamp: status === "new" && !assigneeFullName ? "Now" : timeStr,
-// 		isCurrent: true,
-// 	});
-
-// 	return events;
-// }
-
-// // ─── Mappers ──────────────────────────────────────────────────────────────
-
-// export function mapLeadRowToListRow(row: LeadQueryRow): LeadListRow {
-// 	return {
-// 		id: row.id,
-// 		name: row.fullName,
-// 		phone: row.phoneNumber ?? "—",
-// 		projectPage: buildProjectPage(row.projectName, row.projectSlug),
-// 		projectSlug: row.projectSlug ?? "",
-// 		budget: row.budgetRange ?? "—",
-// 		source: row.source as LeadSource,
-// 		status: row.status as LeadStatus,
-// 		assignedTo: row.assigneeFullName,
-// 		assignedToId: row.assigneeId,
-// 		date: formatDate(row.createdAt),
-// 		time: formatTime(row.createdAt),
-// 	};
-// }
-
-// export function mapLeadRowToDetail(row: LeadQueryRow): LeadDetail {
-// 	const listRow = mapLeadRowToListRow(row);
-
-// 	return {
-// 		...listRow,
-// 		initials: getInitials(row.fullName),
-// 		email: row.email ?? "—",
-// 		enquiredAt: formatFullDateTime(row.createdAt),
-// 		enquiryType: row.enquiryType ?? "—",
-// 		message: row.message ?? "",
-// 		notes: row.notes,
-// 		sourcePage: row.projectSlug ? `/projects/${row.projectSlug}` : "/contact",
-// 		utmSource: row.utmSource ?? "",
-// 		utmMedium: row.utmMedium ?? "",
-// 		utmCampaign: row.utmCampaign ?? "",
-// 		activityTimeline: buildActivityTimeline(
-// 			row.status,
-// 			row.source,
-// 			row.assigneeFullName,
-// 			row.createdAt,
-// 		),
-// 	};
-// }
+	return {
+		...summary,
+		initials: getInitials(row.fullName),
+		email: row.email ?? "—",
+		location: "Not tracked yet",
+		enquiredAt,
+		unitInterest: "Not tracked yet",
+		buyingPurpose: row.enquiryType ?? "Not specified",
+		preferredPlan: "Not tracked yet",
+		message: row.message ?? "",
+		notes: row.notes,
+		landingPageSlug: row.landingPageSlug,
+		sourcePage: sourceLabel,
+		utmSource: row.utmSource ?? "",
+		utmMedium: row.utmMedium ?? "",
+		utmCampaign: row.utmCampaign ?? "",
+		device: "Not tracked yet",
+		referrer: "Not tracked yet",
+		activityTimeline: [
+			{
+				id: `${row.id}-received`,
+				label: `Enquiry received via ${sourceLabel}`,
+				timestamp: enquiredAt,
+			},
+			{
+				id: `${row.id}-status`,
+				label: `Current status: ${row.status}`,
+				timestamp: formatDate(row.updatedAt).full,
+				isCurrent: true,
+			},
+		],
+	};
+}

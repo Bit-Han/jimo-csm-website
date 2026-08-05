@@ -1,10 +1,11 @@
-//@lib/types/admin/lead.ts
+// "X" removed — not in the Postgres leadSourceEnum.
+// Add it with a migration (ALTER TYPE lead_source ADD VALUE 'x')
+// if you need Twitter/X tracking later.
 export type LeadSource =
 	| "website"
 	| "landing_page"
 	| "whatsapp"
 	| "instagram"
-	| "X"
 	| "google"
 	| "referral"
 	| "brochure";
@@ -22,6 +23,8 @@ export interface LeadListRow {
 	id: string;
 	name: string;
 	phone: string;
+	// Computed: "Project Name · Source", "Landing Page Name · Landing Page",
+	// or "General Enquiry". Built in the mapper from joined data.
 	projectPage: string;
 	projectSlug: string;
 	budget: string;
@@ -48,6 +51,8 @@ export interface LeadDetail extends LeadListRow {
 	buyingPurpose: string;
 	preferredPlan: string;
 	message: string;
+	notes: string | null; // append-only log, displayed in SalesNotesPanel
+	landingPageSlug: string | null;
 	sourcePage: string;
 	utmSource: string;
 	utmMedium: string;
@@ -68,18 +73,30 @@ export interface LeadSummaryStats {
 	totalLeads: number;
 }
 
-export interface LeadFilterState {
-	project: string;
-	budget: string;
-	status: string;
-	search: string;
-	sort: "newest" | "oldest";
+export interface LeadFilters {
+	page?: number;
+	status?: string;
+	source?: string;
+	projectSlug?: string;
+	landingPageSlug?: string;
+	search?: string;
+	sort?: "newest" | "oldest";
 }
 
-export type LeadColumnKey =
-	| "phone"
-	| "projectPage"
-	| "budget"
-	| "source"
-	| "assignedTo"
-	| "date";
+export interface PaginatedLeadsResult {
+	rows: LeadListRow[];
+	page: number;
+	pageSize: number;
+	totalCount: number;
+	totalPages: number;
+}
+
+export interface LeadFilterOptions {
+	projects: { slug: string; name: string }[];
+	landingPages: { slug: string; name: string }[];
+}
+
+export interface AssignableAdmin {
+	id: string;
+	fullName: string;
+}
