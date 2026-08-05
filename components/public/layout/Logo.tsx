@@ -10,13 +10,20 @@ export interface LogoProps {
 
 export function Logo({ className, surface = "on-light" }: LogoProps) {
 	return (
-		<Link href="/" className={cn("flex items-center gap-3", className)}>
+		<Link
+			href="/"
+			className={cn("inline-flex items-center shrink-0", className)}
+		>
 			<Image
-								src={siteLogo}
-								alt="Jimo Property Development Logo"
-								width={100}
-								height={100}
-							/>
+				src={siteLogo}
+				alt="Jimo Property Development Logo"
+				width={100}
+				height={60}
+				quality={100}
+				priority
+				unoptimized
+				className="object-contain"
+			/>
 		</Link>
 	);
 }

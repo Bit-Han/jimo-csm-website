@@ -1,3 +1,4 @@
+//@/lib/utils/with-query-time.ts
 export class QueryTimeoutError extends Error {
 	constructor(
 		message = "The database took too long to respond. Please try again.",
@@ -16,7 +17,7 @@ export class QueryTimeoutError extends Error {
  */
 export async function withQueryTimeout<T>(
 	promise: Promise<T>,
-	ms = 10000,
+	ms = 15000,
 ): Promise<T> {
 	let timer: ReturnType<typeof setTimeout>;
 	const timeout = new Promise<never>((_, reject) => {

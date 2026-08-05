@@ -115,14 +115,14 @@ export function InviteUserModal({ onClose }: { onClose: () => void }) {
 							<p className="text-xs font-semibold text-blue-700">
 								Integration Stage Note
 							</p>
-							<p className="mt-0.5 text-xs text-blue-600">
+							{/* <p className="mt-0.5 text-xs text-blue-600">
 								The invite email and token-based signup flow will be fully wired
 								in the auth integration stage. The{" "}
 								<code className="rounded bg-blue-100 px-1">
 									admin_invitations
 								</code>{" "}
 								table is already in the schema ready to receive this data.
-							</p>
+							</p> */}
 						</div>
 
 						{status === "error" && message ? (

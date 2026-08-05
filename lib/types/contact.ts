@@ -26,3 +26,9 @@ export interface ContactFormState {
 	message: string;
 	fieldErrors: Partial<Record<ContactFormField, string>>;
 }
+
+
+export interface ProjectOfInterestOption {
+	value: string;
+	label: string;
+}
