@@ -29,7 +29,7 @@ export function PermissionMatrixTable({
 				</h3>
 			</div>
 			<div className="overflow-x-auto">
-				<table className="w-full min-w-[640px] text-sm">
+				<table className="w-full min-w-160 text-sm">
 					<thead>
 						<tr className="border-b border-stone-100 bg-stone-50/60">
 							<th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-stone-500">

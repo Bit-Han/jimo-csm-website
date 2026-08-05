@@ -1,3 +1,4 @@
+//@/lib/types/amenity.ts
 export type ProjectAmenityIcon =
 	| "camera"
 	| "shield-check"
