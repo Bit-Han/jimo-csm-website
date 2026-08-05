@@ -99,11 +99,12 @@ export function ProjectRowMenu({
 								}}
 								className="z-50 overflow-hidden rounded-xl border border-stone-200 bg-white py-1 shadow-lg"
 							>
-								<Link
-									href={`/admin/projects/${project.slug}/edit`}
-									onClick={() => setOpen(false)}
-									className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-ink-950 hover:bg-stone-50"
-								>
+							<Link
+								href={`/admin/projects/${project.slug}/edit`}
+								prefetch={false}
+								onClick={() => setOpen(false)}
+								className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-ink-950 hover:bg-stone-50"
+							>
 									<Pencil className="h-3.5 w-3.5" />
 									Edit
 								</Link>

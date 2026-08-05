@@ -145,10 +145,14 @@ function mergeSection<T extends object>(
 }
 
 export async function getHomePageContent(): Promise<HomePageData> {
+	console.info("[admin:getHomePageContent] Loading home page content");
 	try {
 		const row = await db.query.homeContent.findFirst({
 			where: eq(homeContent.id, 1),
 		});
+		console.info(
+			`[admin:getHomePageContent] ${row ? "Loaded saved home content" : "Using fallback home content"}`,
+		);
 		const saved = row?.data as Partial<HomePageData> | undefined;
 		if (!saved) return fallbackHomeData;
 
@@ -178,12 +182,16 @@ export async function saveHomePageContent(data: HomePageData): Promise<void> {
 // ─── Company content ──────────────────────────────────────────────────────
 
 export async function getCompanyContent(): Promise<CompanyContentRow | null> {
+	console.info("[admin:getCompanyContent] Loading company content");
 	try {
-		return (
+		const row =
 			(await db.query.companyContent.findFirst({
 				where: eq(companyContent.id, 1),
-			})) ?? null
+			})) ?? null;
+		console.info(
+			`[admin:getCompanyContent] ${row ? "Loaded company content" : "No company content row found"}`,
 		);
+		return row;
 	} catch {
 		return null;
 	}

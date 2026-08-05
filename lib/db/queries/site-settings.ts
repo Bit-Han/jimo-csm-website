@@ -31,9 +31,13 @@ export const DEFAULT_SITE_SETTINGS = {
 /** Raw row for the admin Settings page — null if never saved before. */
 export const getAdminSiteSettings = cache(
 	async (): Promise<SiteSettingsRow | null> => {
+		console.info("[admin:getAdminSiteSettings] Loading admin site settings");
 		const row = await db.query.siteSettings.findFirst({
 			where: eq(siteSettings.id, 1),
 		});
+		console.info(
+			`[admin:getAdminSiteSettings] ${row ? "Loaded site settings row" : "No site settings row found"}`,
+		);
 		return row ?? null;
 	},
 );
