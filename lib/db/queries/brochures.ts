@@ -149,6 +149,7 @@ import type { AdminBrochureListRow } from "@/lib/types/admin/brochure";
 export async function getAdminBrochureListRows(): Promise<
 	AdminBrochureListRow[]
 > {
+	console.info("[admin:getAdminBrochureListRows] Loading admin brochure list");
 	const rows = await db
 		.select({
 			id: brochures.id,
@@ -166,6 +167,7 @@ export async function getAdminBrochureListRows(): Promise<
 		.leftJoin(leads, eq(leads.projectId, projects.id))
 		.groupBy(brochures.id, projects.name, projects.slug)
 		.orderBy(desc(brochures.uploadedAt));
+	console.info(`[admin:getAdminBrochureListRows] Loaded ${rows.length} brochures`);
 
 	return rows.map(mapBrochureRowToListRow);
 }
@@ -200,6 +202,7 @@ export async function getBrochureByProjectSlug(
 export async function getProjectBrochureRow(
 	projectSlug: string,
 ): Promise<AdminBrochureListRow | null> {
+	console.info(`[admin:getProjectBrochureRow] Loading brochure row for project slug: ${projectSlug}`);
 	const rows = await db
 		.select({
 			id: brochures.id,
@@ -217,6 +220,9 @@ export async function getProjectBrochureRow(
 		.limit(1);
 
 	const row = rows[0];
+	console.info(
+		`[admin:getProjectBrochureRow] ${row ? "Loaded brochure row for" : "No brochure row found for"} project slug: ${projectSlug}`,
+	);
 	if (!row) return null;
 
 	return {

@@ -40,10 +40,11 @@ export function HubSpotSyncPanel({ lead }: { lead: LeadDetail }) {
           <h2 className="text-sm font-bold text-ink-950">CRM Integration</h2>
           <p className="text-xs text-stone-400">
             HubSpot not connected. Connect it in{" "}
-            <Link
-              href="/admin/settings"
-              className="font-medium text-red-600 hover:underline"
-            >
+				<Link
+					href="/admin/settings"
+					prefetch={false}
+					className="font-medium text-red-600 hover:underline"
+				>
               Settings → CRM Integration
             </Link>{" "}
             to enable two-way sync.

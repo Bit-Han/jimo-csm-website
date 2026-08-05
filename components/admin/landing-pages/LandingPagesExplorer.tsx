@@ -317,10 +317,11 @@ export function LandingPagesExplorer({
 							</div>
 
 							<div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3">
-								<Link
-									href={`/admin/landing-pages/${page.slug}/edit`}
-									className="text-sm font-medium text-red-600 hover:text-red-700"
-								>
+							<Link
+								href={`/admin/landing-pages/${page.slug}/edit`}
+								prefetch={false}
+								className="text-sm font-medium text-red-600 hover:text-red-700"
+							>
 									Edit
 								</Link>
 								<RowMenu
@@ -395,10 +396,11 @@ export function LandingPagesExplorer({
 										</td>
 										<td className="px-6 py-4">
 											<div className="flex items-center justify-end gap-3">
-												<Link
-													href={`/admin/landing-pages/${page.slug}/edit`}
-													className="text-sm font-medium text-red-600 hover:text-red-700"
-												>
+									<Link
+										href={`/admin/landing-pages/${page.slug}/edit`}
+										prefetch={false}
+										className="text-sm font-medium text-red-600 hover:text-red-700"
+									>
 													Edit
 												</Link>
 												<RowMenu

@@ -57,6 +57,7 @@ export function ProjectSummaryCards({
 					<Link
 						key={title}
 						href={href}
+						prefetch={false}
 						className="flex items-start gap-4 rounded-2xl border border-stone-200 bg-white p-5 transition-shadow hover:shadow-sm"
 					>
 						<span

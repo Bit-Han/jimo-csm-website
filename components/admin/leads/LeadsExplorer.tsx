@@ -475,6 +475,7 @@ export function LeadsExplorer({ leads }: LeadsExplorerProps) {
 											<td className="pr-4 py-4 text-right">
 												<Link
 													href={`/admin/leads/${lead.id}`}
+													prefetch={false}
 													className="text-sm font-medium text-red-600 hover:text-red-700"
 												>
 													View

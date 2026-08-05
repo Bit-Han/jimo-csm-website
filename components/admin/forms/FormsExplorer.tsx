@@ -142,16 +142,18 @@ export function FormsExplorer({ forms }: { forms: AdminFormListRow[] }) {
 										<td className="px-6 py-4 text-stone-600">{form.crmTag}</td>
 										<td className="px-6 py-4">
 											<div className="flex items-center gap-3">
-												<Link
-													href={`/admin/forms/${form.id}/edit`}
-													className="text-sm font-medium text-stone-600 hover:text-ink-950"
-												>
+											<Link
+												href={`/admin/forms/${form.id}/edit`}
+												prefetch={false}
+												className="text-sm font-medium text-stone-600 hover:text-ink-950"
+											>
 													Edit
 												</Link>
-												<Link
-													href={`/admin/forms/${form.id}/edit`}
-													className="text-sm font-medium text-red-600 hover:text-red-700"
-												>
+											<Link
+												href={`/admin/forms/${form.id}/edit`}
+												prefetch={false}
+												className="text-sm font-medium text-red-600 hover:text-red-700"
+											>
 													Builder
 												</Link>
 											</div>

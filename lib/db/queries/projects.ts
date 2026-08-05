@@ -92,6 +92,7 @@ export async function getProjectDetailBySlug(
 // ─── Admin queries ────────────────────────────────────────────────────────
 
 export async function getAdminProjectListRows(): Promise<AdminProjectListRow[]> {
+	console.info("[admin:getAdminProjectListRows] Loading admin project list");
   const rows = await db
     .select({
       id: projects.id,
@@ -107,6 +108,7 @@ export async function getAdminProjectListRows(): Promise<AdminProjectListRow[]> 
     .leftJoin(leads, eq(leads.projectId, projects.id))
     .groupBy(projects.id)
     .orderBy(desc(projects.updatedAt));
+	console.info(`[admin:getAdminProjectListRows] Loaded ${rows.length} projects`);
 
   return rows.map((row) => {
     const adminStatus = (() => {
@@ -144,6 +146,7 @@ export async function getAdminProjectListRows(): Promise<AdminProjectListRow[]> 
 // ones actually visible to the public with a real gap. ─────────────────
 
 export async function getAdminProjectSummaryStats(): Promise<AdminProjectSummaryStats> {
+	console.info("[admin:getAdminProjectSummaryStats] Loading admin project summary stats");
 	const publishedProjects = await db.query.projects.findMany({
 		where: eq(projects.publishStatus, "published"),
 		columns: { id: true, slug: true },
@@ -178,6 +181,9 @@ export async function getAdminProjectSummaryStats(): Promise<AdminProjectSummary
 
 	const withBrochure = new Set(activeBrochureRows.map((r) => r.projectId));
 	const withSeo = new Set(seoConfigRows.map((r) => r.pageSlug));
+	console.info(
+		`[admin:getAdminProjectSummaryStats] Loaded stats for ${publishedIds.length} published and ${draftCountRows[0]?.c ?? 0} draft projects`,
+	);
 
 	return {
 		missingBrochure: publishedIds.filter((id) => !withBrochure.has(id)).length,
@@ -192,5 +198,10 @@ export async function getAdminProjectSummaryStats(): Promise<AdminProjectSummary
 // ── getAdminProjectEditorState at the bottom stays exactly as it was ──
 
 export async function getAdminProjectEditorState(slug: string) {
-  return fetchProjectWithRelations(slug);
+	console.info(`[admin:getAdminProjectEditorState] Loading project editor state for slug: ${slug}`);
+	const project = await fetchProjectWithRelations(slug);
+	console.info(
+		`[admin:getAdminProjectEditorState] ${project ? "Loaded" : "No project found for"} slug: ${slug}`,
+	);
+	return project;
 }

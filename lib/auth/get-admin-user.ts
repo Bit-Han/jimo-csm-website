@@ -65,17 +65,24 @@ export interface AuthenticatedAdminUser extends AdminUserRow {
 
 export const getAdminUser = cache(
 	async (): Promise<AuthenticatedAdminUser | null> => {
+		console.info("[admin:getAdminUser] Checking authenticated admin user");
 		const supabase = await createClient();
 
 		const {
 			data: { user: authUser },
 		} = await supabase.auth.getUser();
+		console.info(
+			`[admin:getAdminUser] ${authUser ? "Supabase user resolved" : "No Supabase user found"}`,
+		);
 
 		if (!authUser) return null;
 
 		const adminUser = await db.query.adminUsers.findFirst({ 
 			where: eq(adminUsers.id, authUser.id) 
 		});
+		console.info(
+			`[admin:getAdminUser] ${adminUser ? `Loaded admin user ${adminUser.id}` : `No admin row found for auth user ${authUser.id}`}`,
+		);
 
 		if (!adminUser) return null;
 
@@ -89,6 +96,7 @@ export const getAdminUser = cache(
 			adminUser.role in roleModuleAccess
 				? adminUser.role
 				: ("sales-crm" as const);
+		console.info(`[admin:getAdminUser] Authenticated admin user ready: ${adminUser.id}`);
 
 		return { ...adminUser, role: validRole } as AuthenticatedAdminUser;
 	},

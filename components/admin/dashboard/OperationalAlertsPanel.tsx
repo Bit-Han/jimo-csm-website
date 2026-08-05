@@ -79,6 +79,7 @@ export function OperationalAlertsPanel({
 				<div className="border-t border-stone-100 p-4">
 					<Link
 						href={primaryAction.actionHref}
+						prefetch={false}
 						className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink-950 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ink-900"
 					>
 						{primaryAction.actionLabel}

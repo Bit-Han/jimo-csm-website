@@ -138,10 +138,11 @@ export function SeoIssuesTable({ issues }: { issues: AdminSeoIssueRow[] }) {
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        <Link
-                          href={issue.actionHref}
-                          className="text-sm font-medium text-red-600 hover:text-red-700"
-                        >
+							<Link
+								href={issue.actionHref}
+								prefetch={false}
+								className="text-sm font-medium text-red-600 hover:text-red-700"
+							>
                           {issue.actionLabel}
                         </Link>
                         <button

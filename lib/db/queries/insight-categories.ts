@@ -12,10 +12,12 @@ const FALLBACK_CATEGORIES: InsightCategoryOption[] = [
 ];
 
 export async function getInsightCategories(): Promise<InsightCategoryOption[]> {
+	console.info("[admin:getInsightCategories] Loading insight categories");
 	try {
 		const rows = await db.query.insightCategories.findMany({
 			orderBy: [asc(insightCategories.position), asc(insightCategories.label)],
 		});
+		console.info(`[admin:getInsightCategories] Loaded ${rows.length} insight categories`);
 		if (rows.length === 0) return FALLBACK_CATEGORIES;
 		return rows.map((r) => ({ value: r.value, label: r.label }));
 	} catch {
