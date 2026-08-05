@@ -19,19 +19,22 @@ import type {
 } from "@/lib/types/admin/seo-centre";
 
 const DB_TIMEOUT_MS = 8000;
+const SEO_GLOBAL_SETTINGS_TIMEOUT_MS = 15000;
 
 // Weight per severity for the health score — simple, stated formula:
 // 100 minus the weighted sum of every currently-open issue, floored at 0.
 const SEVERITY_WEIGHT = { error: 5, warning: 2, info: 1 } as const;
 
 export async function getSeoGlobalSettings(): Promise<SeoGlobalSettingsData> {
+	console.info("[admin:getSeoGlobalSettings] Loading SEO global settings");
 	const row = await withTimeout(
 		db.query.seoGlobalSettings.findFirst({
 			where: eq(seoGlobalSettings.id, 1),
 		}),
-		DB_TIMEOUT_MS,
+		SEO_GLOBAL_SETTINGS_TIMEOUT_MS,
 		"getSeoGlobalSettings",
 	);
+	console.info("[admin:getSeoGlobalSettings] Loaded SEO global settings");
 
 	return {
 		siteTitle: row?.siteTitle ?? "Jimo Property Development",
@@ -42,6 +45,7 @@ export async function getSeoGlobalSettings(): Promise<SeoGlobalSettingsData> {
 }
 
 export async function getAdminSeoIssues(): Promise<AdminSeoIssueRow[]> {
+	console.info("[admin:getAdminSeoIssues] Loading admin SEO issues");
 	const rows = await withTimeout(
 		db.query.seoIssues.findMany({
 			where: eq(seoIssues.status, "open"),
@@ -50,6 +54,7 @@ export async function getAdminSeoIssues(): Promise<AdminSeoIssueRow[]> {
 		DB_TIMEOUT_MS,
 		"getAdminSeoIssues",
 	);
+	console.info(`[admin:getAdminSeoIssues] Loaded ${rows.length} open SEO issues`);
 
 	return rows.map((row) => ({
 		id: row.id,
@@ -86,6 +91,7 @@ function actionHrefFor(pageType: string | null, pageUrl: string): string {
 /** Computed live from the currently-stored open issues — updates the
  * instant Run SEO Audit finishes, since that's what repopulates seo_issues. */
 export async function getSeoScore(): Promise<number> {
+	console.info("[admin:getSeoScore] Loading SEO score");
 	const rows = await withTimeout(
 		db
 			.select({ severity: seoIssues.severity })
@@ -94,6 +100,7 @@ export async function getSeoScore(): Promise<number> {
 		DB_TIMEOUT_MS,
 		"getSeoScore",
 	);
+	console.info(`[admin:getSeoScore] Loaded ${rows.length} SEO issue severities`);
 
 	const penalty = rows.reduce(
 		(sum, r) =>
@@ -105,6 +112,7 @@ export async function getSeoScore(): Promise<number> {
 }
 
 export async function getSeoHealthStats(): Promise<SeoHealthStat[]> {
+	console.info("[admin:getSeoHealthStats] Loading SEO health stats");
 	const [issueRows, indexedCount, noIndexCount, schemaCount] =
 		await Promise.all([
 			withTimeout(
@@ -142,6 +150,9 @@ export async function getSeoHealthStats(): Promise<SeoHealthStat[]> {
 				"getSeoHealthStats:schema",
 			),
 		]);
+	console.info(
+		`[admin:getSeoHealthStats] Loaded ${issueRows.length} issue rows and aggregate SEO counts`,
+	);
 
 	const countByType = (type: string) =>
 		issueRows.filter((r) => r.issueType === type).length;
@@ -191,6 +202,7 @@ export async function getSeoHealthStats(): Promise<SeoHealthStat[]> {
 }
 
 export async function getSitemapStats(): Promise<SitemapStats> {
+	console.info("[admin:getSitemapStats] Loading sitemap stats");
 	const [
 		publishedProjects,
 		publishedInsights,
@@ -230,6 +242,7 @@ export async function getSitemapStats(): Promise<SitemapStats> {
 			"getSitemapStats:noindex",
 		),
 	]);
+	console.info("[admin:getSitemapStats] Loaded sitemap aggregate counts");
 
 	// +1 accounts for the homepage itself, which isn't a row in any of
 	// these tables. "errors" is honestly reported as 0 — with slug columns
@@ -252,6 +265,7 @@ export async function getSitemapStats(): Promise<SitemapStats> {
 }
 
 export async function getSeoChecklist(): Promise<SeoChecklistItem[]> {
+	console.info("[admin:getSeoChecklist] Loading SEO checklist");
 	const [stats, settingsRow] = await Promise.all([
 		getSeoHealthStats(),
 		withTimeout(
@@ -262,6 +276,9 @@ export async function getSeoChecklist(): Promise<SeoChecklistItem[]> {
 			"getSeoChecklist:settings",
 		),
 	]);
+	console.info(
+		`[admin:getSeoChecklist] Loaded SEO checklist inputs with ${stats.length} stats and ${settingsRow ? "a" : "no"} settings row`,
+	);
 
 	const missingMeta = stats.find((s) => s.id === "missing-meta")?.value ?? 0;
 	const missingAlt = stats.find((s) => s.id === "missing-alt")?.value ?? 0;

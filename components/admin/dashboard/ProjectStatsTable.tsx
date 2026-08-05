@@ -123,10 +123,11 @@ export function ProjectStatsTable({ projects }: ProjectStatsTableProps) {
       <div className="rounded-2xl border border-stone-200 bg-white p-8 text-center">
         <p className="text-sm text-stone-400">
           No projects yet.{" "}
-          <Link
-            href="/admin/projects/new"
-            className="font-medium text-red-600 hover:text-red-700"
-          >
+			<Link
+				href="/admin/projects/new"
+				prefetch={false}
+				className="font-medium text-red-600 hover:text-red-700"
+			>
             Add your first project →
           </Link>
         </p>
@@ -203,10 +204,11 @@ export function ProjectStatsTable({ projects }: ProjectStatsTableProps) {
                   <AdminBadge variant={STATUS_BADGE[project.status]} />
                 </td>
                 <td className="pr-6 py-4 text-right">
-                  <Link
-                    href={`/admin/projects/${project.id}/edit`}
-                    className="text-xs font-medium text-red-600 hover:text-red-700"
-                  >
+					<Link
+						href={`/admin/projects/${project.id}/edit`}
+						prefetch={false}
+						className="text-xs font-medium text-red-600 hover:text-red-700"
+					>
                     Edit
                   </Link>
                 </td>

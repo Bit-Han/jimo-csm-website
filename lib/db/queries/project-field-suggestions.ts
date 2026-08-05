@@ -27,6 +27,7 @@ function distinctInOrder(values: string[]): string[] {
  * has drifted over time (e.g. "Yaba" vs "Yaba, Lagos").
  */
 export async function getProjectFieldSuggestions(): Promise<ProjectFieldSuggestions> {
+	console.info("[admin:getProjectFieldSuggestions] Loading project field suggestions");
 	const rows = await db
 		.select({
 			location: projects.location,
@@ -36,6 +37,7 @@ export async function getProjectFieldSuggestions(): Promise<ProjectFieldSuggesti
 		})
 		.from(projects)
 		.orderBy(projects.updatedAt);
+	console.info(`[admin:getProjectFieldSuggestions] Loaded ${rows.length} project rows for suggestions`);
 
 	return {
 		locations: distinctInOrder(rows.map((r) => r.location)).reverse(),

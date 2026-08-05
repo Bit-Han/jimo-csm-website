@@ -90,10 +90,11 @@ export function RecentEnquiriesPanel({ enquiries }: RecentEnquiriesPanelProps) {
           </p>
         </div>
         <div className="border-t border-stone-100 p-4">
-          <Link
-            href="/admin/leads"
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-ink-900"
-          >
+			<Link
+				href="/admin/leads"
+				prefetch={false}
+				className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-ink-900"
+			>
             View all leads
             <ArrowRight className="h-4 w-4" />
           </Link>
@@ -133,10 +134,11 @@ export function RecentEnquiriesPanel({ enquiries }: RecentEnquiriesPanelProps) {
       </ul>
 
       <div className="border-t border-stone-100 p-4">
-        <Link
-          href="/admin/leads"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink-950 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ink-900"
-        >
+		<Link
+			href="/admin/leads"
+			prefetch={false}
+			className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink-950 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ink-900"
+		>
           View all enquiries
           <ArrowRight className="h-4 w-4" />
         </Link>

@@ -95,10 +95,11 @@ export function CompanyPagesExplorer({
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <Link
-                        href={`/admin/company-pages/${page.slug}/edit`}
-                        className="text-sm font-medium text-red-600 hover:text-red-700"
-                      >
+						<Link
+							href={`/admin/company-pages/${page.slug}/edit`}
+							prefetch={false}
+							className="text-sm font-medium text-red-600 hover:text-red-700"
+						>
                         Edit
                       </Link>
                       {isPublished && page.hasPreview ? (

@@ -13,6 +13,14 @@ import type { InviteUserFormState } from "@/lib/types/admin/users-roles";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function getInviteRedirectBaseUrl(): string {
+	return (
+		process.env.NEXT_PUBLIC_SITE_URL ??
+		process.env.NEXT_PUBLIC_APP_URL ??
+		"https://jimodevelopment.com"
+	);
+}
+
 export interface UserActionResult {
 	success: boolean;
 	message: string;
@@ -76,10 +84,11 @@ export async function inviteUser(
 	}
 
 	const adminSupabase = createAdminClient();
+	const redirectBaseUrl = getInviteRedirectBaseUrl();
 
 	const { error: inviteError } =
 		await adminSupabase.auth.admin.inviteUserByEmail(email, {
-			redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback?next=/admin/auth/accept-invite`,
+			redirectTo: `${redirectBaseUrl}/api/callback?next=/admin/auth/accept-invite`,
 			data: { adminRole: data.role },
 		});
 
