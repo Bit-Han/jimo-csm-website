@@ -13,7 +13,6 @@ import {
 	projectFacts,
 	projectMedia,
 	projects,
-	projectTags,
 	projectUnits,
 } from "@/lib/db/schema";
 import { getAdminUser } from "@/lib/auth/get-admin-user";
