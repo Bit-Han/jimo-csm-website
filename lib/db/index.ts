@@ -17,12 +17,8 @@ function createClient() {
 	const isSupabaseConnection = databaseHost.endsWith(".supabase.com");
 
 	return postgres(databaseUrl, {
-		// Serverless prod (Vercel): each function instance gets its own process,
-		// so keep this at 1 — Supabase's pooler multiplies this by however many
-		// instances are running concurrently.
-		// Dev (`next dev`) uses a larger local pool so independent requests do
-		// not wait behind one another.
-		max: isProduction ? 3 : 10,
+		// Serverless prod (Vercel): each function
+		max: isProduction ? 5 : 15,
 
 		prepare: false, // required for Supabase pgbouncer in transaction mode
 		// Supabase pooler endpoints require TLS. The local DATABASE_URL omits
@@ -33,13 +29,10 @@ function createClient() {
 		// Without these, a connection that silently dies (pooler-side idle
 		// drop, network blip) sits in the pool looking "available" forever,
 		// and every query after it hangs until you restart the server.
-		idle_timeout: 20, // seconds — close connections idle this long
+		idle_timeout: 15, // seconds — close connections idle this long
 		// max_lifetime: 60 * 30, // seconds — recycle connections every 30 min regardless
 		connect_timeout: 10, // seconds — fail fast if Postgres is unreachable, don't hang
-		max_lifetime: 60 * 30,
-		connection: {
-			statement_timeout: 8000, // ms
-		},
+		max_lifetime: 60 * 15,
 		onnotice: () => {}, // suppress noisy Postgres NOTICE logs in dev
 	});
 }
