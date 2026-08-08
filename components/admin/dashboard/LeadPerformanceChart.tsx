@@ -1,3 +1,4 @@
+// components/admin/dashboard/LeadPerformanceChart.tsx
 "use client";
 
 import { useState } from "react";

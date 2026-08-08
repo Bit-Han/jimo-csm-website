@@ -14,6 +14,7 @@ const FOLDER_ID_MAP: Record<string, string> = {
   Documents: "documents",
   Videos: "videos",
   "Site Images": "site-images",
+  "Landing Pages": "landing-pages",
 };
 
 const TAG_COLOR_MAP: Record<string, string> = {
@@ -26,6 +27,7 @@ const TAG_COLOR_MAP: Record<string, string> = {
   Documents: "bg-stone-100 text-stone-600",
   Videos: "bg-red-50 text-red-600",
   "Site Images": "bg-teal-50 text-teal-700",
+  "Landing Pages": "bg-indigo-50 text-indigo-700",
 };
 
 export async function getAdminMediaAssets(

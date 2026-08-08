@@ -1,6 +1,4 @@
 
-
-
 //@lib/db/queries/projects.ts — add these imports at the top
 import { and, asc, count, desc, eq, inArray, isNotNull } from "drizzle-orm";
 import { db } from "@/lib/db";
