@@ -1,4 +1,4 @@
-
+//@/components/admin/auth/AcceptInviteForm.tsx
 "use client";
 
 import { useActionState, useState } from "react";
