@@ -243,12 +243,7 @@ export function ProjectStatsTable({
 									</td>
 									<td className="py-4 pr-6 text-right">
 										<Link
-											href={`/admin/projects/${
-												// We don't have slug in ProjectStatRow — use id to
-												// navigate to the list filtered by this project.
-												// TODO: add slug to ProjectStatRow when convenient.
-												""
-											}?highlight=${project.id}`}
+											href="/admin/projects/"
 											className="text-xs font-medium text-red-600 hover:text-red-700"
 											aria-label={`View ${project.name}`}
 										>
