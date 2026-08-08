@@ -83,33 +83,16 @@ export async function inviteUser(
 		};
 	}
 
-	// const adminSupabase = createAdminClient();
-	// const redirectBaseUrl = getInviteRedirectBaseUrl();
-
-	// const { error: inviteError } =
-	// 	await adminSupabase.auth.admin.inviteUserByEmail(email, {
-	// 		redirectTo: `${redirectBaseUrl}/api/callback?next=/admin/auth/accept-invite`,
-	// 		data: { adminRole: data.role },
-	// 	});
-
-	// Inside @/lib/actions/admin/users.ts -> inviteUser function
-
 	const adminSupabase = createAdminClient();
 	const redirectBaseUrl = getInviteRedirectBaseUrl();
 
 	const { error: inviteError } =
 		await adminSupabase.auth.admin.inviteUserByEmail(email, {
-			// Clean up the URL layout here
 			redirectTo: `${redirectBaseUrl}/api/callback`,
 			data: { adminRole: data.role },
 		});
 
 	if (inviteError) {
-		// Supabase returns a specific message when the email already belongs
-		// to an existing Auth user (e.g. left over from a previous invite
-		// that never completed signup, or created some other way). Surface
-		// that plainly instead of a generic failure — it points the admin
-		// at the actual fix (check Supabase Auth → Users directly).
 		const alreadyRegistered = /already registered|already exists/i.test(
 			inviteError.message,
 		);
