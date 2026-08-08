@@ -38,106 +38,62 @@
 
 
 // @/app/api/callback/route.ts
-// import { type NextRequest, NextResponse } from "next/server";
-// import { createClient } from "@/lib/supabase/server";
-
-// export async function GET(request: NextRequest) {
-// 	const { searchParams, origin } = new URL(request.url);
-	
-// 	// 1. Check for invitation email token hashes
-// 	const token_hash = searchParams.get("token_hash");
-// 	const type = searchParams.get("type"); // Usually 'invite' or 'recovery'
-	
-// 	// 2. Check for standard PKCE login codes
-// 	const code = searchParams.get("code");
-	
-// 	const next = searchParams.get("next") ?? "/admin/auth/accept-invite";
-// 	const error = searchParams.get("error");
-// 	const errorDescription = searchParams.get("error_description");
-
-// 	if (error) {
-// 		const loginUrl = new URL("/admin/auth/login", origin);
-// 		loginUrl.searchParams.set("error", error);
-// 		loginUrl.searchParams.set("description", errorDescription ?? "");
-// 		return NextResponse.redirect(loginUrl);
-// 	}
-
-// 	const supabase = await createClient();
-
-// 	// Handle Invitation Link Verification
-// 	if (token_hash && type === "invite") {
-// 		const { error: verifyError } = await supabase.auth.verifyOtp({
-// 			token_hash,
-// 			type: "invite",
-// 		});
-
-// 		if (verifyError) {
-// 			const loginUrl = new URL("/admin/auth/login", origin);
-// 			loginUrl.searchParams.set("error", "invite_expired");
-// 			return NextResponse.redirect(loginUrl);
-// 		}
-
-// 		// Success! User is authenticated. Forward to the onboarding form.
-// 		return NextResponse.redirect(new URL(next, origin));
-// 	}
-
-// 	// Handle Standard PKCE Login Exchange
-// 	if (code) {
-// 		const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-
-// 		if (exchangeError) {
-// 			const loginUrl = new URL("/admin/auth/login", origin);
-// 			loginUrl.searchParams.set("error", "auth_failed");
-// 			return NextResponse.redirect(loginUrl);
-// 		}
-
-// 		return NextResponse.redirect(new URL(next, origin));
-// 	}
-
-// 	// Fallback if neither parameter exists
-// 	return NextResponse.redirect(new URL("/admin/auth/login", origin));
-// }
-
-
-// @/app/api/callback/route.ts
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
 	const { searchParams, origin } = new URL(request.url);
 	
-	// Supabase PKCE flow passes a server-readable 'code' parameter
+	// 1. Check for invitation email token hashes
+	const token_hash = searchParams.get("token_hash");
+	const type = searchParams.get("type"); // Usually 'invite' or 'recovery'
+	
+	// 2. Check for standard PKCE login codes
 	const code = searchParams.get("code");
+	
+	const next = searchParams.get("next") ?? "/admin/auth/accept-invite";
 	const error = searchParams.get("error");
 	const errorDescription = searchParams.get("error_description");
 
-	// 1. Handle explicit Supabase delivery errors
 	if (error) {
-		console.error("[Auth Callback Error]:", error, errorDescription);
 		const loginUrl = new URL("/admin/auth/login", origin);
-		loginUrl.searchParams.set("error", "access_denied");
+		loginUrl.searchParams.set("error", error);
+		loginUrl.searchParams.set("description", errorDescription ?? "");
 		return NextResponse.redirect(loginUrl);
-	}
-
-	// 2. Fallback if no server-side auth token is provided
-	if (!code) {
-		console.warn("[Auth Callback]: Missing PKCE authorization code parameter.");
-		return NextResponse.redirect(new URL("/admin/auth/login?error=invite_not_found", origin));
 	}
 
 	const supabase = await createClient();
-	
-	// 3. Exchange the short-lived code for a secure, cookie-based session
-	const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
-	if (exchangeError) {
-		console.error("[Auth Callback Session Exchange Error]:", exchangeError.message);
-		const loginUrl = new URL("/admin/auth/login", origin);
-		loginUrl.searchParams.set("error", "invite_expired");
-		return NextResponse.redirect(loginUrl);
+	// Handle Invitation Link Verification
+	if (token_hash && type === "invite") {
+		const { error: verifyError } = await supabase.auth.verifyOtp({
+			token_hash,
+			type: "invite",
+		});
+
+		if (verifyError) {
+			const loginUrl = new URL("/admin/auth/login", origin);
+			loginUrl.searchParams.set("error", "invite_expired");
+			return NextResponse.redirect(loginUrl);
+		}
+
+		// Success! User is authenticated. Forward to the onboarding form.
+		return NextResponse.redirect(new URL(next, origin));
 	}
 
-	// 4. Code exchange succeeded. The user session cookies are set. 
-	// Forward them to the secure onboarding registration page.
-	return NextResponse.redirect(new URL("/admin/auth/accept-invite", origin));
+	// Handle Standard PKCE Login Exchange
+	if (code) {
+		const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+
+		if (exchangeError) {
+			const loginUrl = new URL("/admin/auth/login", origin);
+			loginUrl.searchParams.set("error", "auth_failed");
+			return NextResponse.redirect(loginUrl);
+		}
+
+		return NextResponse.redirect(new URL(next, origin));
+	}
+
+	// Fallback if neither parameter exists
+	return NextResponse.redirect(new URL("/admin/auth/login", origin));
 }
