@@ -97,11 +97,6 @@ export async function acceptInviteAction(
 	if (existingRow) {
 		redirect("/admin/dashboard");
 	}
-
-	// FIX: fetched and validated here, before anything is mutated — closes
-	// the gap where AcceptInvitePage's own expiry check (at page-load time)
-	// could pass, but the invite then expires in the time between the page
-	// rendering and the person actually clicking submit.
 	const invitation = await db.query.adminInvitations.findFirst({
 		where: eq(adminInvitations.email, authUser.email!.toLowerCase()),
 	});
@@ -117,13 +112,6 @@ export async function acceptInviteAction(
 				"This invite is no longer valid. Please ask your Super Admin to send a new one.",
 		};
 	}
-
-	// FIX: role now comes from admin_invitations.role — set server-side by
-	// inviteUser() and never exposed to the invitee — instead of
-	// user_metadata.adminRole, which the signed-in user can edit themselves
-	// via the client SDK before submitting this form. Trusting the
-	// client-editable value would let someone self-escalate their role on
-	// signup.
 	const role: AdminRole = invitation.role;
 
 	const { error: updateError } = await supabase.auth.updateUser({ password });
@@ -178,12 +166,6 @@ export async function acceptInviteAction(
 				"Something went wrong finishing your account setup. Please try again or contact your Super Admin.",
 		};
 	}
-
-	// FIX: sign out before redirecting to login — without this, the person
-	// is still authenticated from the invite's session, and
-	// AdminLoginPage's own "already signed in → dashboard" check would
-	// silently skip the login form entirely, defeating the point of
-	// sending them there.
 	await supabase.auth.signOut();
 	redirect("/admin/auth/login?created=1");
 }

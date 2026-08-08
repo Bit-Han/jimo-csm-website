@@ -83,12 +83,24 @@ export async function inviteUser(
 		};
 	}
 
+	// const adminSupabase = createAdminClient();
+	// const redirectBaseUrl = getInviteRedirectBaseUrl();
+
+	// const { error: inviteError } =
+	// 	await adminSupabase.auth.admin.inviteUserByEmail(email, {
+	// 		redirectTo: `${redirectBaseUrl}/api/callback?next=/admin/auth/accept-invite`,
+	// 		data: { adminRole: data.role },
+	// 	});
+
+	// Inside @/lib/actions/admin/users.ts -> inviteUser function
+
 	const adminSupabase = createAdminClient();
 	const redirectBaseUrl = getInviteRedirectBaseUrl();
 
 	const { error: inviteError } =
 		await adminSupabase.auth.admin.inviteUserByEmail(email, {
-			redirectTo: `${redirectBaseUrl}/api/callback?next=/admin/auth/accept-invite`,
+			// Clean up the URL layout here
+			redirectTo: `${redirectBaseUrl}/api/callback`,
 			data: { adminRole: data.role },
 		});
 
