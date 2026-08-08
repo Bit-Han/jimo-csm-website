@@ -1,23 +1,3 @@
-// //@app/admin/(dasahboard)/landing-pages/[slug]/edit/page.tsx
-// import { AdminPlaceholderPage } from "@/components/admin/AdminPlaceholderPage";
-
-// interface AdminLandingPageEditProps {
-// 	params: Promise<{ slug: string }>;
-// }
-
-// export default async function AdminLandingPageEditPage({
-// 	params,
-// }: AdminLandingPageEditProps) {
-// 	const { slug } = await params;
-
-// 	return (
-// 		<AdminPlaceholderPage
-// 			title="Landing Page Builder"
-// 			description={`Editing landing page "${slug}".`}
-// 			stageNote="This becomes the drag-and-drop section builder once we get to this stage."
-// 		/>
-// 	);
-// }
 
 
 
@@ -31,6 +11,7 @@ import {
 	getLandingPageEditorState,
 } from "@/lib/db/queries/landing-pages";
 import { timed } from "@/lib/utils/timed";
+import { EMPTY_LANDING_HERO } from "@/lib/types/landing-page";
 import type { LandingPageEditorState } from "@/lib/types/admin/landing-page";
 
 interface Props {
@@ -65,7 +46,7 @@ export default async function AdminEditLandingPagePage({ params }: Props) {
 		crmTag: row.crmTag ?? "",
 		linkedProjectSlug: row.linkedProjectSlug ?? "",
 		linkedProjectName: "",
-		hero: row.hero,
+		hero: { ...EMPTY_LANDING_HERO, ...row.hero },
 		publishStatus: row.publishStatus as "draft" | "published",
 	};
 

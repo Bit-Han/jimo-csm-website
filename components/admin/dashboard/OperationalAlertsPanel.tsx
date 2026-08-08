@@ -1,3 +1,4 @@
+// components/admin/dashboard/OperationalAlertsPanel.tsx
 import Link from "next/link";
 import { AlertTriangle, CheckCircle2, Info } from "lucide-react";
 import { cn } from "@/lib/utils/helpers";

@@ -3,10 +3,9 @@
 
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { formFields, landingPages, leads } from "@/lib/db/schema";
+import { formFields, landingPages, leads, trackingEventLogs } from "@/lib/db/schema";
 import { withTimeout } from "@/lib/utils/timeout";
 import type { UtmParams } from "@/lib/types/landing-page";
-import { trackingEventLogs } from "@/lib/db/schema";
 
 const DB_TIMEOUT_MS = 8000;
 
@@ -23,9 +22,7 @@ export async function submitLandingPageLead(input: {
 }): Promise<LandingPageLeadResult> {
 	try {
 		const fields = await withTimeout(
-			db.query.formFields.findMany({
-				where: eq(formFields.formId, input.formId),
-			}),
+			db.query.formFields.findMany({ where: eq(formFields.formId, input.formId) }),
 			DB_TIMEOUT_MS,
 			"submitLandingPageLead:fields",
 		);
@@ -36,9 +33,6 @@ export async function submitLandingPageLead(input: {
 			}
 		}
 
-		// crmMapping is exactly what field.crmMapping was designed for — it
-		// tells us which leads column a given form field's submitted value
-		// belongs to, without hardcoding field IDs anywhere.
 		const mapped: Record<string, string> = {};
 		for (const f of fields) {
 			const raw = input.values[f.id];
@@ -50,9 +44,7 @@ export async function submitLandingPageLead(input: {
 		}
 
 		const landingPage = await withTimeout(
-			db.query.landingPages.findFirst({
-				where: eq(landingPages.slug, input.landingPageSlug),
-			}),
+			db.query.landingPages.findFirst({ where: eq(landingPages.slug, input.landingPageSlug) }),
 			DB_TIMEOUT_MS,
 			"submitLandingPageLead:page",
 		);
@@ -79,34 +71,31 @@ export async function submitLandingPageLead(input: {
 			"submitLandingPageLead:insert",
 		);
 
+		// FIX: this used to sit after both the try and catch blocks' return
+		// statements — meaning it was unreachable and never actually ran on
+		// any code path. Moved inside the success path, before the return.
+		try {
+			await withTimeout(
+				db.insert(trackingEventLogs).values({
+					eventName: "form_submit",
+					pagePath: `/lp/${input.landingPageSlug}`,
+					landingPageSlug: input.landingPageSlug,
+					metadata: {},
+				}),
+				5000,
+				"submitLandingPageLead:trackEvent",
+			);
+		} catch (err) {
+			console.error("[submitLandingPageLead] tracking log failed (non-blocking):", err);
+		}
+
 		return { success: true, message: "Thank you — we'll be in touch shortly." };
 	} catch (error) {
-		const message =
-			error instanceof Error ? error.message : "Unexpected error.";
+		const message = error instanceof Error ? error.message : "Unexpected error.";
 		console.error("[submitLandingPageLead]", message);
 		return {
 			success: false,
-			message:
-				"We couldn't save your details right now. Please try again or contact us directly.",
+			message: "We couldn't save your details right now. Please try again or contact us directly.",
 		};
-	}
-
-	// lib/actions/landing-page-lead.ts — right after the successful leads insert
-	try {
-		await withTimeout(
-			db.insert(trackingEventLogs).values({
-				eventName: "form_submit",
-				pagePath: `/lp/${input.landingPageSlug}`,
-				landingPageSlug: input.landingPageSlug,
-				metadata: {},
-			}),
-			5000,
-			"submitLandingPageLead:trackEvent",
-		);
-	} catch (err) {
-		console.error(
-			"[submitLandingPageLead] tracking log failed (non-blocking):",
-			err,
-		);
 	}
 }
