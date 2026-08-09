@@ -319,7 +319,7 @@ export async function inviteUser(
 
 	const { error: inviteError } =
 		await adminSupabase.auth.admin.inviteUserByEmail(email, {
-			redirectTo: `${redirectBaseUrl}/api/callback?next=/admin/auth/accept-invite`,
+			redirectTo: `${redirectBaseUrl}/admin/auth/accept-invite`,
 			data: { adminRole: data.role },
 		});
 
