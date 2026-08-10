@@ -148,24 +148,68 @@
 
 
 
+// // app/admin/auth/accept-invite/page.tsx
+// import type { Metadata } from "next";
+// import { redirect } from "next/navigation";
+// import { AcceptInviteFlow } from "@/components/admin/auth/AcceptInviteFlow";
+
+// export const metadata: Metadata = {
+// 	title: "Create Account | Jimo Command Centre",
+// };
+
+// interface AcceptInvitePageProps {
+// 	searchParams: Promise<{ code?: string }>;
+// }
+
+// export default async function AcceptInvitePage({ searchParams }: AcceptInvitePageProps) {
+// 	const { code } = await searchParams;
+
+// 	if (!code) {
+// 		redirect("/admin/auth/login?error=invite_not_found");
+// 	}
+
+// 	return (
+// 		<div className="flex min-h-screen items-center justify-center bg-navy-950 px-4">
+// 			<div className="w-full max-w-sm">
+// 				<div className="mb-8 text-center">
+// 					<div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gold-500">
+// 						<span className="text-2xl font-bold text-navy-950">J</span>
+// 					</div>
+// 					<p className="mt-3 text-xl font-bold text-white">JIMO</p>
+// 					<p className="text-xs text-white/50">Command Centre</p>
+// 				</div>
+
+// 				<div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+// 					<h1 className="text-base font-bold text-white">Complete your account</h1>
+// 					<p className="mt-0.5 text-xs text-white/50">
+// 						Welcome to Jimo Command Centre. Enter your name and set a password
+// 						to get started.
+// 					</p>
+// 					<div className="mt-5">
+// 						<AcceptInviteFlow code={code} />
+// 					</div>
+// 				</div>
+// 			</div>
+// 		</div>
+// 	);
+// }
+
+
 // app/admin/auth/accept-invite/page.tsx
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { AcceptInviteFlow } from "@/components/admin/auth/AcceptInviteFlow";
+import { resolvePendingInvite } from "@/lib/actions/admin/invite-flow";
+import { AcceptInviteForm } from "@/components/admin/auth/AcceptInviteForm";
 
 export const metadata: Metadata = {
 	title: "Create Account | Jimo Command Centre",
 };
 
-interface AcceptInvitePageProps {
-	searchParams: Promise<{ code?: string }>;
-}
+export default async function AcceptInvitePage() {
+	const result = await resolvePendingInvite();
 
-export default async function AcceptInvitePage({ searchParams }: AcceptInvitePageProps) {
-	const { code } = await searchParams;
-
-	if (!code) {
-		redirect("/admin/auth/login?error=invite_not_found");
+	if (!result.success || !result.email || !result.roleLabel) {
+		redirect(result.errorRedirect ?? "/admin/auth/login?error=invite_not_found");
 	}
 
 	return (
@@ -186,7 +230,7 @@ export default async function AcceptInvitePage({ searchParams }: AcceptInvitePag
 						to get started.
 					</p>
 					<div className="mt-5">
-						<AcceptInviteFlow code={code} />
+						<AcceptInviteForm email={result.email} roleLabel={result.roleLabel} />
 					</div>
 				</div>
 			</div>

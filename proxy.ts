@@ -1,3 +1,4 @@
+// @/proxy.ts
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { adminNavItems } from "@/lib/data/admin/nav";
@@ -5,7 +6,11 @@ import { canAccessModule } from "@/lib/data/admin/roles";
 import type { AdminModule, AdminRole } from "@/lib/types/admin/role";
 import { roleModuleAccess } from "@/lib/data/admin/roles";
 
-const PUBLIC_ADMIN_PATHS = ["/admin/auth/login", "/admin/auth/accept-invite"];
+const PUBLIC_ADMIN_PATHS = [
+	"/admin/auth/login",
+	"/admin/auth/accept-invite",
+	"/admin/auth/confirm",
+];
 
 function pathToModule(pathname: string): AdminModule | null {
   const item = adminNavItems.find(
