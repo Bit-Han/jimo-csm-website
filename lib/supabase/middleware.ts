@@ -1,3 +1,4 @@
+//@/lib/supabase/middleware.ts
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { withTimeout } from "@/lib/utils/timeout";
