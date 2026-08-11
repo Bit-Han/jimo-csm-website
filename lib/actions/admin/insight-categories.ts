@@ -1,3 +1,4 @@
+//@/lib/actions/admin/insight-categories
 "use server";
 
 import { db } from "@/lib/db";

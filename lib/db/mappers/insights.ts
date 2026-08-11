@@ -58,10 +58,14 @@ export function mapInsightRowToSummary(row: InsightQueryRow): InsightSummary {
 export function mapInsightRowToDetail(row: InsightQueryRow): InsightDetail {
 	return {
 		...mapInsightRowToSummary(row),
+		
 		// Strict shape check — not just "is it an object." Old block-array
 		// data from before the body→content migration, or a malformed/empty
 		// doc, silently falls back to a valid empty document instead of
 		// crashing Tiptap's schema builder.
 		content: isValidTiptapDoc(row.content) ? row.content : EMPTY_TIPTAP_DOC,
+
+
 	};
 }
+

@@ -85,6 +85,7 @@ export async function saveIntegrationConfig(
 		}
 
 		revalidatePath("/admin/tracking-analytics", "layout");
+		revalidatePath("/", "layout");
 		return { success: true, message: `${label} configuration saved.` };
 	} catch (error) {
 		const message =
@@ -106,6 +107,7 @@ export async function saveAllIntegrations(
 		}
 
 		revalidatePath("/admin/tracking-analytics", "layout");
+		revalidatePath("/", "layout");
 		return { success: true, message: "All integration settings saved." };
 	} catch (error) {
 		const message =

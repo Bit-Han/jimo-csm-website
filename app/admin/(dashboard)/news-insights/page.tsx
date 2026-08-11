@@ -1,5 +1,3 @@
-
-
 // app/admin/(dashboard)/news-insights/page.tsx
 import type { Metadata } from "next";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";

@@ -1,3 +1,4 @@
+//@/component/public/insight/InsightsExplorer
 "use client";
 
 import { useState } from "react";

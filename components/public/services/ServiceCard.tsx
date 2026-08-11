@@ -18,11 +18,11 @@ export default function ServiceCard({ service }: Props) {
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-0">
 				{/* Image */}
 				<div
-					className={`relative min-h-[240px] md:min-h-[320px] p-6 md:p-8 ${
+					className={`relative min-h-60 md:min-h-80 p-6 md:p-8 ${
 						service.reverse ? "order-1 md:order-2" : "order-2 md:order-1"
 					}`}
 				>
-					<div className="relative w-full h-full min-h-[200px] rounded-xl overflow-hidden">
+					<div className="relative w-full h-full min-h-50 rounded-xl overflow-hidden">
 						<Image
 							src={service.imageUrl}
 							alt={service.imageAlt}

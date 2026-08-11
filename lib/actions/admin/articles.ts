@@ -1,5 +1,5 @@
 
-
+//@/lib/actions/admin/articles
 "use server";
 
 import { eq } from "drizzle-orm";
@@ -9,8 +9,9 @@ import { db } from "@/lib/db";
 import { insights, adminUsers } from "@/lib/db/schema";
 import { getAdminUser } from "@/lib/auth/get-admin-user";
 import { deleteCloudinaryAssetSafe } from "@/lib/integrations/cloudinary";
+import { deleteStorageObjectSafe } from "@/lib/integrations/supabase-storage";
 import { extractImageUrls } from "@/lib/utils/tiptap";
-import type { ArticleEditorState } from "@/lib/types/admin/article";
+import type { ArticleEditorState, ArticleEditorPayload } from "@/lib/types/admin/article";
 
 export interface ArticleActionResult {
 	success: boolean;
@@ -35,7 +36,13 @@ function buildSlug(title: string): string {
  * save/delete failure, since the DB is already the source of truth. */
 async function cleanupImages(urls: string[]): Promise<void> {
 	await Promise.all(
-		urls.filter(Boolean).map((url) => deleteCloudinaryAssetSafe(url, "image")),
+		urls
+			.filter(Boolean)
+			.map((url) =>
+				url.includes("supabase.co")
+					? deleteStorageObjectSafe(url)
+					: deleteCloudinaryAssetSafe(url, "image"),
+			),
 	);
 }
 
@@ -64,12 +71,35 @@ async function resolveAuthorSnapshot(
 	};
 }
 
+/** Parses the wire-boundary payload's stringified content back into a
+ * real Tiptap JSONContent doc, producing the ArticleEditorState shape
+ * every downstream function (upsertInsight, validation, etc.) expects. */
+function parsePayload(payload: ArticleEditorPayload): ArticleEditorState {
+	return {
+		...payload,
+		content: JSON.parse(payload.content) as JSONContent,
+	};
+}
+
 async function upsertInsight(
 	state: ArticleEditorState,
-	publishStatus: "draft" | "published",
+	requestedStatus: "draft" | "published",
 	authorSnapshot: AuthorSnapshot,
-): Promise<string> {
+): Promise<{ slug: string; publishStatus: "draft" | "published" }> {
 	const slug = state.slug || buildSlug(state.title);
+
+	const existing = state.slug
+		? await db.query.insights.findFirst({ where: eq(insights.slug, state.slug) })
+		: null;
+
+	// A "Save Draft" click on an already-published article should save the
+	// edit in place — it must never silently pull a live article off the
+	// public site. Only an explicit Publish/Unpublish action changes
+	// live status.
+	const publishStatus: "draft" | "published" =
+		requestedStatus === "draft" && existing?.publishStatus === "published"
+			? "published"
+			: requestedStatus;
 
 	const values = {
 		slug,
@@ -87,7 +117,7 @@ async function upsertInsight(
 			publishStatus === "published"
 				? state.publishedAt
 					? new Date(state.publishedAt)
-					: new Date()
+					: (existing?.publishedAt ?? new Date())
 				: state.publishedAt
 					? new Date(state.publishedAt)
 					: null,
@@ -99,93 +129,89 @@ async function upsertInsight(
 		updatedAt: new Date(),
 	};
 
-	const existing = state.slug
-		? await db.query.insights.findFirst({
-				where: eq(insights.slug, state.slug),
-			})
-		: null;
-
 	if (existing) {
 		await db.update(insights).set(values).where(eq(insights.id, existing.id));
 	} else {
 		await db.insert(insights).values(values);
 	}
 
-	return slug;
+	return { slug, publishStatus };
 }
 
 export async function saveDraftArticle(
-	state: ArticleEditorState,
+	payload: ArticleEditorPayload,
 	pendingImageDeletions: string[] = [],
 ): Promise<ArticleActionResult> {
 	try {
 		const adminUser = await getAdminUser();
 		if (!adminUser) return { success: false, message: "Not authenticated." };
-		if (!state.title.trim())
+		if (!payload.title.trim())
 			return { success: false, message: "Article title is required." };
 
-		// Drafts are allowed to be incomplete — author/category may not be
-		// set yet. resolveAuthorSnapshot degrades to a blank snapshot rather
-		// than erroring, which is correct here.
-		const authorSnapshot = await resolveAuthorSnapshot(state.authorId || null);
-		const slug = await upsertInsight(state, "draft", authorSnapshot);
+		// content arrives as a JSON string over the Server Action boundary —
+		// see ArticleEditorShell — to avoid Next/Turbopack silently dropping
+		// nested "attrs" keys on image nodes and link marks when a plain
+		// object graph crosses this boundary. Parse it back into a real doc
+		// before it touches anything else.
+		const parsedState = parsePayload(payload);
+
+		const authorSnapshot = await resolveAuthorSnapshot(parsedState.authorId || null);
+		const { slug, publishStatus } = await upsertInsight(parsedState, "draft", authorSnapshot);
 		await cleanupImages(pendingImageDeletions);
 
 		revalidatePath("/admin/news-insights", "layout");
+		// The edit may have kept (or landed on) a LIVE article — e.g. adding a
+		// body image via "Save Draft" on something already published. Without
+		// this, the public page keeps serving its stale ISR cache until the
+		// next natural revalidation window, which looks exactly like "the
+		// image never saved" even though the database already has it.
+		if (publishStatus === "published") {
+			revalidatePath("/insights", "layout");
+			revalidatePath(`/insights/${slug}`);
+		}
+
 		return { success: true, message: "Draft saved.", slug };
 	} catch (error) {
-		const message =
-			error instanceof Error ? error.message : "Unexpected error.";
+		const message = error instanceof Error ? error.message : "Unexpected error.";
 		console.error("[saveDraftArticle]", message);
 		return { success: false, message };
 	}
 }
 
 export async function publishArticle(
-	state: ArticleEditorState,
+	payload: ArticleEditorPayload,
 	pendingImageDeletions: string[] = [],
 ): Promise<ArticleActionResult> {
 	try {
 		const adminUser = await getAdminUser();
 		if (!adminUser) return { success: false, message: "Not authenticated." };
-		if (!state.title.trim())
-			return {
-				success: false,
-				message: "Article title is required before publishing.",
-			};
-		if (!state.excerpt.trim())
-			return {
-				success: false,
-				message: "An excerpt is required before publishing.",
-			};
-		if (!state.category.trim() || !state.categoryLabel.trim())
-			return {
-				success: false,
-				message: "Select a category before publishing.",
-			};
-		if (!state.authorId.trim())
-			return {
-				success: false,
-				message: "Select an author before publishing.",
-			};
+		if (!payload.title.trim())
+			return { success: false, message: "Article title is required before publishing." };
+		if (!payload.excerpt.trim())
+			return { success: false, message: "An excerpt is required before publishing." };
+		if (!payload.category.trim() || !payload.categoryLabel.trim())
+			return { success: false, message: "Select a category before publishing." };
+		if (!payload.authorId.trim())
+			return { success: false, message: "Select an author before publishing." };
+
+		const parsedState = parsePayload(payload);
 
 		// Re-resolve against the database rather than trusting
-		// state.authorName/state.authorAvatarUrl — those are just whatever
+		// parsedState.authorName/authorAvatarUrl — those are just whatever
 		// the client last had in memory, and could be stale if the admin was
 		// renamed, had their photo changed, or was deleted since the editor
 		// loaded. This also catches the case the earlier checks can't: an
 		// authorId that was valid when selected but no longer resolves to a
 		// real admin by the time Publish is clicked.
-		const authorSnapshot = await resolveAuthorSnapshot(state.authorId);
+		const authorSnapshot = await resolveAuthorSnapshot(parsedState.authorId);
 		if (!authorSnapshot.authorId) {
 			return {
 				success: false,
-				message:
-					"The selected author could not be found. Please choose an author again.",
+				message: "The selected author could not be found. Please choose an author again.",
 			};
 		}
 
-		const slug = await upsertInsight(state, "published", authorSnapshot);
+		const { slug } = await upsertInsight(parsedState, "published", authorSnapshot);
 		await cleanupImages(pendingImageDeletions);
 
 		revalidatePath("/insights", "layout");
@@ -193,8 +219,7 @@ export async function publishArticle(
 		revalidatePath("/admin/news-insights", "layout");
 		return { success: true, message: "Article published.", slug };
 	} catch (error) {
-		const message =
-			error instanceof Error ? error.message : "Unexpected error.";
+		const message = error instanceof Error ? error.message : "Unexpected error.";
 		console.error("[publishArticle]", message);
 		return { success: false, message };
 	}
