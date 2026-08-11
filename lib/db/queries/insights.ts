@@ -1,5 +1,3 @@
-
-
 // lib/db/queries/insights.ts
 import { asc, desc, eq } from "drizzle-orm";
 import { cache } from "react";
@@ -33,7 +31,9 @@ export async function getPublishedInsightBySlug(slug: string): Promise<InsightDe
     "getPublishedInsightBySlug",
   );
   if (!row) return null;
+
   return mapInsightRowToDetail(row);
+  
 }
 
 export async function getPublishedInsightSlugs(): Promise<string[]> {

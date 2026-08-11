@@ -1,6 +1,3 @@
-
-
-
 // components/admin/insights/article-editor/RichTextEditor.tsx
 "use client";
 
@@ -183,13 +180,30 @@ export function RichTextEditor({
 		}
 	}
 
+	// function confirmInsertImage() {
+	// 	if (!editor || !imagePopover) return;
+	// 	editor
+	// 		.chain()
+	// 		.focus()
+	// 		.setImage({ src: imagePopover.src, alt: imagePopover.alt })
+	// 		.run();
+	// 	setImagePopover(null);
+	// }
+
 	function confirmInsertImage() {
 		if (!editor || !imagePopover) return;
+
 		editor
 			.chain()
 			.focus()
-			.setImage({ src: imagePopover.src, alt: imagePopover.alt })
+			.insertContent({
+				type: "image",
+				attrs: { src: imagePopover.src, alt: imagePopover.alt.trim() },
+			})
 			.run();
+
+		const updatedJson = editor.getJSON();
+		console.log("[A] after insert:", JSON.stringify(updatedJson));
 		setImagePopover(null);
 	}
 

@@ -1,3 +1,4 @@
+//@/component/public/insight/InsightCard
 import Image from "next/image";
 import Link from "next/link";
 import { AuthorAvatar } from "@/components/admin/ui/AuthorAvatar";

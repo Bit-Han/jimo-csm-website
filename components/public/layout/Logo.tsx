@@ -19,7 +19,7 @@ export function Logo({ className, surface = "on-light" }: LogoProps) {
 				alt="Jimo Property Development Logo"
 				width={100}
 				height={60}
-				quality={100}
+				quality={75}
 				priority
 				unoptimized
 				className="object-contain"

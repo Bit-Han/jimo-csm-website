@@ -1,3 +1,4 @@
+//@/lib/db/queries/insight-categories
 import { asc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { insightCategories } from "@/lib/db/schema";

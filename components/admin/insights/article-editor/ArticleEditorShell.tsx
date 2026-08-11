@@ -1,7 +1,3 @@
-
-
-
-
 // components/admin/insights/article-editor/ArticleEditorShell.tsx
 "use client";
 
@@ -15,7 +11,12 @@ import { ConfirmDialog } from "@/components/admin/ui/ConfirmDialog";
 import { deleteArticle, publishArticle, saveDraftArticle } from "@/lib/actions/admin/articles";
 import { extractImageUrls } from "@/lib/utils/tiptap";
 import { cn } from "@/lib/utils/helpers";
-import type { ArticleEditorState, ArticleSaveStatus, AuthorOption } from "@/lib/types/admin/article";
+import type {
+  ArticleEditorState,
+  ArticleEditorPayload,
+  ArticleSaveStatus,
+  AuthorOption,
+} from "@/lib/types/admin/article";
 import type { InsightCategoryOption } from "@/lib/types/insight";
 
 export interface ArticleEditorShellProps {
@@ -39,6 +40,14 @@ function joinWithAnd(items: string[]): string {
   if (items.length === 1) return items[0]!;
   if (items.length === 2) return `${items[0]} and ${items[1]}`;
   return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+}
+
+// content crosses the Server Action boundary as a string, not the live
+// JSONContent object — see the comment on ArticleEditorPayload — to avoid
+// Next/Turbopack silently dropping nested "attrs" keys on image nodes and
+// link marks when a plain object graph is passed through.
+function toPayload(state: ArticleEditorState): ArticleEditorPayload {
+  return { ...state, content: JSON.stringify(state.content) };
 }
 
 export function ArticleEditorShell({ initialState, mode, categories, authors }: ArticleEditorShellProps) {
@@ -79,9 +88,10 @@ export function ArticleEditorShell({ initialState, mode, categories, authors }: 
     setSaveStatus("saving");
     setSaveMessage("");
     const deletions = collectAllDeletions();
+    const payload = toPayload(state);
     startTransition(async () => {
       try {
-        const result = await saveDraftArticle(state, deletions);
+        const result = await saveDraftArticle(payload, deletions);
         if (result.success) {
           setSaveStatus("saved");
           setSaveMessage(result.message ?? "Draft saved.");
@@ -109,9 +119,10 @@ export function ArticleEditorShell({ initialState, mode, categories, authors }: 
     setSaveStatus("saving");
     setSaveMessage("");
     const deletions = collectAllDeletions();
+    const payload = toPayload(state);
     startTransition(async () => {
       try {
-        const result = await publishArticle(state, deletions);
+        const result = await publishArticle(payload, deletions);
         if (result.success) {
           setSaveStatus("saved");
           setSaveMessage(result.message ?? "Published.");

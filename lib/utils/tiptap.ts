@@ -1,6 +1,6 @@
 // // lib/utils/tiptap.ts
 import type { JSONContent } from "@tiptap/react";
-import { generateHTML } from "@tiptap/html";
+// import { generateHTML } from "@tiptap/html";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
@@ -20,7 +20,7 @@ const extensions = [
 		link: false,
 		underline: false,
 	}),
-	Underline,
+	Underline.configure({}),
 	Link.configure({
 		openOnClick: false,
 		HTMLAttributes: { rel: "noopener noreferrer", target: "_blank" },
@@ -41,12 +41,12 @@ export function isValidTiptapDoc(value: unknown): value is JSONContent {
   );
 }
 
-export function renderInsightContentHtml(
-	doc: JSONContent | null | undefined,
-): string {
-	if (!doc?.content || doc.content.length === 0) return "";
-	return generateHTML(doc, extensions);
-}
+// export function renderInsightContentHtml(
+// 	doc: JSONContent | null | undefined,
+// ): string {
+// 	if (!doc?.content || doc.content.length === 0) return "";
+// 	return generateHTML(doc, extensions);
+// }
 
 /** Walks a Tiptap JSON doc and returns every image node's src. */
 export function extractImageUrls(
@@ -110,13 +110,5 @@ export const EMPTY_TIPTAP_DOC: JSONContent = {
   content: [{ type: "paragraph" }],
 };
 
-// lib/utils/tiptap-render.ts — full file, replace as-is
-
-
-// Must mirror RichTextEditor.tsx's extension config exactly. A mismatch
-// here (e.g. StarterKit's bundled link/underline left enabled while the
-// editor disables them) registers two conflicting definitions of the same
-// extension name, and generateHTML can silently produce malformed or
-// collapsed output for anything touched by that conflict.
 
 
