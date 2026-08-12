@@ -14,3 +14,13 @@ export interface InviteCreatedResult {
 	message: string;
 	inviteLink?: string;
 }
+
+export interface ForgotPasswordFormState {
+	status: "idle" | "success" | "error";
+	message: string;
+}
+
+export interface ResetPasswordFormState {
+	status: "idle" | "error";
+	message: string;
+}

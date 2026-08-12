@@ -7,6 +7,7 @@ import { useState } from "react";
 import { loginAction } from "@/lib/actions/admin/auth";
 import { inputCls } from "@/components/admin/ui/EditorField";
 import type { LoginFormState } from "@/lib/types/admin/auth";
+import Link from "next/link";
 
 const initialState: LoginFormState = { status: "idle", message: "" };
 
@@ -99,6 +100,17 @@ export function LoginForm({
 				{isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
 				Sign In
 			</button>
+			<div className="mb-1.5 flex items-center justify-between">
+				<label htmlFor="password" className="text-sm font-medium text-ink-950">
+					Password
+				</label>
+				<Link
+					href="/admin/auth/forgot-password"
+					className="text-xs font-medium text-stone-500 hover:text-ink-950"
+				>
+					Forgot password?
+				</Link>
+			</div>
 		</form>
 	);
 }
