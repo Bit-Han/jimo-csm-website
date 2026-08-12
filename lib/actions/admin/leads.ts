@@ -444,18 +444,24 @@ export async function pushLeadsToBrevo(): Promise<LeadActionResult> {
 		if (!apiKey) {
 			return {
 				success: false,
-				message: "Brevo API key is not configured. Add BREVO_API_KEY to your environment variables.",
+				message:
+					"Brevo API key is not configured. Add BREVO_API_KEY to your environment variables.",
 				errorCode: "brevo_not_configured",
 			};
 		}
 
-		// FIXED: Replaced relational API with Standard Core Select Syntax 
+		// FIXED: Replaced relational API with Standard Core Select Syntax
 		// FIXED: Reduced processing limit from 500 down to 25 to prevent execution timeouts
 		const unsynced = await db
 			.select()
 			.from(leads)
-			.where(and(sql`${leads.brevoContactId} IS NULL`, sql`${leads.email} IS NOT NULL`))
-			.limit(25); 
+			.where(
+				and(
+					sql`${leads.brevoContactId} IS NULL`,
+					sql`${leads.email} IS NOT NULL`,
+				),
+			)
+			.limit(25);
 
 		let synced = 0;
 		let failed = 0;
@@ -523,7 +529,10 @@ export async function pushLeadsToBrevo(): Promise<LeadActionResult> {
 					synced++;
 				} else {
 					const err = await res.json().catch(() => ({ message: "Unknown" }));
-					console.error(`[pushLeadsToBrevo] Lead ${lead.id} failed:`, err.message);
+					console.error(
+						`[pushLeadsToBrevo] Lead ${lead.id} failed:`,
+						err.message,
+					);
 					failed++;
 				}
 			} catch (err) {
@@ -540,12 +549,14 @@ export async function pushLeadsToBrevo(): Promise<LeadActionResult> {
 
 		return {
 			success: true,
-			message: failed > 0
-				? `Synced ${synced} leads to Brevo. ${failed} failed (missing email or API error).`
-				: `Successfully synced ${synced} new leads to Brevo.`,
+			message:
+				failed > 0
+					? `Synced ${synced} leads to Brevo. ${failed} failed (missing email or API error).`
+					: `Successfully synced ${synced} new leads to Brevo.`,
 		};
 	} catch (error) {
-		const message = error instanceof Error ? error.message : "Unexpected error.";
+		const message =
+			error instanceof Error ? error.message : "Unexpected error.";
 		console.error("[pushLeadsToBrevo]", message);
 		return { success: false, message };
 	}
@@ -568,7 +579,8 @@ export async function pullLeadsFromBrevo(): Promise<LeadActionResult> {
 		if (!apiKey) {
 			return {
 				success: false,
-				message: "Brevo API key is not configured. Add BREVO_API_KEY to your environment variables.",
+				message:
+					"Brevo API key is not configured. Add BREVO_API_KEY to your environment variables.",
 				errorCode: "brevo_not_configured",
 			};
 		}
@@ -622,7 +634,10 @@ export async function pullLeadsFromBrevo(): Promise<LeadActionResult> {
 				const attrs = contact.attributes ?? {};
 				const firstName = attrs.FIRSTNAME ?? "";
 				const lastName = attrs.LASTNAME ?? "";
-				const fullName = `${firstName} ${lastName}`.trim() || contact.email.split("@")[0] || contact.email;
+				const fullName =
+					`${firstName} ${lastName}`.trim() ||
+					contact.email.split("@")[0] ||
+					contact.email;
 
 				await db
 					.insert(leads)
@@ -636,7 +651,10 @@ export async function pullLeadsFromBrevo(): Promise<LeadActionResult> {
 						syncedToBrevoAt: new Date(),
 					})
 					.catch((err: Error) =>
-						console.error(`[pullLeadsFromBrevo] Insert failed for ${contact.email}:`, err.message)
+						console.error(
+							`[pullLeadsFromBrevo] Insert failed for ${contact.email}:`,
+							err.message,
+						),
 					);
 				imported++;
 			}
@@ -648,8 +666,43 @@ export async function pullLeadsFromBrevo(): Promise<LeadActionResult> {
 			message: `Pulled from Brevo: ${imported} new lead${imported !== 1 ? "s" : ""} created, ${linked} existing leads linked.`,
 		};
 	} catch (error) {
-		const message = error instanceof Error ? error.message : "Unexpected error.";
+		const message =
+			error instanceof Error ? error.message : "Unexpected error.";
 		console.error("[pullLeadsFromBrevo]", message);
+		return { success: false, message };
+	}
+}
+
+export async function deleteLead(leadId: string): Promise<LeadActionResult> {
+	try {
+		const adminUser = await getAdminUser();
+		if (!adminUser) return { success: false, message: "Not authenticated." };
+
+		// Deleting is irreversible — unlike deactivating an admin or
+		// unpublishing an article, there's no path back for a lead once
+		// it's gone. Restricted to Super Admin only; widen this to
+		// sales-crm too if you want reps pruning their own dead leads.
+		if (adminUser.role !== "super-admin") {
+			return { success: false, message: "Only Super Admins can delete leads." };
+		}
+
+		const existing = await db.query.leads.findFirst({
+			where: eq(leads.id, leadId),
+		});
+		if (!existing) return { success: false, message: "Lead not found." };
+
+		await db.delete(leads).where(eq(leads.id, leadId));
+
+		revalidatePath("/admin/leads", "layout");
+		revalidatePath(`/admin/leads/${leadId}`);
+		return {
+			success: true,
+			message: `Lead for "${existing.fullName}" deleted.`,
+		};
+	} catch (error) {
+		const message =
+			error instanceof Error ? error.message : "Unexpected error.";
+		console.error("[deleteLead]", message);
 		return { success: false, message };
 	}
 }
