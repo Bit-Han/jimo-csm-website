@@ -21,6 +21,7 @@ export function AdminHeaderSearch() {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const portalRef = useRef<HTMLDivElement>(null);
 
 	const [query, setQuery] = useState("");
 	const [results, setResults] = useState<AdminSearchResult[]>([]);
@@ -94,6 +95,38 @@ export function AdminHeaderSearch() {
 	// ⌘K / Ctrl+K focuses the box from anywhere in the admin — makes the
 	// shortcut badge already shown in the UI actually true, instead of
 	// decorative.
+
+useEffect(() => {
+	if (!open) return;
+	function onClickOutside(e: MouseEvent) {
+		const target = e.target as Node;
+		// The results panel is portalled into document.body, so it's NOT a
+		// DOM descendant of containerRef even though it's a React child of
+		// this component. Checking only containerRef treats every click
+		// inside the panel as "outside" and closes it on mousedown — before
+		// the clicked button's own onClick can fire on the following click
+		// event, since by then the element has already been unmounted.
+		if (containerRef.current?.contains(target)) return;
+		if (portalRef.current?.contains(target)) return;
+		setOpen(false);
+	}
+	function reposition() {
+		computeCoords();
+	}
+	document.addEventListener("mousedown", onClickOutside);
+	window.addEventListener("scroll", reposition, true);
+	window.addEventListener("resize", reposition);
+	return () => {
+		document.removeEventListener("mousedown", onClickOutside);
+		window.removeEventListener("scroll", reposition, true);
+		window.removeEventListener("resize", reposition);
+	};
+}, [open]);
+
+
+
+
+
 	useEffect(() => {
 		function onKeyDown(e: KeyboardEvent) {
 			if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -142,6 +175,7 @@ export function AdminHeaderSearch() {
 			{open && coords
 				? createPortal(
 						<div
+							ref={portalRef}
 							style={{
 								position: "absolute",
 								top: coords.top,
