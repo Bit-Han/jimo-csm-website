@@ -123,7 +123,6 @@ useEffect(() => {
 	};
 }, [open]);
 
-
 	useEffect(() => {
 		function onKeyDown(e: KeyboardEvent) {
 			if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
@@ -224,3 +223,4 @@ useEffect(() => {
 		</div>
 	);
 }
+
