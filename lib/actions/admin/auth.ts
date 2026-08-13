@@ -212,8 +212,16 @@ export async function forgotPasswordAction(
 	}
 
 	const supabase = await createClient();
-	await supabase.auth.resetPasswordForEmail(email);
+	const { error } = await supabase.auth.resetPasswordForEmail(email);
 
+	if (error) {
+		console.error("[forgotPasswordAction]", error.message);
+		return {	
+			status: "error",
+			message:
+				"Something went wrong. Please try again or contact your Super Admin.",
+		};
+	}
 	// Always the same response whether or not this email belongs to an
 	// admin — confirming or denying existence here would let anyone probe
 	// which emails have admin accounts. Supabase's own call follows the
