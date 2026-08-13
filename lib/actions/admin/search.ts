@@ -32,7 +32,8 @@ export async function globalAdminSearch(
 
 	// Escapes LIKE wildcards so a search for "50% off" or "under_score"
 	// isn't misread as a pattern.
-	const escaped = query.replace(/[%_]/g, (c) => `\\${c}`);
+	// const escaped = query.replace(/[%_]/g, (c) => `\\${c}`);
+	const escaped = query.replace(/[\\%_]/g, "\\$&");
 	const pattern = `%${escaped}%`;
 
 	const results: AdminSearchResult[] = [];

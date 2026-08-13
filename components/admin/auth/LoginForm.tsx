@@ -55,12 +55,20 @@ export function LoginForm({
 			</div>
 
 			<div>
-				<label
-					htmlFor="password"
-					className="mb-1.5 block text-sm font-medium text-ink-950"
-				>
-					Password
-				</label>
+				<div className="mb-1.5 flex items-center justify-between">
+					<label
+						htmlFor="password"
+						className="text-sm font-medium text-ink-950"
+					>
+						Password
+					</label>
+					<Link
+						href="/admin/auth/forgot-password"
+						className="text-xs font-medium text-stone-500 hover:text-ink-950"
+					>
+						Forgot password?
+					</Link>
+				</div>
 				<div className="relative">
 					<input
 						id="password"
@@ -100,17 +108,6 @@ export function LoginForm({
 				{isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
 				Sign In
 			</button>
-			<div className="mb-1.5 flex items-center justify-between">
-				<label htmlFor="password" className="text-sm font-medium text-ink-950">
-					Password
-				</label>
-				<Link
-					href="/admin/auth/forgot-password"
-					className="text-xs font-medium text-stone-500 hover:text-ink-950"
-				>
-					Forgot password?
-				</Link>
-			</div>
 		</form>
 	);
 }
