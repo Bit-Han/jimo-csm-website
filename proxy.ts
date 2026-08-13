@@ -10,6 +10,8 @@ const PUBLIC_ADMIN_PATHS = [
 	"/admin/auth/login",
 	"/admin/auth/accept-invite",
 	"/admin/auth/confirm",
+	"/admin/auth/forgot-password",
+	"/admin/auth/reset-password",
 ];
 
 function pathToModule(pathname: string): AdminModule | null {

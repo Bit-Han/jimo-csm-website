@@ -11,7 +11,9 @@ import type { AdminRole } from "@/lib/types/admin/role";
 import { isStrongPassword } from "@/lib/utils/password";
 import type {
 	AcceptInviteFormState,
+	ForgotPasswordFormState,
 	LoginFormState,
+	ResetPasswordFormState,
 } from "@/lib/types/admin/auth";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -192,4 +194,90 @@ export async function acceptInviteAction(
 	// sending them there.
 	await supabase.auth.signOut();
 	redirect("/admin/auth/login?created=1");
+}
+
+
+
+// ─── Forgot Password ────────────────────────────────────────────────────────
+export async function forgotPasswordAction(
+	_prevState: ForgotPasswordFormState,
+	formData: FormData,
+): Promise<ForgotPasswordFormState> {
+	const email = String(formData.get("email") ?? "")
+		.trim()
+		.toLowerCase();
+
+	if (!emailPattern.test(email)) {
+		return { status: "error", message: "Enter a valid email address." };
+	}
+
+	const supabase = await createClient();
+	const { error } = await supabase.auth.resetPasswordForEmail(email);
+
+	if (error) {
+		console.error("[forgotPasswordAction]", error.message);
+		return {	
+			status: "error",
+			message:
+				"Something went wrong. Please try again or contact your Super Admin.",
+		};
+	}
+	// Always the same response whether or not this email belongs to an
+	// admin — confirming or denying existence here would let anyone probe
+	// which emails have admin accounts. Supabase's own call follows the
+	// same rule: it never reveals whether the address matched a user.
+	return {
+		status: "success",
+		message:
+			"If that email belongs to an admin account, a reset link is on its way. Check your inbox.",
+	};
+}
+
+// ─── Reset Password (after clicking the emailed recovery link) ─────────────
+export async function resetPasswordAction(
+	_prevState: ResetPasswordFormState,
+	formData: FormData,
+): Promise<ResetPasswordFormState> {
+	const password = String(formData.get("password") ?? "").trim();
+	const confirmPassword = String(formData.get("confirmPassword") ?? "").trim();
+
+	if (password.length > 72) {
+		return { status: "error", message: "Password is too long." };
+	}
+	if (!isStrongPassword(password)) {
+		return {
+			status: "error",
+			message:
+				"Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a special character.",
+		};
+	}
+	if (password !== confirmPassword) {
+		return { status: "error", message: "Passwords do not match." };
+	}
+
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	if (!user) {
+		return {
+			status: "error",
+			message: "Your reset link has expired. Please request a new one.",
+		};
+	}
+
+	const { error } = await supabase.auth.updateUser({ password });
+	if (error) {
+		return {
+			status: "error",
+			message: "Failed to update password. Please try again.",
+		};
+	}
+
+	// Force a clean re-login with the new password — matches the invite
+	// flow's own sign-out-after-set-password pattern, and this also
+	// invalidates any other lingering sessions for this account.
+	await supabase.auth.signOut();
+	redirect("/admin/auth/login?reason=password_reset");
 }

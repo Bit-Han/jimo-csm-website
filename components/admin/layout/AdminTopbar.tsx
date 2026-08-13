@@ -6,15 +6,17 @@ import {
 	ChevronDown,
 	LogOut,
 	Menu,
+	KeyRound,
 	PanelLeftClose,
 	PanelLeftOpen,
-	Search,
 	UserCog,
 } from "lucide-react";
+import Link from "next/link";
 import { logoutAction } from "@/lib/actions/admin/auth";
 import { adminRoleDefinitions } from "@/lib/data/admin/roles";
 import { EditProfileModal } from "@/components/admin/layout/EditProfileModal";
 import type { AuthenticatedAdminUser } from "@/lib/auth/get-admin-user";
+import { AdminHeaderSearch } from "@/components/admin/layout/AdminHeaderSearch";
 
 export interface AdminTopbarProps {
 	currentUser: AuthenticatedAdminUser;
@@ -73,16 +75,7 @@ export function AdminTopbar({
 					<PanelLeftClose className="h-5 w-5" />
 				)}
 			</button>
-
-			<div className="flex flex-1 items-center gap-2 rounded-lg border border-stone-200 bg-cream-50 px-3 py-2 text-sm text-stone-400 sm:max-w-md">
-				<Search className="h-4 w-4 shrink-0" />
-				<span className="hidden truncate sm:inline">
-					Search projects, content, leads...
-				</span>
-				<span className="ml-auto hidden shrink-0 rounded border border-stone-200 bg-white px-1.5 py-0.5 text-xs sm:inline">
-					⌘K
-				</span>
-			</div>
+			<AdminHeaderSearch />
 
 			<div className="ml-auto flex items-center gap-4">
 				<button
@@ -141,6 +134,26 @@ export function AdminTopbar({
 										{roleLabel}
 									</p>
 								</div>
+								{/* <button
+									type="button"
+									onClick={() => {
+										setMenuOpen(false);
+										setProfileOpen(true);
+									}}
+									className="flex w-full items-center gap-2 px-4 py-3 text-sm font-medium text-ink-950 hover:bg-stone-50"
+								>
+									<UserCog className="h-4 w-4" />
+									Edit Profile
+								</button>
+								<button
+									type="button"
+									onClick={handleSignOut}
+									disabled={isPending}
+									className="flex w-full items-center gap-2 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+								>
+									<LogOut className="h-4 w-4" />
+									Sign Out
+								</button> */}
 								<button
 									type="button"
 									onClick={() => {
@@ -152,6 +165,14 @@ export function AdminTopbar({
 									<UserCog className="h-4 w-4" />
 									Edit Profile
 								</button>
+								<Link
+									href="/admin/account/change-password"
+									onClick={() => setMenuOpen(false)}
+									className="flex w-full items-center gap-2 px-4 py-3 text-sm font-medium text-ink-950 hover:bg-stone-50"
+								>
+									<KeyRound className="h-4 w-4" />
+									Change Password
+								</Link>
 								<button
 									type="button"
 									onClick={handleSignOut}
