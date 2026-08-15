@@ -18,6 +18,9 @@ export const DEFAULT_SITE_SETTINGS = {
 	companyName: "Jimo Property Development Limited",
 	legalName: "Jimo Property Development Limited",
 	companyEmail: "info@jimopropertydevelopment.com",
+	tagline: "Property Development",
+	description:
+		"Premium residential, hospitality, and investment-led real estate developments built with structure, insight, and long-term value.",
 	salesEmail: "",
 	phone: "+234 000 000 0000",
 	whatsappNumber: "+234 000 000 0000",
@@ -45,6 +48,8 @@ export const getAdminSiteSettings = cache(
 export interface PublicSiteSettings {
 	name: string;
 	legalName: string;
+	tagline: string;
+	description: string;
 	email: string;
 	salesEmail: string;
 	phone: string;
@@ -74,6 +79,8 @@ export const getPublicSiteSettings = cache(
 		return {
 			name: row?.companyName || DEFAULT_SITE_SETTINGS.companyName,
 			legalName: row?.legalName || DEFAULT_SITE_SETTINGS.legalName,
+			tagline: row?.tagline || DEFAULT_SITE_SETTINGS.tagline,
+			description: row?.description || DEFAULT_SITE_SETTINGS.description,
 			email: row?.companyEmail || DEFAULT_SITE_SETTINGS.companyEmail,
 			salesEmail: row?.salesEmail || DEFAULT_SITE_SETTINGS.salesEmail,
 			phone: row?.phone || DEFAULT_SITE_SETTINGS.phone,

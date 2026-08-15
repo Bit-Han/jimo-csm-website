@@ -5,7 +5,7 @@ import { Logo } from "./Logo";
 import { Container } from "@/components/ui/Container";
 import { companyLinks } from "@/lib/data/site";
 import { getPublicSiteSettings } from "@/lib/db/queries/site-settings";
-import { siteConfig } from "@/lib/data/site";
+// import { siteConfig } from "@/lib/data/site";
 
 export async function Footer() {
 	const year = new Date().getFullYear();
@@ -20,7 +20,7 @@ export async function Footer() {
 					    below. Kept static intentionally rather than guessing a new
 					    DB field to invent. */}
 					<p className="max-w-sm text-sm leading-relaxed text-white/60">
-						{siteConfig.description}
+						{settings.description}
 					</p>
 				</div>
 
