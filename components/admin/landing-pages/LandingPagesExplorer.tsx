@@ -13,7 +13,7 @@ import {
 	deleteLandingPage,
 	unpublishLandingPage,
 } from "@/lib/actions/admin/landing-pages";
-import { cn } from "@/lib/utils/helpers";
+// import { cn } from "@/lib/utils/helpers";
 import type {
 	AdminLandingPageListRow,
 	LandingPageFilterState,
@@ -339,7 +339,7 @@ export function LandingPagesExplorer({
 			{/* Desktop — table from md up */}
 			<div className="hidden overflow-hidden rounded-2xl border border-stone-200 bg-white md:block">
 				<div className="overflow-x-auto">
-					<table className="w-full min-w-[760px] text-left text-sm">
+					<table className="w-full min-w-190 text-left text-sm">
 						<thead>
 							<tr className="border-b border-stone-100 bg-stone-50/60">
 								{[

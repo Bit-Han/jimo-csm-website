@@ -105,6 +105,12 @@ export async function saveWebsiteDefaults(
 		if (!data.legalName.trim()) {
 			return { success: false, message: "Legal name is required." };
 		}
+		if (!data.tagline.trim()) {
+				return { success: false, message: "Tagline is required." };
+		}
+		if (!data.description.trim()) {
+				return { success: false, message: "Description is required." };
+		}
 		if (!data.responseTimeNote.trim()) {
 			return { success: false, message: "Response time note is required." };
 		}
@@ -113,6 +119,8 @@ export async function saveWebsiteDefaults(
 
 		const values = {
 			legalName: data.legalName.trim(),
+			tagline: data.tagline.trim(),
+			description: data.description.trim(),
 			responseTimeNote: data.responseTimeNote.trim(),
 			updatedAt: new Date(),
 		};

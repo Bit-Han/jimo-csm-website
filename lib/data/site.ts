@@ -1,4 +1,4 @@
-
+//@/lib/data/site.ts
 export interface NavLink {
 	label: string;
 	href: string;

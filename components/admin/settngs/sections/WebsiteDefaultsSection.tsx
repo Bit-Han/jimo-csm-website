@@ -63,6 +63,40 @@ export function WebsiteDefaultsSection({
 
 					<div>
 						<label className="mb-1.5 block text-sm font-medium text-ink-950">
+							Tagline <span className="text-red-500">*</span>
+						</label>
+						<input
+							type="text"
+							value={data.tagline}
+							onChange={(e) => set("tagline", e.target.value)}
+							placeholder="Property Development"
+							className={inputCls}
+						/>
+						<p className="mt-1 text-xs text-stone-400">
+							Short line shown next to the company name — nav, footer, browser
+							tab title.
+						</p>
+					</div>
+
+					<div>
+						<label className="mb-1.5 block text-sm font-medium text-ink-950">
+							Site Description <span className="text-red-500">*</span>
+						</label>
+						<textarea
+							rows={3}
+							value={data.description}
+							onChange={(e) => set("description", e.target.value)}
+							placeholder="Premium residential, hospitality, and investment-led real estate developments..."
+							className={inputCls}
+						/>
+						<p className="mt-1 text-xs text-stone-400">
+							Used as the default meta description and social-share summary
+							site-wide.
+						</p>
+					</div>
+
+					<div>
+						<label className="mb-1.5 block text-sm font-medium text-ink-950">
 							Response Time Note <span className="text-red-500">*</span>
 						</label>
 						<input

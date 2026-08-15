@@ -6,7 +6,8 @@ import { db } from "@/lib/db";
 import { leads, projects } from "@/lib/db/schema";
 import { sendBrochureEmail } from "@/lib/email/resend";
 import { getBrochureByProjectSlug } from "@/lib/db/queries/brochures";
-import { siteConfig } from "@/lib/data/site";
+// import { siteConfig } from "@/lib/data/site";
+import { getPublicSiteSettings } from "@/lib/db/queries/site-settings";
 import type { BrochureLeadFormState } from "@/lib/types/brochure";
 import { trackingEventLogs } from "@/lib/db/schema";
 import { withTimeout } from "@/lib/utils/timeout";
@@ -23,7 +24,7 @@ export async function submitBrochureRequest(
 	const phoneNumber = String(formData.get("phoneNumber") ?? "").trim();
 
 	const fieldErrors: BrochureLeadFormState["fieldErrors"] = {};
-	if (fullName.length < 8) fieldErrors.fullName = "Enter your full name.";
+	if (fullName.length < 2) fieldErrors.fullName = "Enter your full name.";
 	if (!emailPattern.test(email))
 		fieldErrors.email = "Enter a valid email address.";
 	if (phoneNumber.length < 11)
@@ -69,12 +70,19 @@ export async function submitBrochureRequest(
 			? brochure.fileUrl
 			: `${appUrl}${brochure.fileUrl}`;
 
+       // Pulled from the DB-backed settings singleton (with its own
+		// built-in fallback) instead of the static siteConfig constant, so
+		// changing the WhatsApp number in the admin Settings page actually
+		// reaches this email without a code deploy.
+
+		const settings = await getPublicSiteSettings();
+
 		const emailResult = await sendBrochureEmail({
 			to: email,
 			recipientName: fullName,
 			projectName: project?.name ?? projectSlug,
 			brochureDownloadUrl: downloadUrl,
-			whatsappHref: siteConfig.whatsappHref,
+			whatsappHref: settings.whatsappHref,
 		});
 
 		if (!emailResult.success) {

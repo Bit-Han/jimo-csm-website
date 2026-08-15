@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { DynamicFormRenderer } from "./DynamicFormRenderer";
 import { submitLandingPageLead } from "@/lib/actions/landing-page-lead";
+import { trackEvent } from "@/lib/tracking/dispatch";
 import type { PublicFormForOverlay, UtmParams } from "@/lib/types/landing-page";
 
 export function InlineFormCard({
@@ -30,6 +31,10 @@ export function InlineFormCard({
 			});
 			if (result.success) {
 				setStatus("success");
+				trackEvent("landing_page_form_submit", {
+					landingPageSlug,
+					formId: form.id,
+				});
 			} else {
 				setStatus("error");
 				setErrorMessage(result.message);
