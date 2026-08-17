@@ -68,7 +68,7 @@ export function MediaCarousel({ items }: MediaCarouselProps) {
 	return (
 		<div
 			onPointerDown={pauseThenResume}
-			className="relative aspect-4/3 overflow-hidden rounded-3xl shadow-sm sm:aspect-[16/9]"
+			className="relative aspect-4/3 overflow-hidden rounded-3xl shadow-sm sm:aspect-video"
 		>
 			{activeItem.type === "video" ? (
 				<video

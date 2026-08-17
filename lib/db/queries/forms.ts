@@ -1,5 +1,5 @@
 //@/lib/db/queries/forms.ts
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { formFields, forms } from "@/lib/db/schema";
 import {
@@ -10,6 +10,37 @@ import type {
 	AdminFormListRow,
 	FormBuilderState,
 } from "@/lib/types/admin/form-builder";
+import { landingPages } from "@/lib/db/schema";
+
+
+export interface FormUsageRow {
+	slug: string;
+	title: string;
+	role: "primary" | "secondary";
+}
+
+export async function getFormUsage(formId: string): Promise<FormUsageRow[]> {
+	const rows = await db
+		.select({
+			slug: landingPages.slug,
+			title: landingPages.title,
+			formId: landingPages.formId,
+		})
+		.from(landingPages)
+		.where(
+			or(
+				eq(landingPages.formId, formId),
+				sql`${landingPages.hero}->'secondaryCta'->>'formId' = ${formId}`,
+			),
+		);
+
+	return rows.map((row) => ({
+		slug: row.slug,
+		title: row.title,
+		role: row.formId === formId ? "primary" : "secondary",
+	}));
+}
+
 
 export async function getAdminFormListRows(): Promise<AdminFormListRow[]> {
 	console.info("[admin:getAdminFormListRows] Loading admin form list");

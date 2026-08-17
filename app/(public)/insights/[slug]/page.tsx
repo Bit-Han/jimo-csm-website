@@ -58,7 +58,7 @@ export default async function InsightDetailPage({ params }: InsightPageProps) {
       <article className="bg-cream-50 py-16">
         <Container className="max-w-2xl">
           {insight.coverImage.src ? (
-            <div className="relative aspect-[16/9] overflow-hidden rounded-3xl">
+            <div className="relative aspect-video overflow-hidden rounded-3xl">
               <Image
                 src={insight.coverImage.src}
                 alt={insight.coverImage.alt}
