@@ -46,7 +46,7 @@ export function ProjectHero({ project }: ProjectHeroProps) {
 				</div>
 
 				<div>
-					<div className="relative aspect-square overflow-hidden rounded-3xl shadow-2xl sm:aspect-[4/5] lg:aspect-[5/6]">
+					<div className="relative aspect-square overflow-hidden rounded-3xl shadow-2xl sm:aspect-4/5 lg:aspect-5/6">
 						<Image
 							src={project.coverImage.src}
 							alt={project.coverImage.alt}

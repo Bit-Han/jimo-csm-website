@@ -241,7 +241,9 @@ export function FormsExplorer({ forms: initialForms }: { forms: AdminFormListRow
 			{blockedMessage ? (
 				<div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
 					<AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-					<p className="flex-1 text-xs font-medium text-stone-700">{blockedMessage}</p>
+					<p className="flex-1 text-xs font-medium text-stone-700">
+						{blockedMessage}
+					</p>
 					<button
 						type="button"
 						onClick={() => setBlockedMessage(null)}
@@ -253,57 +255,83 @@ export function FormsExplorer({ forms: initialForms }: { forms: AdminFormListRow
 			) : null}
 
 			<div className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
-				<table className="w-full text-left text-sm">
-					<thead>
-						<tr className="border-b border-stone-100 bg-stone-50/60">
-							{["Title", "Type", "Fields", "Status", "CRM Tag", "Actions"].map((h) => (
-								<th key={h} className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wide text-stone-500">
-									{h}
-								</th>
-							))}
-						</tr>
-					</thead>
-					<tbody>
-						{filtered.length === 0 ? (
-							<tr>
-								<td colSpan={6} className="px-6 py-12 text-center text-sm text-stone-400">
-									No forms match your search.
-								</td>
+				<div className="overflow-x-auto">
+					<table className="w-full min-w-180 text-left text-sm">
+						<thead>
+							<tr className="border-b border-stone-100 bg-stone-50/60">
+								{[
+									"Title",
+									"Type",
+									"Fields",
+									"Status",
+									"CRM Tag",
+									"Actions",
+								].map((h) => (
+									<th
+										key={h}
+										className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wide text-stone-500"
+									>
+										{h}
+									</th>
+								))}
 							</tr>
-						) : (
-							filtered.map((form) => (
-								<tr key={form.id} className="border-b border-stone-100 last:border-none hover:bg-stone-50">
-									<td className="px-6 py-4 font-semibold text-ink-950">{form.title}</td>
-									<td className="px-6 py-4 text-stone-600">{form.type}</td>
-									<td className="px-6 py-4 text-stone-600">{form.relatedLabel}</td>
-									<td className="px-6 py-4">
-										<AdminBadge variant={form.status === "active" ? "published" : "draft"} />
-									</td>
-									<td className="px-6 py-4 text-stone-500">{form.crmTag}</td>
-									<td className="px-6 py-4">
-										<div className="flex items-center justify-end gap-3">
-											<Link
-												href={`/admin/forms/${form.id}/edit`}
-												className="text-sm font-medium text-red-600 hover:text-red-700"
-											>
-												Edit
-											</Link>
-											<button
-												type="button"
-												onClick={() => setConfirmDelete(form)}
-												disabled={busyId === form.id && isPending}
-												className="text-stone-400 hover:text-red-500 disabled:opacity-50"
-												aria-label="Delete form"
-											>
-												<Trash2 className="h-4 w-4" />
-											</button>
-										</div>
+						</thead>
+						<tbody>
+							{filtered.length === 0 ? (
+								<tr>
+									<td
+										colSpan={6}
+										className="px-6 py-12 text-center text-sm text-stone-400"
+									>
+										No forms match your search.
 									</td>
 								</tr>
-							))
-						)}
-					</tbody>
-				</table>
+							) : (
+								filtered.map((form) => (
+									<tr
+										key={form.id}
+										className="border-b border-stone-100 last:border-none hover:bg-stone-50"
+									>
+										<td className="px-6 py-4 font-semibold text-ink-950">
+											{form.title}
+										</td>
+										<td className="px-6 py-4 text-stone-600">{form.type}</td>
+										<td className="px-6 py-4 text-stone-600">
+											{form.relatedLabel}
+										</td>
+										<td className="px-6 py-4">
+											<AdminBadge
+												variant={
+													form.status === "active" ? "published" : "draft"
+												}
+											/>
+										</td>
+										<td className="px-6 py-4 text-stone-500">{form.crmTag}</td>
+										<td className="px-6 py-4">
+											<div className="flex items-center justify-end gap-3">
+												<Link
+													href={`/admin/forms/${form.id}/edit`}
+													className="text-sm font-medium text-red-600 hover:text-red-700"
+												>
+													Edit
+												</Link>
+												<button
+													type="button"
+													onClick={() => setConfirmDelete(form)}
+													disabled={busyId === form.id && isPending}
+													className="text-stone-400 hover:text-red-500 disabled:opacity-50"
+													aria-label="Delete form"
+												>
+													<Trash2 className="h-4 w-4" />
+												</button>
+											</div>
+										</td>
+									</tr>
+								))
+							)}
+						</tbody>
+					</table>
+				</div>
 			</div>
 
 			<ConfirmDialog
