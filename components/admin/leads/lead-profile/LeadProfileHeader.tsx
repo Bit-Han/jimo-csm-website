@@ -180,7 +180,7 @@ export function LeadProfileHeader({
 						) : null}
 
 						<Link
-							href={siteConfig.whatsappHref}
+							href={lead.phone !== "—" ? `https://wa.me/${lead.phone}` : siteConfig.whatsappHref}
 							target="_blank"
 							rel="noopener noreferrer"
 							className="flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
