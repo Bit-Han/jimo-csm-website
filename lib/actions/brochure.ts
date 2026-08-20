@@ -135,11 +135,14 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { leads, projects, trackingEventLogs } from "@/lib/db/schema";
+import { projects, trackingEventLogs } from "@/lib/db/schema";
 import { sendBrochureEmail } from "@/lib/email/resend";
 import { getBrochureByProjectSlug } from "@/lib/db/queries/brochures";
 import { getPublicSiteSettings } from "@/lib/db/queries/site-settings";
-import { hasRecentBrochureRequest } from "@/lib/db/queries/leads-dedupe";
+import {
+	claimBrochureLead,
+	markBrochureDelivered,
+} from "@/lib/db/queries/leads-dedupe";
 import { validateAndFormatPhone } from "@/lib/utils/phonenumber-validation";
 import { looksLikeBot } from "@/lib/utils/bot-heuristics";
 import { checkIpRateLimit } from "@/lib/utils/rate-limit";
@@ -219,91 +222,175 @@ export async function submitBrochureRequest(
 				};
 			}
 
-			const alreadyRequested = await hasRecentBrochureRequest({
-				projectSlug,
-				email,
-				phoneNumber,
-			});
+			// const alreadyRequested = await hasRecentBrochureRequest({
+			// 	projectSlug,
+			// 	email,
+			// 	phoneNumber,
+			// });
 
-			if (alreadyRequested) {
-				try {
-					await withTimeout(
-						db.insert(trackingEventLogs).values({
-							eventName: "brochure_duplicate_blocked",
-							pagePath: `/brochures/${projectSlug}`,
+			// if (alreadyRequested) {
+			// 	try {
+			// 		await withTimeout(
+			// 			db.insert(trackingEventLogs).values({
+			// 				eventName: "brochure_duplicate_blocked",
+			// 				pagePath: `/brochures/${projectSlug}`,
+			// 				projectSlug,
+			// 				metadata: {},
+			// 			}),
+			// 			5000,
+			// 			"submitBrochureRequest:duplicateLog",
+			// 		);
+			// 	} catch {
+			// 		/* non-blocking */
+			// 	}
+			// 	shouldRedirect = true;
+			// } else {
+			// 	const project = await db.query.projects.findFirst({
+			// 		where: eq(projects.slug, projectSlug),
+			// 	});
+
+			// 	await db.insert(leads).values({
+			// 		fullName,
+			// 		email,
+			// 		phoneNumber,
+			// 		projectId: project?.id ?? null,
+			// 		projectSlug,
+			// 		source: "brochure",
+			// 		status: "new",
+			// 		enquiryType: "brochure-download",
+			// 	});
+
+			// 	const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+			// 	const downloadUrl = brochure.fileUrl.startsWith("http")
+			// 		? brochure.fileUrl
+			// 		: `${appUrl}${brochure.fileUrl}`;
+			// 	const settings = await getPublicSiteSettings();
+
+			// 	const emailResult = await sendBrochureEmail({
+			// 		to: email,
+			// 		recipientName: fullName,
+			// 		projectName: project?.name ?? projectSlug,
+			// 		brochureDownloadUrl: downloadUrl,
+			// 		whatsappHref: settings.whatsappHref,
+			// 	});
+
+			// 	if (!emailResult.success) {
+			// 		console.error(
+			// 			"[submitBrochureRequest] brochure email failed:",
+			// 			emailResult.message,
+			// 		);
+			// 		return {
+			// 			status: "error",
+			// 			message:
+			// 				"Your request was received, but we could not send the brochure email right now. Please try again or contact us directly.",
+			// 			fieldErrors: {},
+			// 		};
+			// 	}
+
+			// 	try {
+			// 		await withTimeout(
+			// 			db.insert(trackingEventLogs).values({
+			// 				eventName: "brochure_form_submit",
+			// 				pagePath: `/brochures/${projectSlug}`,
+			// 				projectSlug,
+			// 				metadata: {},
+			// 			}),
+			// 			5000,
+			// 			"submitBrochureRequest:trackEvent",
+			// 		);
+			// 	} catch (err) {
+			// 		console.error(
+			// 			"[submitBrochureRequest] tracking log failed (non-blocking):",
+			// 			err,
+			// 		);
+			// 	}
+
+			// 	shouldRedirect = true;
+			// }
+						const project = await db.query.projects.findFirst({
+							where: eq(projects.slug, projectSlug),
+						});
+
+						const claim = await claimBrochureLead({
+							fullName,
+							email,
+							phoneNumber,
+							projectId: project?.id ?? null,
 							projectSlug,
-							metadata: {},
-						}),
-						5000,
-						"submitBrochureRequest:duplicateLog",
-					);
-				} catch {
-					/* non-blocking */
-				}
-				shouldRedirect = true;
-			} else {
-				const project = await db.query.projects.findFirst({
-					where: eq(projects.slug, projectSlug),
-				});
+						});
 
-				await db.insert(leads).values({
-					fullName,
-					email,
-					phoneNumber,
-					projectId: project?.id ?? null,
-					projectSlug,
-					source: "brochure",
-					status: "new",
-					enquiryType: "brochure-download",
-				});
+						if (!claim.claimed) {
+							try {
+								await withTimeout(
+									db.insert(trackingEventLogs).values({
+										eventName: "brochure_duplicate_blocked",
+										pagePath: `/brochures/${projectSlug}`,
+										projectSlug,
+										metadata: {},
+									}),
+									5000,
+									"submitBrochureRequest:duplicateLog",
+								);
+							} catch {
+								/* non-blocking */
+							}
+							shouldRedirect = true;
+						} else {
+							const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+							const downloadUrl = brochure.fileUrl.startsWith("http")
+								? brochure.fileUrl
+								: `${appUrl}${brochure.fileUrl}`;
+							const settings = await getPublicSiteSettings();
 
-				const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
-				const downloadUrl = brochure.fileUrl.startsWith("http")
-					? brochure.fileUrl
-					: `${appUrl}${brochure.fileUrl}`;
-				const settings = await getPublicSiteSettings();
+							const emailResult = await sendBrochureEmail({
+								to: email,
+								recipientName: fullName,
+								projectName: project?.name ?? projectSlug,
+								brochureDownloadUrl: downloadUrl,
+								whatsappHref: settings.whatsappHref,
+							});
 
-				const emailResult = await sendBrochureEmail({
-					to: email,
-					recipientName: fullName,
-					projectName: project?.name ?? projectSlug,
-					brochureDownloadUrl: downloadUrl,
-					whatsappHref: settings.whatsappHref,
-				});
+							if (!emailResult.success) {
+								console.error(
+									"[submitBrochureRequest] brochure email failed:",
+									emailResult.message,
+								);
+								// Row stays undelivered — a retry after the 45s cooldown
+								// genuinely re-sends instead of being told "already sent."
+								return {
+									status: "error",
+									message:
+										"Your details were saved, but we couldn't send the brochure email right now. Please try again in a moment.",
+									fieldErrors: {},
+								};
+							}
 
-				if (!emailResult.success) {
-					console.error(
-						"[submitBrochureRequest] brochure email failed:",
-						emailResult.message,
-					);
-					return {
-						status: "error",
-						message:
-							"Your request was received, but we could not send the brochure email right now. Please try again or contact us directly.",
-						fieldErrors: {},
-					};
-				}
+							await markBrochureDelivered(claim.leadId!);
 
-				try {
-					await withTimeout(
-						db.insert(trackingEventLogs).values({
-							eventName: "brochure_form_submit",
-							pagePath: `/brochures/${projectSlug}`,
-							projectSlug,
-							metadata: {},
-						}),
-						5000,
-						"submitBrochureRequest:trackEvent",
-					);
-				} catch (err) {
-					console.error(
-						"[submitBrochureRequest] tracking log failed (non-blocking):",
-						err,
-					);
-				}
+							// Only alert sales on a genuinely new lead, not on every retry —
+							// claim.attemptCount === 1 means this INSERT (not an UPDATE) won.
+							if (claim.attemptCount === 1) {
+								try {
+									await withTimeout(
+										db.insert(trackingEventLogs).values({
+											eventName: "brochure_form_submit",
+											pagePath: `/brochures/${projectSlug}`,
+											projectSlug,
+											metadata: {},
+										}),
+										5000,
+										"submitBrochureRequest:trackEvent",
+									);
+								} catch (err) {
+									console.error(
+										"[submitBrochureRequest] tracking log failed (non-blocking):",
+										err,
+									);
+								}
+							}
 
-				shouldRedirect = true;
-			}
+							shouldRedirect = true;
+						}
 		} catch (error) {
 			const message =
 				error instanceof Error ? error.message : "Unexpected error.";

@@ -6,3 +6,4 @@
 // later isn't locked out. Set very high (e.g. 24 * 365) for an effectively
 // permanent block instead.
 export const BROCHURE_DEDUPE_COOLDOWN_HOURS = 24;
+export const BROCHURE_RETRY_COOLDOWN_SECONDS = 45;

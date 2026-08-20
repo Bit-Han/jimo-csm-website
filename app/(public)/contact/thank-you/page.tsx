@@ -1,3 +1,4 @@
+//@/contact/thank-you/page.tsx
 import type { Metadata } from "next";
 import { ButtonLink } from "@/components/ui/Button";
 import { CheckCircle2 } from "lucide-react";
